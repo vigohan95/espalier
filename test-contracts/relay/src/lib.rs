@@ -15,4 +15,9 @@ impl Relay {
             Gas::from_tgas(120),
         )
     }
+
+    /// Stands in for a broken registry: an answer with the right method name and the wrong shape.
+    pub fn check(&self) -> String {
+        "definitely not listed".to_string()
+    }
 }

@@ -11,6 +11,8 @@
 //!   R6 a denied or rolled-back decision adds nothing to any counter (R3 would catch it)
 //! And once at the end:
 //!   R7 the recipients' balances grew by exactly the settled total
+//! With --screened every spend also goes through a real registry contract that lists one recipient:
+//!   R8 the listed recipient's balance never grows, and no native funds stay held after a batch
 use crate::env::*;
 use crate::fresh_env;
 use anyhow::{anyhow, Result};
@@ -95,10 +97,40 @@ fn check_views(nodes: &[Node], views: &[Value]) -> Result<()> {
     Ok(())
 }
 
-pub async fn run(root: &Account, ops: u64, seed: u64, keys: usize, report: Option<&str>) -> Result<bool> {
+/// Puts a real registry in front of the vault and lists the last recipient through two reporters.
+async fn screen(e: &Env) -> Result<()> {
+    let reg = e.use_registry().await?;
+    let listed = e.recipients.last().unwrap().id().clone();
+    let reporters = [e.base.clone(), e.owner.clone()];
+    for (i, who) in reporters.iter().enumerate() {
+        who.call(&reg, "report")
+            .args_json(json!({
+                "subject": listed, "category": "property-test", "evidence_sha256": format!("{:064x}", i + 1),
+                "evidence_uri": "evidence://property", "ttl_secs": 15_000_000,
+            }))
+            .deposit(near_workspaces::types::NearToken::from_millinear(10))
+            .gas(near_workspaces::types::Gas::from_tgas(30))
+            .transact()
+            .await?
+            .into_result()?;
+    }
+    e.owner_call("set_screen", json!({"screen": {
+        "registry": reg,
+        "reporters": reporters.iter().map(|a| a.id().to_string()).collect::<Vec<_>>(),
+        "quorum": 2,
+    }}))
+    .await?
+    .into_result()?;
+    Ok(())
+}
+
+pub async fn run(root: &Account, ops: u64, seed: u64, keys: usize, screened: bool, report: Option<&str>) -> Result<bool> {
     let started = Instant::now();
     let mut rng = SmallRng::seed_from_u64(seed);
     let e = fresh_env(root, 1_500, 60).await?;
+    if screened {
+        screen(&e).await?;
+    }
     let nobody: AccountId = format!("nobody-here.{}", e.owner.id()).parse()?;
     let mut start_balances = vec![];
     for r in &e.recipients {
@@ -193,6 +225,9 @@ pub async fn run(root: &Account, ops: u64, seed: u64, keys: usize, report: Optio
                 views.push(e.grant(n.agent.grant).await?);
             }
             check_views(&nodes, &views)?;
+            if screened && e.info().await?["native_held"].as_str() != Some("0") {
+                return Err(anyhow!("R8 funds still held after the batch"));
+            }
             if batches % 20 == 0 {
                 println!("{done}/{ops} ops, round {rounds}, {:.0}s, {outcomes:?}", started.elapsed().as_secs_f64());
             }
@@ -209,8 +244,12 @@ pub async fn run(root: &Account, ops: u64, seed: u64, keys: usize, report: Optio
     if got != native_out {
         return Err(anyhow!("R7 recipients got {got}, settled {native_out}"));
     }
+    if screened && e.balance(e.recipients.last().unwrap()).await? != *start_balances.last().unwrap() {
+        return Err(anyhow!("R8 the listed recipient was paid"));
+    }
     let doc = json!({
         "harness": "real NEAR runtime: near-workspaces sandbox (neard 2.14.0), compiled wasm, signed transactions, parallel batches",
+        "screened": screened,
         "seed": seed,
         "keys_per_tree": keys,
         "operations": done,
@@ -221,7 +260,7 @@ pub async fn run(root: &Account, ops: u64, seed: u64, keys: usize, report: Optio
         "revokes_racing_a_batch": revokes,
         "spends_that_settled_in_the_same_batch_as_their_revoke": raced,
         "native_paid_yocto": native_out.to_string(),
-        "invariants": ["R1","R2","R3","R4","R5","R6","R7"],
+        "invariants": if screened { json!(["R1","R2","R3","R4","R5","R6","R7","R8"]) } else { json!(["R1","R2","R3","R4","R5","R6","R7"]) },
         "wasm_sha256": crate::report::wasm_sha256(),
         "git_commit": crate::report::git_commit(),
     });

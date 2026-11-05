@@ -30,6 +30,10 @@ const GAS_KEY_CALLBACK: Gas = Gas::from_tgas(10);
 /// die on the static gas attachment without ever reaching the denial counter.
 const GAS_MIN_SPEND: Gas = Gas::from_tgas(50);
 const GAS_MIN_DELEGATE: Gas = Gas::from_tgas(20);
+/// A screened spend also pays for the registry call and for a callback that carries the dispatch.
+const GAS_SCREEN: Gas = Gas::from_tgas(10);
+const GAS_SCREENED: Gas = Gas::from_tgas(50);
+const GAS_MIN_SCREENED_SPEND: Gas = Gas::from_tgas(90);
 /// Headroom for what this call itself writes, on top of the storage already in use.
 const STORAGE_MARGIN_BYTES: u64 = 4096;
 
@@ -45,6 +49,7 @@ enum Key {
     Tokens,
     Blocked,
     Sweep,
+    Contacts,
 }
 
 #[near(contract_state)]
@@ -69,6 +74,15 @@ pub struct Vault {
     sweep_queue: LookupMap<u64, GrantId>,
     sweep_head: u64,
     sweep_tail: u64,
+    /// Shared denylist consulted on every spend. None means this vault does not use one.
+    screen: Option<Screen>,
+    /// Who signs clearance tickets.
+    attestor: Option<PublicKey>,
+    /// Native funds reserved by spends waiting for the registry. They are still in the account
+    /// balance, so the balance check has to subtract them or two spends could promise the same NEAR.
+    native_held: u128,
+    /// (grant, recipient) -> settled payments, kept for the leaf and for its root.
+    contacts: LookupMap<(GrantId, AccountId), Contact>,
 }
 
 /// Why something was refused. `counted` is false for refusals that are not the agent's doing.
@@ -140,6 +154,27 @@ fn promise_succeeded() -> bool {
     !matches!(env::promise_result_checked(0, 64), Err(PromiseError::Failed))
 }
 
+fn unhex(s: &str) -> Option<Vec<u8>> {
+    if s.len() % 2 != 0 {
+        return None;
+    }
+    (0..s.len()).step_by(2).map(|i| u8::from_str_radix(s.get(i..i + 2)?, 16).ok()).collect()
+}
+
+/// What the attestor signs. Domain tag first, then borsh of the rest; see client/espalier/ticket.py.
+pub fn clearance_message(
+    vault: &AccountId,
+    grant: GrantId,
+    recipient: &AccountId,
+    max_amount: u128,
+    expires_at_ms: u64,
+    code_hash: &[u8; 32],
+) -> Vec<u8> {
+    let mut out = b"espalier-clearance-v1".to_vec();
+    out.extend(near_sdk::borsh::to_vec(&(vault, grant, recipient, max_amount, expires_at_ms, code_hash)).expect("borsh"));
+    out
+}
+
 fn allowance(amount: u128) -> Allowance {
     Allowance::Limited(NonZeroU128::new(amount).expect("allowance checked non-zero"))
 }
@@ -170,6 +205,10 @@ impl Vault {
             sweep_queue: LookupMap::new(Key::Sweep),
             sweep_head: 0,
             sweep_tail: 0,
+            screen: None,
+            attestor: None,
+            native_held: 0,
+            contacts: LookupMap::new(Key::Contacts),
         }
     }
 
@@ -221,6 +260,32 @@ impl Vault {
         events::emit("recipient_unblocked", json!({"account": account}));
     }
 
+    /// Chooses the shared denylist and whose reports count. `quorum` is the number of different
+    /// pieces of evidence from these reporters that it takes to refuse a recipient, and it can
+    /// never be 1: that is what keeps a single reporter from blocking anyone.
+    pub fn set_screen(&mut self, screen: Option<Screen>) {
+        self.assert_owner();
+        if let Some(s) = &screen {
+            require!(s.quorum >= MIN_QUORUM, "quorum must be at least 2");
+            require!(s.reporters.len() >= s.quorum as usize, "fewer reporters than the quorum");
+            require!(s.reporters.len() <= MAX_REPORTERS, "too many reporters");
+            let unique: std::collections::BTreeSet<_> = s.reporters.iter().collect();
+            require!(unique.len() == s.reporters.len(), "reporters must be different accounts");
+        }
+        events::emit("screen_set", json!({"screen": screen}));
+        self.screen = screen;
+    }
+
+    /// Sets who signs clearance tickets. Replacing it kills every ticket already issued.
+    pub fn set_attestor(&mut self, attestor: Option<PublicKey>) {
+        self.assert_owner();
+        if let Some(pk) = &attestor {
+            require!(pk.curve_type() == near_sdk::CurveType::ED25519, "attestor key must be ed25519");
+        }
+        events::emit("attestor_set", json!({"attestor": attestor}));
+        self.attestor = attestor;
+    }
+
     /// Takes out funds that no grant has in flight. Same reserve and rollback path as a spend.
     pub fn withdraw(&mut self, asset: Asset, amount: U128, to: AccountId) -> PromiseOrValue<Decision> {
         self.assert_owner();
@@ -258,20 +323,25 @@ impl Vault {
         recipient: AccountId,
         amount: U128,
         memo: Option<String>,
+        clearance: Option<Clearance>,
     ) -> PromiseOrValue<Decision> {
         let gid = match self.agent("request_spend") {
             Ok(g) => g,
             Err((g, d)) => return PromiseOrValue::Value(self.deny(g, d)),
         };
         let now = now_ms();
-        let checked = Self::check_gas(GAS_MIN_SPEND)
+        let checked = Self::check_gas(self.min_spend_gas())
             .and_then(|_| Self::check_memo(&memo))
-            .and_then(|_| self.evaluate_spend(gid, &recipient, amount.0, now));
+            .and_then(|_| self.evaluate_spend(gid, &recipient, amount.0, now))
+            .and_then(|_| self.check_clearance(gid, &recipient, amount.0, &clearance, now));
         if let Err(d) = checked {
             return PromiseOrValue::Value(self.deny(Some(gid), d));
         }
-        if amount.0 > self.grant(gid).threshold {
-            return PromiseOrValue::Value(self.enqueue(gid, recipient, amount.0, memo, now));
+        // No ticket means nobody outside the agent has looked at this recipient, so a human or an
+        // unbound ancestor must. An agent that skips its wrapper ends up here, not at the transfer.
+        let no_clearance = self.grant(gid).clearance && clearance.is_none();
+        if no_clearance || amount.0 > self.grant(gid).threshold {
+            return PromiseOrValue::Value(self.enqueue(gid, recipient, amount.0, memo, now, no_clearance));
         }
         PromiseOrValue::Promise(self.commit_spend(gid, recipient, amount.0, memo, now))
     }
@@ -477,34 +547,36 @@ impl Vault {
     // predecessor == current_account. What keeps agents out is that no FC key the vault issues
     // ever lists these names, and `method_names` can only produce names from METHODS.
 
+    /// The registry has answered. A spend that passes is dispatched here; anything else goes back
+    /// exactly as a failed transfer would. No answer, or one that does not parse, refuses the spend.
+    /// Liveness is checked again because a revoke can land while the registry is being asked.
+    #[private]
+    pub fn on_screened(&mut self, spend_id: u64) -> PromiseOrValue<Decision> {
+        let p = self.pending.get(&spend_id).expect("pending spend").clone();
+        let gid = p.grant.expect("only grant spends are screened");
+        if p.asset == Asset::Native {
+            self.native_held -= p.amount;
+        }
+        let checked = Self::screen_answer(&p.recipient)
+            .and_then(|_| self.check_live(gid, now_ms()))
+            .and_then(|_| self.check_not_paused());
+        match checked {
+            Ok(()) => {
+                events::emit("spend_screened", json!({"spend_id": spend_id, "grant": gid}));
+                PromiseOrValue::Promise(Self::dispatch(p.asset, p.recipient, p.amount, spend_id))
+            }
+            Err(d) => {
+                self.finish_spend(spend_id, false);
+                events::emit("spend_released", json!({"spend_id": spend_id, "grant": gid, "amount": U128(p.amount)}));
+                PromiseOrValue::Value(self.deny(Some(gid), d))
+            }
+        }
+    }
+
     #[private]
     pub fn on_spend_settled(&mut self, spend_id: u64) -> Decision {
         let ok = promise_succeeded();
-        let p = self.pending.remove(&spend_id).expect("pending spend");
-        self.in_flight -= 1;
-        if let Some(gid) = p.grant {
-            let leaf = self.grants.get_mut(&gid).expect("grant");
-            leaf.direct_reserved -= p.amount;
-            if ok {
-                leaf.direct_spent += p.amount;
-            }
-            let mut cur = Some(gid);
-            while let Some(id) = cur {
-                let g = self.grants.get_mut(&id).expect("ancestor");
-                g.reserved -= p.amount;
-                if ok {
-                    g.spent += p.amount;
-                } else {
-                    g.window.sub(p.at_ms, g.window_ms, p.amount);
-                }
-                cur = g.parent;
-            }
-        }
-        if !ok {
-            if let Asset::Ft(token) = &p.asset {
-                *self.tokens.get_mut(token).expect("token") += p.amount;
-            }
-        }
+        let p = self.finish_spend(spend_id, ok);
         let (event, outcome, code) = if ok {
             ("spend_settled", "settled", "SETTLED")
         } else {
@@ -642,6 +714,7 @@ impl Vault {
             max_depth: g.max_depth,
             max_denials: g.max_denials,
             key_allowance: U128(g.key_allowance),
+            clearance_required: g.clearance,
             pk: g.pk.clone(),
             key_live: g.key_live,
             spent: U128(g.spent),
@@ -683,7 +756,13 @@ impl Vault {
             spend_hash: hex(&a.hash),
             expires_at_ms: a.expires_at_ms,
             approved_by: a.approved_by.clone(),
+            no_clearance: a.no_clearance,
         })
+    }
+
+    /// Settled payments between a grant and a recipient. Roots also hold their whole tree's total.
+    pub fn contact(&self, grant_id: GrantId, recipient: AccountId) -> Option<Contact> {
+        self.contacts.get(&(grant_id, recipient)).cloned()
     }
 
     pub fn is_pending(&self, spend_id: u64) -> bool {
@@ -704,19 +783,38 @@ impl Vault {
             in_flight: self.in_flight,
             sweep_backlog: self.sweep_tail - self.sweep_head,
             available_native: U128(self.available_native()),
+            native_held: U128(self.native_held),
+            screen: self.screen.clone(),
+            attestor: self.attestor.clone(),
             now_ms: now_ms(),
         }
     }
 
     /// What `request_spend` would decide right now, without touching state. A wrapper can call
-    /// this for free before spending any of its key's allowance.
-    pub fn preview_spend(&self, grant_id: GrantId, recipient: AccountId, amount: U128) -> Decision {
+    /// this for free before spending any of its key's allowance. The registry is not asked, because
+    /// a view cannot make a call: a wrapper reads `check` on the registry itself.
+    pub fn preview_spend(
+        &self,
+        grant_id: GrantId,
+        recipient: AccountId,
+        amount: U128,
+        clearance: Option<Clearance>,
+    ) -> Decision {
         let now = now_ms();
         if !self.grants.contains_key(&grant_id) {
             return Decision { outcome: "denied".into(), code: "UNKNOWN_GRANT".into(), ..Default::default() };
         }
-        match self.evaluate_spend(grant_id, &recipient, amount.0, now) {
+        let checked = self
+            .evaluate_spend(grant_id, &recipient, amount.0, now)
+            .and_then(|_| self.check_clearance(grant_id, &recipient, amount.0, &clearance, now));
+        match checked {
             Err(d) => Self::denied_decision(Some(grant_id), &d),
+            Ok(()) if self.grant(grant_id).clearance && clearance.is_none() => Decision {
+                outcome: "queued".into(),
+                code: "NEEDS_CLEARANCE".into(),
+                grant: Some(grant_id),
+                ..Default::default()
+            },
             Ok(()) if amount.0 > self.grant(grant_id).threshold => Decision {
                 outcome: "queued".into(),
                 code: "NEEDS_APPROVAL".into(),
@@ -901,6 +999,7 @@ impl Vault {
                 max_depth: t.max_depth,
                 max_denials: t.max_denials,
                 key_allowance: t.key_allowance.0,
+                clearance: t.clearance_required,
                 pk: pk.clone(),
                 key_live: true,
                 spent: 0,
@@ -973,7 +1072,79 @@ impl Vault {
                 "recipient": recipient, "memo": memo, "headroom_before": headroom,
             }),
         );
-        Self::dispatch(asset, recipient, amount, spend_id)
+        let Some(screen) = &self.screen else {
+            return Self::dispatch(asset, recipient, amount, spend_id);
+        };
+        // The reservation is already in place at every level, so nothing can spend this money twice
+        // while the registry answers. Native funds stay in the account until the dispatch.
+        let args = json!({"subject": recipient, "reporters": screen.reporters, "quorum": screen.quorum});
+        let ask = Promise::new(screen.registry.clone()).function_call(
+            "check".to_string(),
+            args.to_string().into_bytes(),
+            NearToken::from_yoctonear(0),
+            GAS_SCREEN,
+        );
+        if asset == Asset::Native {
+            self.native_held += amount;
+        }
+        ask.then(
+            Self::ext(env::current_account_id())
+                .with_static_gas(GAS_SCREENED)
+                .on_screened(spend_id),
+        )
+    }
+
+    /// Closes a reservation on every level, as settled or as released. Returns what it closed.
+    fn finish_spend(&mut self, spend_id: u64, ok: bool) -> Pending {
+        let p = self.pending.remove(&spend_id).expect("pending spend");
+        self.in_flight -= 1;
+        if let Some(gid) = p.grant {
+            let leaf = self.grants.get_mut(&gid).expect("grant");
+            leaf.direct_reserved -= p.amount;
+            if ok {
+                leaf.direct_spent += p.amount;
+            }
+            let mut root = gid;
+            let mut cur = Some(gid);
+            while let Some(id) = cur {
+                let g = self.grants.get_mut(&id).expect("ancestor");
+                g.reserved -= p.amount;
+                if ok {
+                    g.spent += p.amount;
+                } else {
+                    g.window.sub(p.at_ms, g.window_ms, p.amount);
+                }
+                root = id;
+                cur = g.parent;
+            }
+            if ok {
+                self.note_contact(gid, &p.recipient, p.amount);
+                if root != gid {
+                    self.note_contact(root, &p.recipient, p.amount);
+                }
+            }
+        }
+        if !ok {
+            if let Asset::Ft(token) = &p.asset {
+                *self.tokens.get_mut(token).expect("token") += p.amount;
+            }
+        }
+        p
+    }
+
+    fn note_contact(&mut self, grant: GrantId, recipient: &AccountId, amount: u128) {
+        let now = now_ms();
+        let key = (grant, recipient.clone());
+        let c = match self.contacts.get(&key) {
+            Some(c) => Contact {
+                count: c.count.saturating_add(1),
+                total: U128(c.total.0.saturating_add(amount)),
+                first_ms: c.first_ms,
+                last_ms: now,
+            },
+            None => Contact { count: 1, total: U128(amount), first_ms: now, last_ms: now },
+        };
+        self.contacts.insert(key, c);
     }
 
     fn dispatch(asset: Asset, recipient: AccountId, amount: u128, spend_id: u64) -> Promise {
@@ -1000,6 +1171,7 @@ impl Vault {
         amount: u128,
         memo: Option<String>,
         now: u64,
+        no_clearance: bool,
     ) -> Decision {
         // Expired entries free their slot here, so a full queue cannot block a grant forever. A
         // refused request leaves them in place: a denial changes nothing but the denial counter.
@@ -1029,6 +1201,7 @@ impl Vault {
                 hash,
                 expires_at_ms: now + self.approval_ttl_ms,
                 approved_by: None,
+                no_clearance,
             },
         );
         let threshold = self.grant(gid).threshold;
@@ -1036,13 +1209,18 @@ impl Vault {
             "approval_queued",
             json!({
                 "approval_id": approval_id, "grant": gid, "recipient": recipient, "amount": U128(amount),
-                "threshold": U128(threshold), "spend_hash": hex(&hash),
+                "threshold": U128(threshold), "spend_hash": hex(&hash), "no_clearance": no_clearance,
             }),
         );
+        let (code, detail) = if no_clearance {
+            ("NEEDS_CLEARANCE", "no clearance ticket for this recipient".to_string())
+        } else {
+            ("NEEDS_APPROVAL", format!("{amount} > {threshold} approval threshold"))
+        };
         Decision {
             outcome: "queued".into(),
-            code: "NEEDS_APPROVAL".into(),
-            detail: format!("{amount} > {threshold} approval threshold"),
+            code: code.into(),
+            detail,
             grant: Some(gid),
             limit: Some(U128(threshold)),
             attempted: Some(U128(amount)),
@@ -1083,6 +1261,26 @@ impl Vault {
             .as_yoctonear()
             .saturating_sub(storage)
             .saturating_sub(self.gas_floor)
+            .saturating_sub(self.native_held)
+    }
+
+    fn min_spend_gas(&self) -> Gas {
+        if self.screen.is_some() {
+            GAS_MIN_SCREENED_SPEND
+        } else {
+            GAS_MIN_SPEND
+        }
+    }
+
+    /// Reads the registry's answer. Fails closed: only a clear "not listed" lets the spend go on.
+    fn screen_answer(recipient: &AccountId) -> Result<(), Denial> {
+        let unavailable = || Denial::new("REGISTRY_UNAVAILABLE", "no usable answer from the registry").uncounted();
+        let bytes = env::promise_result_checked(0, 1024).map_err(|_| unavailable())?;
+        let answer: ScreenAnswer = near_sdk::serde_json::from_slice(&bytes).map_err(|_| unavailable())?;
+        if answer.listed {
+            return Err(Denial::new("RECIPIENT_LISTED", format!("{recipient} is listed by the reporter quorum")));
+        }
+        Ok(())
     }
 
     fn spendable(&self, gid: GrantId, now: u64) -> u128 {
@@ -1106,6 +1304,42 @@ impl Vault {
     fn check_gas(min: Gas) -> Result<(), Denial> {
         if env::prepaid_gas() < min {
             return Err(Denial::new("GAS_TOO_LOW", format!("{} < {} prepaid gas", env::prepaid_gas(), min)));
+        }
+        Ok(())
+    }
+
+    /// Verifies a ticket if there is one. A missing ticket is not a refusal: the caller queues it.
+    fn check_clearance(
+        &self,
+        gid: GrantId,
+        recipient: &AccountId,
+        amount: u128,
+        clearance: &Option<Clearance>,
+        now: u64,
+    ) -> Result<(), Denial> {
+        let (true, Some(c)) = (self.grant(gid).clearance, clearance) else {
+            return Ok(());
+        };
+        let Some(attestor) = &self.attestor else {
+            return Err(Denial::new("NO_ATTESTOR", "this vault has no attestor"));
+        };
+        if now >= c.expires_at_ms {
+            return Err(Denial::new("CLEARANCE_EXPIRED", format!("ticket expired at {}", c.expires_at_ms)));
+        }
+        if c.expires_at_ms - now > MAX_CLEARANCE_TTL_MS {
+            return Err(Denial::new("CLEARANCE_TOO_LONG", format!("ticket runs until {}", c.expires_at_ms)));
+        }
+        if amount > c.max_amount.0 {
+            return Err(Denial::new("CLEARANCE_AMOUNT", format!("{amount} > {} on the ticket", c.max_amount.0))
+                .numbers(c.max_amount.0, 0, amount));
+        }
+        let bad = || Denial::new("CLEARANCE_BAD_SIG", "signature does not match this grant, recipient and ticket");
+        let code_hash: [u8; 32] = unhex(&c.code_hash).and_then(|b| b.try_into().ok()).ok_or_else(bad)?;
+        let signature: [u8; 64] = unhex(&c.signature).and_then(|b| b.try_into().ok()).ok_or_else(bad)?;
+        let key: [u8; 32] = attestor.as_bytes()[1..].try_into().expect("ed25519 key");
+        let message = clearance_message(&env::current_account_id(), gid, recipient, c.max_amount.0, c.expires_at_ms, &code_hash);
+        if !env::ed25519_verify(&signature, &message, &key) {
+            return Err(bad());
         }
         Ok(())
     }
@@ -1345,6 +1579,9 @@ impl Vault {
         if t.max_denials > p.max_denials {
             return wide("ATT_DENIALS", p.max_denials as u128, t.max_denials as u128, "max_denials");
         }
+        if p.clearance && !t.clearance_required {
+            return Err(Denial::new("ATT_CLEARANCE", "child dropped the clearance requirement").at(parent));
+        }
         let gas_asked = t.key_allowance.0.saturating_add(t.gas_budget.0);
         if gas_asked > p.gas_left {
             return wide("ATT_GAS", p.gas_left, gas_asked, "key_allowance + gas_budget");
@@ -1424,6 +1661,10 @@ impl Vault {
                     .at(*c)
                     .numbers(threshold, 0, a.amount));
             }
+            // Otherwise a compromised parent could wave through what its own key could not pay.
+            if a.no_clearance && self.grant(*c).clearance {
+                return Err(Denial::new("APPROVER_NEEDS_CLEARANCE", format!("grant {c} is bound by clearance itself")).at(*c));
+            }
         }
         Ok(())
     }
@@ -1437,7 +1678,7 @@ impl Vault {
         memo: &Option<String>,
         now: u64,
     ) -> Result<Approval, Denial> {
-        Self::check_gas(GAS_MIN_SPEND)?;
+        Self::check_gas(self.min_spend_gas())?;
         let Some(a) = self.approvals.get(&id) else {
             return Err(Denial::new("APPROVAL_NOT_FOUND", format!("no approval {id}")));
         };

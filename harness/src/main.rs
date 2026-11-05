@@ -6,6 +6,7 @@
 mod env;
 mod gas;
 mod property;
+mod recipient;
 mod report;
 mod scenarios;
 mod testnet;
@@ -69,7 +70,7 @@ pub async fn fresh_env(root: &Account, vault_near: u128, ttl_secs: u32) -> Resul
                 .into_result()?,
         );
     }
-    Ok(Env { vault, owner, base, recipients, trace: Trace::default() })
+    Ok(Env { vault, owner, base, recipients, trace: Trace::default(), registry: None })
 }
 
 async fn run_one(root: Account, s: Scenario) -> ScenarioResult {
@@ -134,7 +135,8 @@ async fn main() -> Result<()> {
             let ops = arg("--ops").and_then(|v| v.parse().ok()).unwrap_or(500);
             let seed = arg("--seed").and_then(|v| v.parse().ok()).unwrap_or(1);
             let keys = arg("--keys").and_then(|v| v.parse().ok()).unwrap_or(8);
-            property::run(&worker.root_account()?, ops, seed, keys, arg("--report").as_deref()).await?
+            let screened = std::env::args().any(|a| a == "--screened");
+            property::run(&worker.root_account()?, ops, seed, keys, screened, arg("--report").as_deref()).await?
         }
         "gas" => {
             let worker = sandbox_worker().await?;

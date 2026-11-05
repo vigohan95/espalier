@@ -1,0 +1,561 @@
+{
+  "what": "read-only mainnet queries; signals are observations, not accusations",
+  "queried_at": "2026-11-05T09:34:49Z",
+  "rpc": "https://rpc.mainnet.fastnear.com",
+  "archival_rpc": "https://archival-rpc.mainnet.fastnear.com",
+  "rpc_methods": [
+    "query view_account (at final and at past block heights)",
+    "query view_access_key_list",
+    "block"
+  ],
+  "archival_reads": 405,
+  "seconds": 622.2,
+  "policy": {
+    "young_days": 7,
+    "code_change_days": 7
+  },
+  "stand_ins": "history and denylist are neutral stand-ins here: no vault or registry exists on mainnet",
+  "accounts": [
+    {
+      "signals": {
+        "account": "wrap.near",
+        "missing": [],
+        "block_height": 223146740,
+        "exists": true,
+        "balance_yocto": "35578085474954170401464169444610",
+        "storage_usage": 168257347,
+        "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1",
+        "is_contract": true,
+        "code_follows_publisher": false,
+        "keys": {
+          "keys": 0,
+          "full_access_keys": 0,
+          "transactions_signed_estimate": 0
+        },
+        "age": {
+          "created_block": 29998009,
+          "created_at": 1613398226.6503947,
+          "age_secs": 180472460.1025517,
+          "method": "bisection on view_account existence"
+        },
+        "code": {
+          "changed_block": 35438886,
+          "changed_at": 1619090101.9840732,
+          "changed_ago_secs": 174780584.7688732,
+          "previous_code_hash": "9kQaNiscuPh69vRs1GyzfnkEjpUPGLjJhT6RaJBQyG7p",
+          "current_code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1",
+          "first_deploy": false,
+          "account_absent_before": false,
+          "samples": [
+            {
+              "block": 223143740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 223137740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 223125740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 223101740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 223053740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 222957740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 222765740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 222381740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 221613740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 220077740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 217005740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 210861740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 198573740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 173997740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 124845740,
+              "code_hash": "DL2f5xmZ44cQRP6vBMt94rvseH5d5KKnAGis2WkTAsh1"
+            },
+            {
+              "block": 29998009,
+              "code_hash": "11111111111111111111111111111111"
+            }
+          ],
+          "method": "doubling steps back from now, then bisection on view_account code_hash"
+        }
+      },
+      "verdict_from_age_and_code_only": {
+        "verdict": "allow",
+        "reasons": [
+          {
+            "level": "info",
+            "code": "CONTRACT_LOCKED",
+            "detail": "no full-access key: only the contract itself can change its code"
+          },
+          {
+            "level": "info",
+            "code": "KNOWN_RECIPIENT",
+            "detail": "10 payments settled"
+          }
+        ]
+      }
+    },
+    {
+      "signals": {
+        "account": "intents.near",
+        "missing": [],
+        "block_height": 223146876,
+        "exists": true,
+        "balance_yocto": "134022784610907627919433248170",
+        "storage_usage": 13348782649,
+        "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk",
+        "is_contract": true,
+        "code_follows_publisher": false,
+        "keys": {
+          "keys": 9,
+          "full_access_keys": 0,
+          "transactions_signed_estimate": 7825089
+        },
+        "age": {
+          "created_block": 131734076,
+          "created_at": 1730495329.7878704,
+          "age_secs": 63375434.47330189,
+          "method": "bisection on view_account existence"
+        },
+        "code": {
+          "changed_block": 218982375,
+          "changed_at": 1791402799.6770973,
+          "changed_ago_secs": 2467964.584074974,
+          "previous_code_hash": "EHTzkKyabhTGuKpvET5hBi7xPdKacuesMc91dDGkWvqb",
+          "current_code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk",
+          "first_deploy": false,
+          "account_absent_before": false,
+          "samples": [
+            {
+              "block": 223143876,
+              "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk"
+            },
+            {
+              "block": 223137876,
+              "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk"
+            },
+            {
+              "block": 223125876,
+              "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk"
+            },
+            {
+              "block": 223101876,
+              "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk"
+            },
+            {
+              "block": 223053876,
+              "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk"
+            },
+            {
+              "block": 222957876,
+              "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk"
+            },
+            {
+              "block": 222765876,
+              "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk"
+            },
+            {
+              "block": 222381876,
+              "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk"
+            },
+            {
+              "block": 221613876,
+              "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk"
+            },
+            {
+              "block": 220077876,
+              "code_hash": "BtA1BEFNS619KkvXFsgcpQ21Tb5yMm32aaUkn7xNothk"
+            },
+            {
+              "block": 217005876,
+              "code_hash": "HUJ89jxFhsXF17XS8L5kmxz7te8AKfdWw2xzrVYo7aoj"
+            }
+          ],
+          "method": "doubling steps back from now, then bisection on view_account code_hash"
+        }
+      },
+      "verdict_from_age_and_code_only": {
+        "verdict": "allow",
+        "reasons": [
+          {
+            "level": "info",
+            "code": "CONTRACT_LOCKED",
+            "detail": "no full-access key: only the contract itself can change its code"
+          },
+          {
+            "level": "info",
+            "code": "KNOWN_RECIPIENT",
+            "detail": "10 payments settled"
+          }
+        ]
+      }
+    },
+    {
+      "signals": {
+        "account": "v2.ref-finance.near",
+        "missing": [],
+        "block_height": 223147001,
+        "exists": true,
+        "balance_yocto": "32604407295393618385891598233",
+        "storage_usage": 111097808,
+        "code_hash": "GZmkbfVLcN7ErxU9RDxP24YTaKmoVixhM6XyycP15Qvi",
+        "is_contract": true,
+        "code_follows_publisher": false,
+        "keys": {
+          "keys": 0,
+          "full_access_keys": 0,
+          "transactions_signed_estimate": 0
+        },
+        "age": {
+          "created_block": 45752814,
+          "created_at": 1629510267.3529959,
+          "age_secs": 164360569.43320322,
+          "method": "bisection on view_account existence"
+        },
+        "code": {
+          "changed_block": 222301528,
+          "changed_at": 1793380737.0507617,
+          "changed_ago_secs": 490099.7354373932,
+          "previous_code_hash": "25eNFdfK76NUEZn4cDgq1xQYKjxKCuzgXmPB3SHBRW4Y",
+          "current_code_hash": "GZmkbfVLcN7ErxU9RDxP24YTaKmoVixhM6XyycP15Qvi",
+          "first_deploy": false,
+          "account_absent_before": false,
+          "samples": [
+            {
+              "block": 223144001,
+              "code_hash": "GZmkbfVLcN7ErxU9RDxP24YTaKmoVixhM6XyycP15Qvi"
+            },
+            {
+              "block": 223138001,
+              "code_hash": "GZmkbfVLcN7ErxU9RDxP24YTaKmoVixhM6XyycP15Qvi"
+            },
+            {
+              "block": 223126001,
+              "code_hash": "GZmkbfVLcN7ErxU9RDxP24YTaKmoVixhM6XyycP15Qvi"
+            },
+            {
+              "block": 223102001,
+              "code_hash": "GZmkbfVLcN7ErxU9RDxP24YTaKmoVixhM6XyycP15Qvi"
+            },
+            {
+              "block": 223054001,
+              "code_hash": "GZmkbfVLcN7ErxU9RDxP24YTaKmoVixhM6XyycP15Qvi"
+            },
+            {
+              "block": 222958001,
+              "code_hash": "GZmkbfVLcN7ErxU9RDxP24YTaKmoVixhM6XyycP15Qvi"
+            },
+            {
+              "block": 222766001,
+              "code_hash": "GZmkbfVLcN7ErxU9RDxP24YTaKmoVixhM6XyycP15Qvi"
+            },
+            {
+              "block": 222382001,
+              "code_hash": "GZmkbfVLcN7ErxU9RDxP24YTaKmoVixhM6XyycP15Qvi"
+            },
+            {
+              "block": 221614001,
+              "code_hash": "25eNFdfK76NUEZn4cDgq1xQYKjxKCuzgXmPB3SHBRW4Y"
+            }
+          ],
+          "method": "doubling steps back from now, then bisection on view_account code_hash"
+        }
+      },
+      "verdict_from_age_and_code_only": {
+        "verdict": "warn",
+        "reasons": [
+          {
+            "level": "warn",
+            "code": "CODE_CHANGED_RECENTLY",
+            "detail": "code hash changed 136.1 hours ago at block 222301528"
+          },
+          {
+            "level": "info",
+            "code": "CONTRACT_LOCKED",
+            "detail": "no full-access key: only the contract itself can change its code"
+          },
+          {
+            "level": "info",
+            "code": "KNOWN_RECIPIENT",
+            "detail": "10 payments settled"
+          }
+        ]
+      }
+    },
+    {
+      "signals": {
+        "account": "dclv2.ref-labs.near",
+        "missing": [],
+        "block_height": 223147178,
+        "exists": true,
+        "balance_yocto": "9612712675395233870138675041",
+        "storage_usage": 27485549,
+        "code_hash": "3G34Nhjmir5JPYPtijaA9iCNnHDPR7h3wfC9H77woEGo",
+        "is_contract": true,
+        "code_follows_publisher": false,
+        "keys": {
+          "keys": 0,
+          "full_access_keys": 0,
+          "transactions_signed_estimate": 0
+        },
+        "age": {
+          "created_block": 83798330,
+          "created_at": 1674692411.1284678,
+          "age_secs": 119178527.84137511,
+          "method": "bisection on view_account existence"
+        },
+        "code": {
+          "changed_block": 223137957,
+          "changed_at": 1793865658.985343,
+          "changed_ago_secs": 5279.984499931335,
+          "previous_code_hash": "BzhtCCGJibs9ykCZUuMZ9Diq3gFAi4ZGeMHgEuVqvoiA",
+          "current_code_hash": "3G34Nhjmir5JPYPtijaA9iCNnHDPR7h3wfC9H77woEGo",
+          "first_deploy": false,
+          "account_absent_before": false,
+          "samples": [
+            {
+              "block": 223144178,
+              "code_hash": "3G34Nhjmir5JPYPtijaA9iCNnHDPR7h3wfC9H77woEGo"
+            },
+            {
+              "block": 223138178,
+              "code_hash": "3G34Nhjmir5JPYPtijaA9iCNnHDPR7h3wfC9H77woEGo"
+            },
+            {
+              "block": 223126178,
+              "code_hash": "BzhtCCGJibs9ykCZUuMZ9Diq3gFAi4ZGeMHgEuVqvoiA"
+            }
+          ],
+          "method": "doubling steps back from now, then bisection on view_account code_hash"
+        }
+      },
+      "verdict_from_age_and_code_only": {
+        "verdict": "warn",
+        "reasons": [
+          {
+            "level": "warn",
+            "code": "CODE_CHANGED_RECENTLY",
+            "detail": "code hash changed 1.5 hours ago at block 223137957"
+          },
+          {
+            "level": "info",
+            "code": "CONTRACT_LOCKED",
+            "detail": "no full-access key: only the contract itself can change its code"
+          },
+          {
+            "level": "info",
+            "code": "KNOWN_RECIPIENT",
+            "detail": "10 payments settled"
+          }
+        ]
+      }
+    },
+    {
+      "signals": {
+        "account": "sp4t8.sputnik-dao.near",
+        "missing": [],
+        "block_height": 223147392,
+        "exists": true,
+        "balance_yocto": "89999999999999999999997",
+        "storage_usage": 5753,
+        "code_hash": "DtHZA1mUmGYeScEaUoUZYQGGFHSMpnjMCvkr5U9hJXuF",
+        "is_contract": true,
+        "code_follows_publisher": false,
+        "keys": {
+          "keys": 0,
+          "full_access_keys": 0,
+          "transactions_signed_estimate": 0
+        },
+        "age": {
+          "created_block": 223133088,
+          "created_at": 1793862869.5823402,
+          "age_secs": 8191.165471076965,
+          "method": "bisection on view_account existence"
+        },
+        "code": {
+          "changed_block": null,
+          "changed_at": null,
+          "changed_ago_secs": null,
+          "previous_code_hash": null,
+          "current_code_hash": "DtHZA1mUmGYeScEaUoUZYQGGFHSMpnjMCvkr5U9hJXuF",
+          "first_deploy": false,
+          "account_absent_before": false,
+          "samples": [
+            {
+              "block": 223144392,
+              "code_hash": "DtHZA1mUmGYeScEaUoUZYQGGFHSMpnjMCvkr5U9hJXuF"
+            },
+            {
+              "block": 223138392,
+              "code_hash": "DtHZA1mUmGYeScEaUoUZYQGGFHSMpnjMCvkr5U9hJXuF"
+            },
+            {
+              "block": 223133088,
+              "code_hash": "DtHZA1mUmGYeScEaUoUZYQGGFHSMpnjMCvkr5U9hJXuF"
+            }
+          ],
+          "method": "no change seen at any sampled height down to the floor"
+        }
+      },
+      "verdict_from_age_and_code_only": {
+        "verdict": "warn",
+        "reasons": [
+          {
+            "level": "warn",
+            "code": "ACCOUNT_YOUNG",
+            "detail": "first seen 2.3 hours ago"
+          },
+          {
+            "level": "info",
+            "code": "CONTRACT_LOCKED",
+            "detail": "no full-access key: only the contract itself can change its code"
+          },
+          {
+            "level": "info",
+            "code": "KNOWN_RECIPIENT",
+            "detail": "10 payments settled"
+          }
+        ]
+      }
+    },
+    {
+      "signals": {
+        "account": "contract.main.burrow.near",
+        "missing": [],
+        "block_height": 223147538,
+        "exists": true,
+        "balance_yocto": "11013883142260863927307953849",
+        "storage_usage": 53660982,
+        "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa",
+        "is_contract": true,
+        "code_follows_publisher": false,
+        "keys": {
+          "keys": 0,
+          "full_access_keys": 0,
+          "transactions_signed_estimate": 0
+        },
+        "age": {
+          "created_block": 62303111,
+          "created_at": 1648421334.9490025,
+          "age_secs": 145449809.05240893,
+          "method": "bisection on view_account existence"
+        },
+        "code": {
+          "changed_block": 207314063,
+          "changed_at": 1784268599.4209514,
+          "changed_ago_secs": 9602544.580460072,
+          "previous_code_hash": "966EV3pFmRLMgpsuJEy4twnM5t9W9ub9B9h3hV7ECguq",
+          "current_code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa",
+          "first_deploy": false,
+          "account_absent_before": false,
+          "samples": [
+            {
+              "block": 223144538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 223138538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 223126538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 223102538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 223054538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 222958538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 222766538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 222382538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 221614538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 220078538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 217006538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 210862538,
+              "code_hash": "6Nek1MZ8cwJJ2xMQAUWup9V5AToYS9rkTxJfwo6BCpFa"
+            },
+            {
+              "block": 198574538,
+              "code_hash": "GscSfcabe34NFeBjq9ADgXRenoAsWhompHht6FVseiUQ"
+            }
+          ],
+          "method": "doubling steps back from now, then bisection on view_account code_hash"
+        }
+      },
+      "verdict_from_age_and_code_only": {
+        "verdict": "allow",
+        "reasons": [
+          {
+            "level": "info",
+            "code": "CONTRACT_LOCKED",
+            "detail": "no full-access key: only the contract itself can change its code"
+          },
+          {
+            "level": "info",
+            "code": "KNOWN_RECIPIENT",
+            "detail": "10 payments settled"
+          }
+        ]
+      }
+    }
+  ]
+}

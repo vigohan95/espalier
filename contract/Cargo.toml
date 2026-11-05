@@ -16,3 +16,4 @@ near-sdk = "5.30.0"
 near-sdk = { version = "5.30.0", features = ["unit-testing"] }
 rand = { version = "0.8", features = ["small_rng"] }
 serde_json = "1"
+ed25519-dalek = "2"

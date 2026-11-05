@@ -41,15 +41,16 @@ def main():
     keys = view["result"]["keys"]
     full = [k for k in keys if k["access_key"]["permission"] == "FullAccess"]
     print(f"vault has {len(keys)} keys, {len(full)} full-access")
-    account = rpc("query", {"request_type": "view_account", "account_id": vault, "finality": "final"})["result"]
-    alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-    n, digest = int(deploy["wasm_sha256"], 16), ""
-    while n:
-        n, r = divmod(n, 58)
-        digest = alphabet[r] + digest
-    print(f"on-chain code_hash {account['code_hash']}, report says {digest}, match: {account['code_hash'] == digest}")
-    if account["code_hash"] != digest:
-        mismatched += 1
+    for label, account_id, sha in (("vault", vault, deploy["wasm_sha256"]), ("registry", deploy["registry"], deploy["registry_wasm_sha256"])):
+        account = rpc("query", {"request_type": "view_account", "account_id": account_id, "finality": "final"})["result"]
+        alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+        n, digest = int(sha, 16), ""
+        while n:
+            n, r = divmod(n, 58)
+            digest = alphabet[r] + digest
+        print(f"{label} {account_id}: on-chain code_hash {account['code_hash']}, report says {digest}, match: {account['code_hash'] == digest}")
+        if account["code_hash"] != digest:
+            mismatched += 1
     sys.exit(1 if missing or mismatched else 0)
 
 main()

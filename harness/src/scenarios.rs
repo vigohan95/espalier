@@ -100,9 +100,12 @@ pub fn all() -> Vec<Scenario> {
         sc!("P01", "controls", "pause stops spending and delegation but not revocation", false, p01),
         sc!("P02", "controls", "blocklist overrides an allowlist", false, p02),
     ]
+    .into_iter()
+    .chain(crate::recipient::all())
+    .collect()
 }
 
-fn events(logs: &[&str], name: &str) -> Vec<Value> {
+pub fn events(logs: &[&str], name: &str) -> Vec<Value> {
     logs.iter()
         .filter_map(|l| l.strip_prefix("EVENT_JSON:"))
         .filter_map(|l| serde_json::from_str::<Value>(l).ok())
@@ -1278,6 +1281,17 @@ impl Env {
 
     pub async fn wasm(&self) -> Result<Vec<u8>> {
         Ok(std::fs::read(crate::wasm_path("espalier_vault"))?)
+    }
+
+    /// The shared registry if there is one, otherwise a fresh one for this scenario.
+    pub async fn use_registry(&self) -> Result<AccountId> {
+        if let Some(r) = &self.registry {
+            return Ok(r.clone());
+        }
+        let a = self.new_account("registry", 5).await?;
+        let c = a.deploy(&std::fs::read(crate::wasm_path("espalier_registry"))?).await?.into_result()?;
+        c.call("new").transact().await?.into_result()?;
+        Ok(a.id().clone())
     }
 
     pub async fn relay(&self) -> Result<Account> {

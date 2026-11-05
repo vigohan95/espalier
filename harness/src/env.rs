@@ -91,6 +91,7 @@ pub struct Tm {
     pub key_allowance: u128,
     pub gas_budget: u128,
     pub node_budget: u32,
+    pub clearance: bool,
 }
 
 impl Tm {
@@ -110,6 +111,7 @@ impl Tm {
             key_allowance: 200 * MILLI,
             gas_budget: 8_000_000 * MILLI,
             node_budget: 100_000,
+            clearance: false,
         }
     }
 
@@ -144,6 +146,7 @@ impl Tm {
             "key_allowance": self.key_allowance.to_string(),
             "gas_budget": self.gas_budget.to_string(),
             "node_budget": self.node_budget,
+            "clearance_required": self.clearance,
         })
     }
 }
@@ -155,6 +158,8 @@ pub struct Env {
     pub base: Account,
     pub recipients: Vec<Account>,
     pub trace: Trace,
+    /// A registry that outlives one scenario, as on testnet. None means each scenario deploys its own.
+    pub registry: Option<AccountId>,
 }
 
 pub fn record_from(label: &str, signer: &str, method: &str, r: &ExecutionFinalResult) -> TxRecord {
@@ -202,7 +207,7 @@ impl Env {
         self.check(claim, pass, code, observed);
     }
 
-    fn keep(&self, label: &str, signer: &str, method: &str, r: &ExecutionFinalResult) {
+    pub fn keep(&self, label: &str, signer: &str, method: &str, r: &ExecutionFinalResult) {
         self.trace.txs.lock().unwrap().push(record_from(label, signer, method, r));
     }
 

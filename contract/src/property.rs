@@ -15,6 +15,10 @@
 //!      widened in exactly one dimension is refused with that dimension's code
 //!   I8 when everything has settled, nothing is reserved and nothing is in flight
 //!   I9 funds that left the vault equal the settled total; the vault never pays more than it holds
+//!   I10 native funds held for spends in screening equal the oracle's total, and never exceed the balance
+//!   I11 only a clear registry answer lets a screened spend go on; a revoke or pause during screening wins
+//!   I12 a clearance-bound grant reserves only with a valid ticket or through a human approval
+//!   I13 contact records equal the oracle's settled totals per grant and recipient
 //!
 //! Env: PROPERTY_SEEDS, PROPERTY_OPS, PROPERTY_REPORT (path of the JSON report).
 
@@ -24,6 +28,8 @@ use near_sdk::{test_vm_config, testing_env, CurveType, PromiseResult, RuntimeFee
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 use std::collections::{BTreeMap, HashMap, HashSet};
+
+use ed25519_dalek::{Signer, SigningKey};
 
 const NATIVE_START: u128 = 2_000_000_000_000_000_000_000_000_000;
 
@@ -41,6 +47,26 @@ fn token_id() -> AccountId {
 }
 fn recipients_pool() -> Vec<AccountId> {
     (0..12).map(|i| acct(&format!("merchant-{i}.test"))).collect()
+}
+
+fn attestor() -> SigningKey {
+    SigningKey::from_bytes(&[7u8; 32])
+}
+
+fn hexs(b: &[u8]) -> String {
+    b.iter().map(|x| format!("{x:02x}")).collect()
+}
+
+fn ticket(key: &SigningKey, grant: GrantId, recipient: &AccountId, amount: u128, now: u64) -> Clearance {
+    let code = [0u8; 32];
+    let expires = now + 60_000;
+    let msg = clearance_message(&vault_id(), grant, recipient, amount, expires, &code);
+    Clearance {
+        max_amount: U128(amount),
+        expires_at_ms: expires,
+        code_hash: hexs(&code),
+        signature: hexs(&key.sign(&msg).to_bytes()),
+    }
 }
 
 fn pk_from(n: u64) -> PublicKey {
@@ -72,9 +98,12 @@ enum Fate {
 struct Spend {
     id: u64,
     leaf: GrantId,
+    recipient: AccountId,
     amount: u128,
     native: bool,
     fate: Fate,
+    /// Still waiting for the registry: nothing has been dispatched yet.
+    screening: bool,
 }
 
 #[derive(Default)]
@@ -98,6 +127,10 @@ struct Sim {
     blocked: HashSet<AccountId>,
     paused: bool,
     native_out: u128,
+    /// This run has a registry in front of every spend.
+    screened: bool,
+    held: u128,
+    contacts: BTreeMap<(GrantId, AccountId), u128>,
     stats: Stats,
     /// approval id -> (grant, recipient, amount, hash, approved)
     queue: BTreeMap<u64, (GrantId, AccountId, u128, String, bool)>,
@@ -124,12 +157,23 @@ impl Sim {
             blocked: HashSet::new(),
             paused: false,
             native_out: 0,
+            screened: seed % 2 == 0,
+            held: 0,
+            contacts: BTreeMap::new(),
             stats: Stats::default(),
             queue: BTreeMap::new(),
         };
         sim.context(Who::Owner, vec![]);
         let mut vault = Vault::new(owner_id(), U128(0), 300);
         vault.tokens.insert(token_id(), 0);
+        vault.attestor = Some(PublicKey::from_parts(CurveType::ED25519, attestor().verifying_key().to_bytes().to_vec()).unwrap());
+        if sim.screened {
+            vault.screen = Some(Screen {
+                registry: acct("registry.test"),
+                reporters: vec![acct("a.test"), acct("b.test")],
+                quorum: 2,
+            });
+        }
         env::state_write(&vault);
         drop(vault);
         sim.call(Who::Owner, vec![], |v| {
@@ -231,6 +275,7 @@ impl Sim {
             out.extend(v.next_nonce.to_le_bytes());
             out.extend(v.next_grant.to_le_bytes());
             out.extend(v.in_flight.to_le_bytes());
+            out.extend(v.native_held.to_le_bytes());
             out.extend(v.tokens.get(&token_id()).copied().unwrap_or(0).to_le_bytes());
             out
         })
@@ -268,12 +313,21 @@ impl Sim {
                 assert_eq!(g.reserved, n.reserved, "I3 reserved on grant {id}");
             }
         });
+        let (held, balance) = (self.held, self.balance);
+        let contacts = self.contacts.clone();
+        self.view(|v| {
+            assert_eq!(v.native_held, held, "I10 held funds");
+            assert!(held <= balance, "I10 more held than the vault has");
+            for ((g, r), total) in &contacts {
+                assert_eq!(v.contact(*g, r.clone()).map(|c| c.total.0), Some(*total), "I13 contact of grant {g}");
+            }
+        });
     }
 
     fn note_denial(&mut self, grant: Option<GrantId>, code: &str) {
         *self.stats.by_code.entry(code.to_string()).or_default() += 1;
         let Some(id) = grant else { return };
-        if matches!(code, "PAUSED" | "ALREADY_REVOKED") {
+        if matches!(code, "PAUSED" | "ALREADY_REVOKED" | "REGISTRY_UNAVAILABLE") {
             return;
         }
         let n = self.nodes.get_mut(&id).unwrap();
@@ -369,13 +423,16 @@ impl Sim {
             }
             (Ok(()), "VAULT_BALANCE") | (_, "VAULT_BALANCE") => {}
             (Ok(()), "QUEUE_FULL") => {
-                assert!(amount > self.nodes[&id].terms.approval_threshold.0, "queue refusal below threshold");
+                assert!(
+                    amount > self.nodes[&id].terms.approval_threshold.0 || self.nodes[&id].terms.clearance_required,
+                    "queue refusal below threshold"
+                );
             }
             (e, code) => panic!("oracle expected {e:?}, contract said {code}: {}", d.detail),
         }
     }
 
-    fn record_reservation(&mut self, leaf: GrantId, spend_id: u64, amount: u128) {
+    fn record_reservation(&mut self, leaf: GrantId, recipient: &AccountId, spend_id: u64, amount: u128) {
         for a in self.lineage(leaf) {
             let now = self.now;
             let n = self.nodes.get_mut(&a).unwrap();
@@ -392,10 +449,22 @@ impl Sim {
         }
         let native = self.nodes[&leaf].terms.asset == Asset::Native;
         if native {
-            assert!(amount <= self.balance, "I9 vault paid more than it holds");
-            self.balance -= amount;
+            if self.screened {
+                self.held += amount;
+            } else {
+                assert!(amount <= self.balance, "I9 vault paid more than it holds");
+                self.balance -= amount;
+            }
         }
-        self.spends.push(Spend { id: spend_id, leaf, amount, native, fate: Fate::InFlight });
+        self.spends.push(Spend {
+            id: spend_id,
+            leaf,
+            recipient: recipient.clone(),
+            amount,
+            native,
+            fate: Fate::InFlight,
+            screening: self.screened,
+        });
     }
 
     fn op_spend(&mut self) {
@@ -412,9 +481,18 @@ impl Sim {
             _ => self.rng.gen_range(1..=per_tx),
         };
         let pk = self.nodes[&id].pk.clone();
+        // Bound grants see every kind of ticket; a ticket on an unbound grant is simply ignored.
+        let bound = self.nodes[&id].terms.clearance_required;
+        let roll = self.rng.gen_range(0..10);
+        let (carried, forged) = match roll {
+            0..=3 => (None, false),
+            4..=7 => (Some(ticket(&attestor(), id, &recipient, amount, self.now)), false),
+            _ => (Some(ticket(&SigningKey::from_bytes(&[9u8; 32]), id, &recipient, amount, self.now)), true),
+        };
+        let no_ticket = carried.is_none();
         let before = self.financial_snapshot();
         let d = self.call(Who::Key(pk), vec![], |v| {
-            match v.request_spend(recipient.clone(), U128(amount), None) {
+            match v.request_spend(recipient.clone(), U128(amount), None, carried) {
                 PromiseOrValue::Value(d) => (d, None),
                 PromiseOrValue::Promise(p) => {
                     let spend_id = v.next_nonce - 1;
@@ -427,13 +505,18 @@ impl Sim {
             (_, Some(spend_id)) => {
                 self.expected_spend(id, &recipient, amount)
                     .unwrap_or_else(|e| panic!("oracle expected {e} but the contract reserved"));
-                self.record_reservation(id, spend_id, amount);
-                self.count("spend_reserved");
+                assert!(!bound || (!no_ticket && !forged), "I12 bound grant {id} reserved without a valid ticket");
+                self.record_reservation(id, &recipient, spend_id, amount);
+                self.count(if bound { "spend_reserved_with_ticket" } else { "spend_reserved" });
             }
             (d, None) if d.outcome == "queued" => {
                 self.expected_spend(id, &recipient, amount)
                     .unwrap_or_else(|e| panic!("oracle expected {e} but the contract queued"));
-                assert!(amount > self.nodes[&id].terms.approval_threshold.0, "queued below threshold");
+                assert_eq!(d.code == "NEEDS_CLEARANCE", bound && no_ticket, "I12 clearance queue on grant {id}");
+                assert!(
+                    (bound && no_ticket) || amount > self.nodes[&id].terms.approval_threshold.0,
+                    "queued below threshold"
+                );
                 self.queue.insert(
                     d.approval_id.unwrap(),
                     (id, recipient, amount, d.spend_hash.unwrap(), false),
@@ -442,7 +525,12 @@ impl Sim {
             }
             (d, None) => {
                 assert_eq!(d.outcome, "denied");
-                self.assert_refusal_matches(id, &recipient, amount, &d);
+                if d.code == "CLEARANCE_BAD_SIG" {
+                    assert!(bound && forged, "I12 a good ticket was refused");
+                } else {
+                    assert!(!(bound && forged && self.expected_spend(id, &recipient, amount).is_ok() && d.code != "VAULT_BALANCE"), "I12 forged ticket not noticed");
+                    self.assert_refusal_matches(id, &recipient, amount, &d);
+                }
                 let after = self.financial_snapshot();
                 assert_eq!(before, after, "I5 denied spend changed state: {}", d.code);
                 self.note_denial(Some(id), &d.code);
@@ -459,8 +547,72 @@ impl Sim {
         }
         // Any order at all: callbacks of different spends interleave freely.
         let idx = open[self.rng.gen_range(0..open.len())];
+        if self.spends[idx].screening {
+            self.answer_screen(idx);
+            return;
+        }
         let ok = self.rng.gen_bool(0.8);
         self.settle(idx, ok);
+    }
+
+    /// Delivers the registry's answer. Only a clear answer on a live lineage goes on to the transfer.
+    fn answer_screen(&mut self, idx: usize) {
+        let (id, leaf, amount, native) = {
+            let s = &self.spends[idx];
+            (s.id, s.leaf, s.amount, s.native)
+        };
+        let result = match self.rng.gen_range(0..100) {
+            0..=69 => PromiseResult::Successful(br#"{"listed":false,"trusted_reports":0}"#.to_vec()),
+            70..=81 => PromiseResult::Successful(br#"{"listed":true,"trusted_reports":2}"#.to_vec()),
+            82..=90 => PromiseResult::Successful(b"not json".to_vec()),
+            _ => PromiseResult::Failed,
+        };
+        let clear = matches!(&result, PromiseResult::Successful(b) if b.starts_with(br#"{"listed":false"#));
+        let expect = match &result {
+            PromiseResult::Successful(b) if b.starts_with(br#"{"listed":true"#) => Some("RECIPIENT_LISTED"),
+            _ if !clear => Some("REGISTRY_UNAVAILABLE"),
+            _ => None,
+        };
+        let dead = self.model_dead(leaf);
+        let paused = self.paused;
+        let before_balance = self.balance;
+        let out = self.call(Who::Callback, vec![result], |v| match v.on_screened(id) {
+            PromiseOrValue::Value(d) => Some(d),
+            PromiseOrValue::Promise(p) => {
+                p.detach();
+                None
+            }
+        });
+        if native {
+            self.held -= amount;
+        }
+        match out {
+            None => {
+                assert!(clear && !dead && !paused, "I11 spend {id} dispatched without a clear answer on a live lineage");
+                if native {
+                    assert!(amount <= before_balance, "I9 vault paid more than it holds");
+                    self.balance -= amount;
+                }
+                self.spends[idx].screening = false;
+                self.count("screen_passed");
+            }
+            Some(d) => {
+                assert_eq!(d.outcome, "denied");
+                match expect {
+                    Some(code) => assert_eq!(d.code, code, "I11 wrong refusal"),
+                    None => assert!(dead || paused, "I11 clear answer refused: {}", d.code),
+                }
+                for a in self.lineage(leaf) {
+                    let n = self.nodes.get_mut(&a).unwrap();
+                    n.reserved -= amount;
+                    n.log.retain(|(_, _, s)| *s != id);
+                }
+                self.spends[idx].fate = Fate::RolledBack;
+                self.spends[idx].screening = false;
+                self.note_denial(Some(leaf), &d.code);
+                self.count("screen_refused");
+            }
+        }
     }
 
     fn settle(&mut self, idx: usize, ok: bool) {
@@ -468,6 +620,7 @@ impl Sim {
             let s = &self.spends[idx];
             (s.id, s.leaf, s.amount, s.native)
         };
+        let recipient = self.spends[idx].recipient.clone();
         let result = if ok { PromiseResult::Successful(vec![]) } else { PromiseResult::Failed };
         let d = self.call(Who::Callback, vec![result], |v| v.on_spend_settled(id));
         assert_eq!(d.outcome, if ok { "settled" } else { "rolled_back" });
@@ -485,6 +638,13 @@ impl Sim {
                 self.native_out += amount;
             } else {
                 self.balance += amount;
+            }
+        }
+        if ok {
+            let root = *self.lineage(leaf).last().unwrap();
+            *self.contacts.entry((leaf, recipient.clone())).or_default() += amount;
+            if root != leaf {
+                *self.contacts.entry((root, recipient)).or_default() += amount;
             }
         }
         self.spends[idx].fate = if ok { Fate::Settled } else { Fate::RolledBack };
@@ -539,6 +699,7 @@ impl Sim {
             key_allowance: U128(1),
             gas_budget: U128(gas_left.saturating_sub(1) / 3),
             node_budget: nodes_left.saturating_sub(1) / 2,
+            clearance_required: p.clearance_required || rng.gen_bool(0.1),
         }
     }
 
@@ -554,7 +715,14 @@ impl Sim {
             }
             (g.gas_left, g.nodes_left, remaining)
         });
-        match self.rng.gen_range(0..13) {
+        match self.rng.gen_range(0..14) {
+            13 => {
+                if !p.clearance_required {
+                    return None;
+                }
+                t.clearance_required = false;
+                Some("ATT_CLEARANCE")
+            }
             0 => {
                 t.asset = if p.asset == Asset::Native { Asset::Ft(token_id()) } else { Asset::Native };
                 Some("ATT_ASSET")
@@ -743,6 +911,7 @@ impl Sim {
         assert!(c.expires_at_ms <= p.expires_at_ms);
         assert!(c.max_depth < p.max_depth);
         assert!(c.max_denials <= p.max_denials);
+        assert!(!p.clearance_required || c.clearance_required, "I7 child dropped clearance");
         assert!(c.methods.iter().all(|m| p.methods.contains(m)));
         if let Some(list) = &p.recipients {
             let asked = c.recipients.as_ref().expect("I7 list parent, unlimited child");
@@ -879,7 +1048,7 @@ impl Sim {
                 assert!(!tamper, "tampered amount executed");
                 self.expected_spend(grant, &recipient, amount)
                     .unwrap_or_else(|e| panic!("execution passed but the oracle expected {e}"));
-                self.record_reservation(grant, spend_id, amount);
+                self.record_reservation(grant, &recipient, spend_id, amount);
                 self.queue.remove(&aid);
                 // Replay of the same approval.
                 let pk = self.nodes[&grant].pk.clone();
@@ -962,6 +1131,7 @@ impl Sim {
             key_allowance: U128(1),
             gas_budget: U128(1_000_000),
             node_budget: rng.gen_range(10..40),
+            clearance_required: rng.gen_bool(0.25),
         };
         let t = terms.clone();
         let k = pk.clone();
@@ -1017,6 +1187,9 @@ impl Sim {
 
     fn drain(&mut self) {
         for idx in 0..self.spends.len() {
+            if self.spends[idx].screening {
+                self.answer_screen(idx);
+            }
             if self.spends[idx].fate == Fate::InFlight {
                 let ok = self.rng.gen_bool(0.8);
                 self.settle(idx, ok);
@@ -1085,7 +1258,7 @@ fn random_operations_hold_every_invariant() {
         "window_refusals_within_bucket_slack": total.window_conservative,
         "operations": total.by_op,
         "denial_codes": total.by_code,
-        "invariants": ["I1","I2","I3","I4","I5","I6","I7","I8","I9"],
+        "invariants": ["I1","I2","I3","I4","I5","I6","I7","I8","I9","I10","I11","I12","I13"],
     });
     println!("{}", serde_json::to_string_pretty(&report).unwrap());
     if let Ok(path) = std::env::var("PROPERTY_REPORT") {
@@ -1093,10 +1266,10 @@ fn random_operations_hold_every_invariant() {
     }
     // A run that never reached the interesting paths proves nothing, so coverage is asserted too.
     if total.ops >= 10_000 {
-        for op in ["spend_reserved", "spend_queued", "delegated", "delegate_denied", "revoked", "settled", "rolled_back", "executed_then_replay_denied"] {
+        for op in ["spend_reserved", "spend_reserved_with_ticket", "spend_queued", "delegated", "delegate_denied", "revoked", "settled", "rolled_back", "executed_then_replay_denied", "screen_passed", "screen_refused"] {
             assert!(total.by_op.get(op).copied().unwrap_or(0) > 0, "operation {op} never happened");
         }
-        for code in ["ANCESTOR_CAP", "ANCESTOR_REVOKED", "PER_TX", "RECIPIENT_NOT_ALLOWED", "ATT_CAP", "ATT_METHODS", "ATT_RECIPIENTS"] {
+        for code in ["ANCESTOR_CAP", "ANCESTOR_REVOKED", "PER_TX", "RECIPIENT_NOT_ALLOWED", "ATT_CAP", "ATT_METHODS", "ATT_RECIPIENTS", "ATT_CLEARANCE", "RECIPIENT_LISTED", "REGISTRY_UNAVAILABLE", "CLEARANCE_BAD_SIG"] {
             assert!(total.by_code.get(code).copied().unwrap_or(0) > 0, "code {code} never happened");
         }
         assert!(total.max_depth_seen >= 3, "tree stayed too shallow");

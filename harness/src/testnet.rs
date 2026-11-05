@@ -32,30 +32,42 @@ fn stored(id: &str, worker: &Worker<Testnet>) -> Result<Account> {
     load(&cred_dir().join(format!("{id}.json")), id, worker)
 }
 
+/// The first vault, `vault.<base>`, ran an earlier contract with a different state layout and stays
+/// as it is. Each layout change gets a new account, because deployed state cannot be reinterpreted.
+const VAULT: &str = "vault2";
+
 fn names(base: &str) -> (String, String, Vec<String>) {
-    (format!("vault.{base}"), format!("owner.{base}"), (0..3).map(|i| format!("r{i}.{base}")).collect())
+    (format!("{VAULT}.{base}"), format!("owner.{base}"), (0..3).map(|i| format!("r{i}.{base}")).collect())
 }
 
 async fn deploy(worker: &Worker<Testnet>, base: &Account) -> Result<()> {
     let wasm = std::fs::read(crate::wasm_path("espalier_vault"))?;
+    let registry_wasm = std::fs::read(crate::wasm_path("espalier_registry"))?;
     let mut txs = vec![];
     let dir = cred_dir();
-    let owner = base.create_subaccount("owner").initial_balance(NearToken::from_millinear(900)).transact().await?.into_result()?;
-    owner.store_credentials(&dir).await?;
-    let mut recipients = vec![];
-    for i in 0..3 {
-        let r = base.create_subaccount(&format!("r{i}")).initial_balance(NearToken::from_millinear(50)).transact().await?.into_result()?;
-        r.store_credentials(&dir).await?;
-        recipients.push(r);
-    }
-    let storage_near = (wasm.len() as u128 / 100_000 + 1) * 1000;
+    let (_, owner_id, _) = names(base.id().as_str());
+    let owner = stored(&owner_id, worker)?;
+    let storage_near = wasm.len() as u128 / 100 + 200;
     let vault = base
-        .create_subaccount("vault")
-        .initial_balance(NearToken::from_millinear(storage_near as u128 + 1_500))
+        .create_subaccount(VAULT)
+        .initial_balance(NearToken::from_millinear(storage_near as u128 + 1_000))
         .transact()
         .await?
         .into_result()?;
     vault.store_credentials(&dir).await?;
+    let registry = base
+        .create_subaccount("registry")
+        .initial_balance(NearToken::from_millinear(registry_wasm.len() as u128 / 100 + 150))
+        .transact()
+        .await?
+        .into_result()?;
+    registry.store_credentials(&dir).await?;
+    let d = registry.deploy(&registry_wasm).await?;
+    txs.push(json!({"label": "deploy registry", "hash": d.details.outcome().transaction_hash.to_string()}));
+    let c = d.into_result()?;
+    let r = c.call("new").gas(Gas::from_tgas(30)).transact().await?;
+    txs.push(json!({"label": "init registry", "hash": r.outcome().transaction_hash.to_string()}));
+    r.into_result()?;
     let d = vault.deploy(&wasm).await?;
     txs.push(json!({"label": "deploy", "hash": d.details.outcome().transaction_hash.to_string()}));
     let c = d.into_result()?;
@@ -67,7 +79,15 @@ async fn deploy(worker: &Worker<Testnet>, base: &Account) -> Result<()> {
         .await?;
     txs.push(json!({"label": "init", "hash": r.outcome().transaction_hash.to_string()}));
     r.into_result()?;
-    let doc = json!({"vault": vault.id(), "owner": owner.id(), "wasm_sha256": wasm_sha256(), "txs": txs});
+    let doc = json!({
+        "vault": vault.id(),
+        "owner": owner.id(),
+        "registry": registry.id(),
+        "wasm_sha256": wasm_sha256(),
+        "registry_wasm_sha256": sha256_of("espalier_registry"),
+        "first_block": worker.view_block().await?.height(),
+        "txs": txs,
+    });
     println!("{}", serde_json::to_string_pretty(&doc)?);
     std::fs::write("docs/evidence/testnet-deploy.json", serde_json::to_string_pretty(&doc)?)?;
     let _ = worker;
@@ -192,6 +212,7 @@ pub async fn run(account: &str, key_file: &str, report: Option<&str>) -> Result<
         base,
         recipients: recipient_ids.iter().map(|r| stored(r, &worker)).collect::<Result<_>>()?,
         trace: Trace::default(),
+        registry: Some(format!("registry.{account}").parse()?),
     };
     let only: Option<Vec<String>> = std::env::args()
         .skip_while(|a| a != "--only")

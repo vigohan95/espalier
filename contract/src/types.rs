@@ -19,6 +19,11 @@ pub const MAX_MEMO_BYTES: usize = 128;
 pub const EAGER_SWEEP: u32 = if cfg!(test) { 1 } else { 32 };
 pub const AUTO_REVOKE_SWEEP: u32 = 8;
 pub const MAX_SWEEP: u32 = 64;
+/// A clearance ticket must expire within this much of the moment it is used.
+pub const MAX_CLEARANCE_TTL_MS: u64 = 3_600_000;
+pub const MAX_REPORTERS: usize = 16;
+/// One reporter alone must never be able to block a recipient, so this is the floor for any vault.
+pub const MIN_QUORUM: u8 = 2;
 
 /// Vault methods a grant can hold. The FC key the vault issues lists exactly these names, so the
 /// protocol enforces this dimension before the contract runs.
@@ -79,6 +84,48 @@ pub struct Terms {
     pub gas_budget: U128,
     /// Grants this grant can create below itself, across all levels.
     pub node_budget: u32,
+    /// Every spend needs a fresh ticket signed by the vault's attestor, or a human approval.
+    pub clearance_required: bool,
+}
+
+/// The shared denylist this vault consults on every spend, and whose reports it counts.
+#[near(serializers = [borsh, json])]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Screen {
+    pub registry: AccountId,
+    pub reporters: Vec<AccountId>,
+    pub quorum: u8,
+}
+
+/// Signed off chain after the recipient check says allow. The grant and the recipient are not
+/// fields: they come from the call itself and go into the signed message, so a ticket for anything
+/// else fails the signature.
+#[near(serializers = [json])]
+#[derive(Clone, Debug)]
+pub struct Clearance {
+    pub max_amount: U128,
+    pub expires_at_ms: u64,
+    /// Hex sha256 of the recipient's code as the attestor saw it. All zero for a plain account.
+    pub code_hash: String,
+    /// Hex ed25519 signature.
+    pub signature: String,
+}
+
+/// Payments that settled between a grant and a recipient. Written only by settlement.
+#[near(serializers = [borsh, json])]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Contact {
+    pub count: u32,
+    pub total: U128,
+    pub first_ms: u64,
+    pub last_ms: u64,
+}
+
+/// What the vault reads from the registry. Anything that does not parse counts as no answer.
+#[near(serializers = [json])]
+#[derive(Clone, Debug)]
+pub struct ScreenAnswer {
+    pub listed: bool,
 }
 
 #[near(serializers = [borsh])]
@@ -100,6 +147,7 @@ pub struct Grant {
     pub max_depth: u8,
     pub max_denials: u32,
     pub key_allowance: u128,
+    pub clearance: bool,
 
     // Live state.
     pub pk: PublicKey,
@@ -146,6 +194,8 @@ pub struct Approval {
     pub hash: [u8; 32],
     pub expires_at_ms: u64,
     pub approved_by: Option<Approver>,
+    /// Queued for want of a ticket, so only someone not bound by clearance can approve it.
+    pub no_clearance: bool,
 }
 
 /// Returned by every state-changing agent method. A denial is a normal return, never a panic: a
@@ -187,6 +237,7 @@ pub struct GrantView {
     pub max_depth: u8,
     pub max_denials: u32,
     pub key_allowance: U128,
+    pub clearance_required: bool,
     pub pk: PublicKey,
     pub key_live: bool,
     pub spent: U128,
@@ -215,6 +266,7 @@ pub struct ApprovalView {
     pub spend_hash: String,
     pub expires_at_ms: u64,
     pub approved_by: Option<Approver>,
+    pub no_clearance: bool,
 }
 
 #[near(serializers = [json])]
@@ -228,5 +280,9 @@ pub struct VaultInfo {
     pub in_flight: u64,
     pub sweep_backlog: u64,
     pub available_native: U128,
+    /// Native funds promised to spends that are waiting for the registry's answer.
+    pub native_held: U128,
+    pub screen: Option<Screen>,
+    pub attestor: Option<PublicKey>,
     pub now_ms: u64,
 }

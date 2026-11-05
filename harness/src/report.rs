@@ -43,8 +43,12 @@ pub fn git_commit() -> String {
 }
 
 pub fn wasm_sha256() -> String {
+    sha256_of("espalier_vault")
+}
+
+pub fn sha256_of(name: &str) -> String {
     Command::new("sha256sum")
-        .arg(crate::wasm_path("espalier_vault"))
+        .arg(crate::wasm_path(name))
         .output()
         .ok()
         .map(|o| String::from_utf8_lossy(&o.stdout).split_whitespace().next().unwrap_or("").to_string())
