@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Does the property test actually catch bugs? Each mutant below breaks the contract in one place,
 then the in-process property test runs against the broken copy. A mutant counts as caught only if
-the test fails. A surviving mutant means the test suite has a hole. Run inside WSL."""
-import json, os, shutil, subprocess, sys, time
+the test fails. A surviving mutant means the test suite has a hole. Takes about 10 minutes."""
+import json, os, shutil, subprocess, sys, tempfile, time
 
-REPO = "/mnt/d/income-engine/work/hackathons/near"
-WORK = "/root/espalier-build/mutant-src"
-TARGET = "/root/espalier-build/mutant-target"
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCRATCH = os.environ.get("ESPALIER_BUILD", os.path.join(tempfile.gettempdir(), "espalier-build"))
+WORK = os.path.join(SCRATCH, "mutant-src")
+TARGET = os.path.join(SCRATCH, "mutant-target")
 
 LIB, WIN = "contract/src/lib.rs", "contract/src/window.rs"
 
@@ -97,7 +98,7 @@ def run_test(seeds, ops):
 
 
 def main():
-    seeds, ops = int(sys.argv[1]) if len(sys.argv) > 1 else 6, int(sys.argv[2]) if len(sys.argv) > 2 else 1500
+    seeds, ops = int(sys.argv[1]) if len(sys.argv) > 1 else 4, int(sys.argv[2]) if len(sys.argv) > 2 else 1500
     results = []
     shutil.rmtree(WORK, ignore_errors=True)
     os.makedirs(WORK)

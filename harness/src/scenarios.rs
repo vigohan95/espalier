@@ -453,7 +453,8 @@ async fn b11(e: Env) -> Result<()> {
 }
 
 pub async fn chain(e: &Env, levels: usize) -> Result<(Vec<Agent>, Vec<Tm>)> {
-    let t = Tm::root(e.now_ms().await?);
+    let mut t = Tm::root(e.now_ms().await?);
+    t.max_depth = levels.max(6) as u8;
     let mut agents = vec![e.root(&t).await?];
     let mut terms = vec![t];
     for i in 0..levels {
@@ -1070,10 +1071,14 @@ async fn f02(e: Env) -> Result<()> {
     let child = e.child(&root, &ct).await?;
     let before = e.balance(&e.vault).await?;
     let mut attempts = 0u32;
+    let mut burnt = 0f64;
     let mut error = String::new();
     for i in 0..120 {
         match e.spend_with_gas(&child, &e.r(0), 1_000 * MILLI, Some(&format!("drain {i}")), 60).await {
-            Ok(_) => attempts += 1,
+            Ok(r) => {
+                attempts += 1;
+                burnt += r.total_gas_burnt.as_gas() as f64 / 1e12;
+            }
             Err(err) => {
                 error = format!("{err:?}");
                 break;
@@ -1083,8 +1088,10 @@ async fn f02(e: Env) -> Result<()> {
     e.check("the attack really ran", attempts >= 3, ">= 3 attempts reached the contract", attempts);
     e.eq("each attempt was counted", e.grant(child.grant).await?["denied"].as_u64(), Some(attempts as u64));
     e.check("protocol stopped the key", error.contains("NotEnoughAllowance"), "NotEnoughAllowance", format!("after {attempts} attempts: {error}"));
-    let lost = before.saturating_sub(e.balance(&e.vault).await?);
-    e.check("vault lost no more than the allowance", lost <= 75 * MILLI, "<= 75 milliNEAR", lost);
+    e.sleep_ms(2000).await;
+    let after = e.balance(&e.vault).await?;
+    let lost = before as i128 - after as i128;
+    e.check("vault lost no more than the allowance", lost <= 75 * MILLI as i128, "<= 75 milliNEAR", format!("balance change {lost} yocto over {attempts} attempts, {burnt:.1} Tgas burnt"));
     Ok(())
 }
 async fn f03(e: Env) -> Result<()> {

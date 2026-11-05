@@ -1,0 +1,19 @@
+{
+  "owner": "owner.espalier-vault-1105.testnet",
+  "txs": [
+    {
+      "hash": "91xMMds7QLQDuw4ubdFyL8zEVFMvQkpDQ5Xza7B5nrPK",
+      "label": "deploy"
+    },
+    {
+      "hash": "CZfBR8vZbABCJKv5HzxSa5As7vKW12Bg7XSdqSEBWtyh",
+      "label": "init"
+    },
+    {
+      "hash": "74rhqe3GEgjimFx6BCLrXYBFAwKVjG45Pn8iPSpJHRaB",
+      "label": "redeploy"
+    }
+  ],
+  "vault": "vault.espalier-vault-1105.testnet",
+  "wasm_sha256": "91909733d24c562aea39c44771e8f55e8868de9bad09d85a2a0903e86163d3e2"
+}

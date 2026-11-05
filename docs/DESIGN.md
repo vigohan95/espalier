@@ -122,7 +122,9 @@ Agent keys live on the vault account, so their gas is paid from the vault. There
    out is bounded by the root's `gas_budget`, carved at each level. This is a hard stop that no
    contract bug can move (F02).
 2. **Denial counter.** Denials return normally instead of panicking, so the counter survives. After
-   `max_denials` the vault revokes the grant and deletes the key (F01, F08). The counter does not
+   `max_denials` the vault revokes the grant and deletes the key (F01, F08). That call does at most 8
+   units of sweep work, because the attacker picks its gas: a sweep that ran it out of gas would roll
+   the denial back with it. The counter does not
    reset on a success, so a key cannot launder failures with dust spends. It never resets at all: a
    grant that reaches its limit needs a new grant.
 3. **Refill.** A key with an exhausted allowance is locked out. The protocol cannot raise an allowance
@@ -130,10 +132,10 @@ Agent keys live on the vault account, so their gas is paid from the vault. There
    ancestor's budget (F03). Only an ancestor or the owner can refill, so a compromised key cannot
    extend its own life.
 
-Sizing an allowance: the protocol charges `prepaid gas x gas price` up front against the allowance and
-refunds what was not burnt, so a key must always hold a full call's worth. The sandbox prices gas at
-1e9 yocto (100 Tgas needs 0.1 NEAR of allowance). A key below that is refused before the contract
-runs, whatever it has burnt so far.
+Sizing an allowance: the protocol checks the prepaid gas against the allowance up front, so a key must
+always hold a full call's worth, whatever it has burnt so far. On the sandbox a 200 Tgas call was
+refused with `cost: 0.2009 NEAR`, about 0.001 NEAR per prepaid Tgas, while in F02 a 75 milliNEAR
+allowance lasted 55 denied attempts at 60 Tgas each: the unburnt part comes back after each call.
 
 **Known limit (F04).** A call with arguments that fail to parse panics in the generated entry point
 before any contract code runs, so it burns gas and does not move the counter. The same goes for a
@@ -168,7 +170,6 @@ The queue holds at most 8 entries per grant, so it cannot be used to fill storag
 
 ## Storage
 
-A grant stores about 400 bytes plus its recipient list, and an agent can create grants without
-attaching a deposit, because FC keys cannot attach one. Storage is therefore paid by the vault, and
+An agent creates grants without attaching a deposit, because FC keys cannot attach one. Storage is therefore paid by the vault, and
 `node_budget` is what bounds it: a root's whole tree can hold at most `node_budget + 1` grants, at
 most 32 children per grant, 16 recipients per list and 8 levels.

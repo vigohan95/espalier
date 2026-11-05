@@ -1,0 +1,1620 @@
+{
+  "assertions": 116,
+  "git_commit": "e5617e1",
+  "network": "testnet",
+  "node_version": "Version { version: \"2.14.0-rc.5\", build: \"2.14.0-rc.5\", commit: \"b7b4737cab46f17a6daa2ed694d7aebbd204363a\", rustc_version: \"1.95.0\" }",
+  "passed": 16,
+  "scenarios": [
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_CAP",
+          "observed": "ATT_CAP: child cap 1001000000000000000000000 > parent 1000000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "30",
+          "observed": "30",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A01",
+      "seconds": 39.342545995,
+      "status": "pass",
+      "title": "child cap above parent's remaining is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "JAZvQpMK6FB4o28aqsSf3EmWrauJWCpGn6QfLGrU9q6y",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 6.020960120216
+        },
+        {
+          "code": "ATT_CAP",
+          "detail": "child cap 1001000000000000000000000 > parent 1000000000000000000000000",
+          "hash": "Dz9DoVS6W2SsDq1h5hejHpFyptW2TDWDTeTGzjo83eMZ",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 39",
+          "tgas_burnt": 2.504523071055
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_RECIPIENTS",
+          "observed": "ATT_RECIPIENTS: r2.espalier-vault-1105.testnet is not in the parent list",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "31",
+          "observed": "31",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A06",
+      "seconds": 11.902130794,
+      "status": "pass",
+      "title": "child recipient outside parent's list is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "CkVVcGKw7qS829PCR4johHE1xCEZAo7NF5KB25qfhnw3",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 6.024032470925
+        },
+        {
+          "code": "ATT_RECIPIENTS",
+          "detail": "r2.espalier-vault-1105.testnet is not in the parent list",
+          "hash": "HE33sM9N8ZjPfibHNzHC5pKrCMQMp3CGpwzuBh7ibANU",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 40",
+          "tgas_burnt": 2.55156026626
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "children together are promised twice the parent",
+          "expected": "60000000000000000000000",
+          "observed": "60000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "spend inside the shared cap settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "spend inside the shared cap settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "spend inside the shared cap settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "next spend hits the parent",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 30000000000000000000000 + 10000000000000000000000 > 30000000000000000000000 cap on grant 41",
+          "pass": true
+        },
+        {
+          "claim": "blocking grant is the root",
+          "expected": "Some(41)",
+          "observed": "Some(41)",
+          "pass": true
+        },
+        {
+          "claim": "root total equals its cap",
+          "expected": "30000000000000000000000",
+          "observed": "30000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A17",
+      "seconds": 27.28919762,
+      "status": "pass",
+      "title": "oversubscribed siblings stop exactly at the parent's cap",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "GepVS8oXqhSLgV9tF5DNSkWqwNjGDQcVcqp7G61EAzN3",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.789805859503
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FFLNvLSw7FRrwKMkV38d25tdGPxjKmccvDPMMo7SNTaU",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 41",
+          "tgas_burnt": 6.351602731463
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "D1fFKf184NhXRGY9Hm4Wy9A9Rrz7uLTtJGZh7jCiTFgn",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 41",
+          "tgas_burnt": 6.373938861008
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "CepwzSnUASKsuqHLzj8baA2ai31XvTha8iNg9FFCD8jf",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 42",
+          "tgas_burnt": 6.631739850059
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "CKhVsfJvya5LSPWgHWpBxuBnVfBzB2ZTwwfLqAPdhLuk",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 43",
+          "tgas_burnt": 6.633426218231
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "ESqocb7XsW9w5jRbpXFEU6cQ5ouqqDW5oXEBHoux46GD",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 42",
+          "tgas_burnt": 6.635118345695
+        },
+        {
+          "code": "ANCESTOR_CAP",
+          "detail": "30000000000000000000000 + 10000000000000000000000 > 30000000000000000000000 cap on grant 41",
+          "hash": "Gt322czqyY6iPZPTrVSE8y65mDYf6CMm8vt3PgLr5qey",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 43",
+          "tgas_burnt": 2.654155452802
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "reason code",
+          "expected": "NOT_ANCESTOR",
+          "observed": "NOT_ANCESTOR: grant 45 is not above grant 44",
+          "pass": true
+        },
+        {
+          "claim": "parent still live",
+          "expected": "Some(true)",
+          "observed": "Some(true)",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B01",
+      "seconds": 10.732458396,
+      "status": "pass",
+      "title": "child cannot revoke its parent",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7voQBVQL9j3rUTVMyxL7suRiWBcGXeGqyjvKDniH9rpo",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.79383053701
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "4L9SV6sUh9muC38K7HZCtTehQjcHcJbbVp6JvpZETs2V",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 44",
+          "tgas_burnt": 6.35482788761
+        },
+        {
+          "code": "NOT_ANCESTOR",
+          "detail": "grant 45 is not above grant 44",
+          "hash": "GLXAkVczNChrcBKRLEauxB7ACPCs7YVdkK6LA6Nqh2Ry",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "denied",
+          "signer": "grant 45",
+          "tgas_burnt": 2.443090267755
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "protocol rejects the callback name for this key",
+          "expected": "MethodNameMismatch",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(MethodNameMismatch { method_name: \"on_spend_settled\" }) })) } }",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B07",
+      "seconds": 23.094260489,
+      "status": "pass",
+      "title": "agent key cannot call settlement callbacks",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "CWEvdTjA6xs8vivJEjmpXTCcA8kjhUoYJSqDmN28x4XJ",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.793630607302
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "plain transfer refused",
+          "expected": "protocol error",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(RequiresFullAccess) })) } }",
+          "pass": true
+        },
+        {
+          "claim": "adding a key refused",
+          "expected": "protocol error",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(RequiresFullAccess) })) } }",
+          "pass": true
+        },
+        {
+          "claim": "attached deposit refused",
+          "expected": "DepositWithFunctionCall",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(DepositWithFunctionCall) })) } }",
+          "pass": true
+        },
+        {
+          "claim": "other receiver refused",
+          "expected": "ReceiverMismatch",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(ReceiverMismatch { tx_receiver: AccountId(\"r0.espalier-vault-1105.testnet\"), ak_receiver: \"vault.espalier-vault-1105.testnet\" }) })) } }",
+          "pass": true
+        },
+        {
+          "claim": "recipient balance unchanged",
+          "expected": "277000000000000000000000",
+          "observed": "277000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B08",
+      "seconds": 79.890068874,
+      "status": "pass",
+      "title": "agent key cannot transfer, add keys, attach deposit or leave the vault",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "zXnkSoNjvt1M86GP73vbka4A9viqhkokFhva5doSPpM",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.79383053701
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "tree has 7 levels",
+          "expected": "7",
+          "observed": "7",
+          "pass": true
+        },
+        {
+          "claim": "deepest grant reports depth 6",
+          "expected": "Some(6)",
+          "observed": "Some(6)",
+          "pass": true
+        },
+        {
+          "claim": "deepest grant can spend before revoke",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "one transaction",
+          "expected": "\"REVOKED\"",
+          "observed": "\"REVOKED\"",
+          "pass": true
+        },
+        {
+          "claim": "tx succeeded",
+          "expected": "true",
+          "observed": "true",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "root untouched",
+          "expected": "Some(true)",
+          "observed": "Some(true)",
+          "pass": true
+        },
+        {
+          "claim": "root still spends",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        }
+      ],
+      "group": "revocation",
+      "id": "C01",
+      "seconds": 62.71616395,
+      "status": "pass",
+      "title": "one transaction revokes a depth-6 chain and deletes its keys",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7dn12bgDUrxF3Pt2seRpnp28DnKRWiHEqSQ8mg6Pg53x",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.791084034358
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5tZBts6qoBYTdsQ8eUuWEyarm9op6NsEduDPwrVWp84i",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 48",
+          "tgas_burnt": 6.351322660802
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9yXCsUMYgeragFGNJ8tSHTRceoTDHcoZXYbp391GpweK",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 49",
+          "tgas_burnt": 6.441261909137
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "8quQrasMXCUFTN88fiGqG4xoyinDYtPH2WjAS3dSPKJH",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 50",
+          "tgas_burnt": 6.527285394606
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5ti4Mu88FYG7sW4tYk9WnA3tAVARQeiVRKvsCH11i6UR",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 51",
+          "tgas_burnt": 6.610847321121
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BBbqtLA1XgfqvVeXbYDQ6n5cZ5Hae6e7BybGScv1ovPB",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 52",
+          "tgas_burnt": 6.694624666584
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "HW3jphnkN97yxiBAj9qWxQw3HbqYK99jwwfJCqk911U6",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 53",
+          "tgas_burnt": 6.784174770517
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "FcKD4UeBCGWviEyyv3bxUhNZvtiwVyzRzHxo6ggCE8Mz",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 54",
+          "tgas_burnt": 9.339244675374
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 11, backlog 0",
+          "hash": "HPu9sk72Yf4RipFLYXfi29zQsSJzF8GXHNG6yJTvBhwU",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 9.452236138211
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "CedD9x4AikfX84qhkfYfZAduEBXuFLEhWGcQUJbzeUmo",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 48",
+          "tgas_burnt": 6.092975762469
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "deleted key is rejected by the protocol",
+          "expected": "protocol error",
+          "observed": "Failed to query access key\n\nCaused by:\n    handler error: [Access key for public key ed25519:5AsWukGRFCF6tYGooaXAHQiYL2CEoE4TvrZSdMHFrXCh does not exist while viewing]",
+          "pass": true
+        },
+        {
+          "claim": "nothing spent",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        }
+      ],
+      "group": "revocation",
+      "id": "C02",
+      "seconds": 34.127998763,
+      "status": "pass",
+      "title": "a deleted key cannot sign anything",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7vXJaDCjPyYCpkyR31DgLb3ByEcqJq7KtbWnWe62iRan",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.79349732083
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2UR6VPvASVkQVVNMFfaQKuKuCxvSnsCUfGrP4rdJyTkn",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 55",
+          "tgas_burnt": 6.355816017566
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BS9Q4A3VG51vMewnUQ7ZDZxAYiUHrcAHxpTpvYGLYUAU",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 56",
+          "tgas_burnt": 6.440595476777
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 3, backlog 0",
+          "hash": "GpAmVgcDw7kJ74NwthiwTkcnXAyBRjqZzv3xwzfrNL2r",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 4.557614474278
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "request is queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "nothing moved yet",
+          "expected": "297000000000000000000000",
+          "observed": "297000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing reserved yet",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "cannot execute before approval",
+          "expected": "APPROVAL_NOT_APPROVED",
+          "observed": "APPROVAL_NOT_APPROVED: approval 20 is still waiting",
+          "pass": true
+        },
+        {
+          "claim": "owner approves the hash",
+          "expected": "APPROVED",
+          "observed": "APPROVED",
+          "pass": true
+        },
+        {
+          "claim": "execution settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "recipient paid",
+          "expected": "50000000000000000000000",
+          "observed": "50000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D01",
+      "seconds": 55.100457198,
+      "status": "pass",
+      "title": "above threshold queues; funds move only after approval",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "C7LntSJwnVP9cqenkDTQHGzALMBoZyDoV5btMgPWF9U4",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.793151630608
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "DkyL2otSML2H4fcE4ar1hFKvRDzxz2sj2d9EMHscCTgs",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 58",
+          "tgas_burnt": 6.354980983725
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "DKRd1xgSfMYiHhp4n5bFT3tgyRrtdTLceakTgX42ek4B",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 59",
+          "tgas_burnt": 2.866310072787
+        },
+        {
+          "code": "APPROVAL_NOT_APPROVED",
+          "detail": "approval 20 is still waiting",
+          "hash": "CiVBWMxfsdgnk1qkRPQQ4Ww8bwK52rVAs8PknxzbPWiF",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "grant 59",
+          "tgas_burnt": 2.452860840128
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "2LJAiRTk2ZfEfLpubFTte2PrRUE2Qf8b6X2cdEuKtgf2",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 2.19486668025
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "CdDCYsqpQ24K5k65dv8KvrvsXzUsyB2TttpCskJTrFCX",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "settled",
+          "signer": "grant 59",
+          "tgas_burnt": 7.011778731631
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "first execution settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "replay refused",
+          "expected": "APPROVAL_NOT_FOUND",
+          "observed": "APPROVAL_NOT_FOUND: no approval 22",
+          "pass": true
+        },
+        {
+          "claim": "spent once",
+          "expected": "50000000000000000000000",
+          "observed": "50000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D02",
+      "seconds": 22.566882806,
+      "status": "pass",
+      "title": "approval cannot be replayed",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "EujnYVYomRGvuzNGFTFv8hNgX8BdcorcdTZgdPEzkPpU",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.7929517009
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "Gmdi6awibs9SSre7m9fpYY5zBHGjnompyLmF6SBjKS4V",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 60",
+          "tgas_burnt": 6.352473239833
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "HAg7djchECgi87tkvrsx16ocQrC9Db2Brwv3QmLi7LnZ",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 61",
+          "tgas_burnt": 2.866063245987
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "9fqHBQyE9sphh6MrnoDVY9jh1SeSCJXfNJMAgFpEsA8L",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 2.19474326685
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "AFkUch1UEQEXqGP5J57RWvFSoaMKai9kopzaHPeiqnqm",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "settled",
+          "signer": "grant 61",
+          "tgas_burnt": 7.011655318231
+        },
+        {
+          "code": "APPROVAL_NOT_FOUND",
+          "detail": "no approval 22",
+          "hash": "FwUH1qgjCQJiCDCrKRPDeqYjUmFbqikGgZoYM2Cx1YnW",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "grant 61",
+          "tgas_burnt": 2.432673952397
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "settled",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "recipient delta is exact",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "every level counts it",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing stays reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "every level counts it",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing stays reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "every level counts it",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing stays reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "every level counts it",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing stays reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "reservation lists headroom at all 4 levels",
+          "expected": "Some(4)",
+          "observed": "Some(4)",
+          "pass": true
+        },
+        {
+          "claim": "memo is in the event",
+          "expected": "Some(\"task-42\")",
+          "observed": "Some(\"task-42\")",
+          "pass": true
+        },
+        {
+          "claim": "settlement event emitted",
+          "expected": "1",
+          "observed": "1",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E01",
+      "seconds": 37.954852029,
+      "status": "pass",
+      "title": "native spend moves the exact amount and settles every level",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "rgpjycoGxc4vDXxjbayXNCxBLnE8iww8zyfNZDYyAL2",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.792630958762
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "EnMeQAaNDYA94QBQ7cUSi77SgDRwJNU4AoEnSCUpi4QE",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 62",
+          "tgas_burnt": 6.355016298734
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6JksCQN77ibm22dJsjFDVBa6ioYp9QH6jXcjn9nBK5zJ",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 63",
+          "tgas_burnt": 6.439103677025
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "GdDivMNzkwGaPRz2hGi7Tvdm21QWKMoR5SonVmZ2hQV2",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 64",
+          "tgas_burnt": 6.521925675774
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "BPbSaWRhjaizXoJRwwRYBjhYUEGMoaYc74MChUToea48",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 65",
+          "tgas_burnt": 7.718342120285
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "rolled back",
+          "expected": "\"rolled_back\"",
+          "observed": "\"rolled_back\"",
+          "pass": true
+        },
+        {
+          "claim": "reason",
+          "expected": "TRANSFER_FAILED",
+          "observed": "TRANSFER_FAILED",
+          "pass": true
+        },
+        {
+          "claim": "spent stays zero",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "reserved released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "window released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "spent stays zero",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "reserved released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "window released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "spent stays zero",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "reserved released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "window released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "refund came back: vault lost only gas",
+          "expected": "< 40 milliNEAR",
+          "observed": "673430473765900000000",
+          "pass": true
+        },
+        {
+          "claim": "the same budget is usable again",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E03",
+      "seconds": 68.071426182,
+      "status": "pass",
+      "title": "failed native transfer rolls back all levels and the window",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5xHtiMjud7D2jg2k1JK1SH65jZW3gnEoPbMrsTggBBVL",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.792764245234
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "E46VBDzwbvCcvBRvEHEb3zGyF6QUWUiBMDigpyVJ9WnZ",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 66",
+          "tgas_burnt": 6.355016298734
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FLDt2ndCo6js3eDVmV3nVWFpdfcEcnm19Et3EfjVRXdK",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 67",
+          "tgas_burnt": 6.442742190305
+        },
+        {
+          "code": "TRANSFER_FAILED",
+          "detail": "",
+          "hash": "8o5gBkbgRGf6vtTgCi8d9dkABs1gbhsHENRg8uykjain",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "rolled_back",
+          "signer": "grant 68",
+          "tgas_burnt": 7.403852425159
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "AonVxtJSpQS6Ed84EYcvjRCGZ4cCvM9kmFZgvNV1m48y",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 68",
+          "tgas_burnt": 7.173679001146
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "injected payment outside the list",
+          "expected": "RECIPIENT_NOT_ALLOWED",
+          "observed": "RECIPIENT_NOT_ALLOWED: r1.espalier-vault-1105.testnet is not in grant 70",
+          "pass": true
+        },
+        {
+          "claim": "counter",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        },
+        {
+          "claim": "injected payment outside the list",
+          "expected": "RECIPIENT_NOT_ALLOWED",
+          "observed": "RECIPIENT_NOT_ALLOWED: r1.espalier-vault-1105.testnet is not in grant 70",
+          "pass": true
+        },
+        {
+          "claim": "counter",
+          "expected": "Some(2)",
+          "observed": "Some(2)",
+          "pass": true
+        },
+        {
+          "claim": "injected payment outside the list",
+          "expected": "RECIPIENT_NOT_ALLOWED",
+          "observed": "RECIPIENT_NOT_ALLOWED: r1.espalier-vault-1105.testnet is not in grant 70",
+          "pass": true
+        },
+        {
+          "claim": "grant revoked by the vault itself",
+          "expected": "Some(true)",
+          "observed": "Some(true)",
+          "pass": true
+        },
+        {
+          "claim": "key gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "its subtree is dead too",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "subtree key gone as well",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "further attempts cannot even be signed",
+          "expected": "protocol error",
+          "observed": "unable to broadcast the transaction to the network\n\nCaused by:\n    handler error: [An error happened during transaction execution: InvalidAccessKeyError(AccessKeyNotFound { account_id: AccountId(\"vault.espalier-vault-1105.testnet\"), public_key: ed25519:H6wMZ6h82VQy4NXG3AN9eZeKoeyDdc1RxqpLHqXyqo5M })]",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F01",
+      "seconds": 52.076122822,
+      "status": "pass",
+      "title": "N denied attempts revoke the grant and delete its key",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "Dc4kCuzm1MDNe6RPKwUewFkz3nmbgwrbjHRNTV3Y743K",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.791283964066
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BKdzZWxL5j1VBt4fyDcYNAom5Goo8xgGSksh1A8QEoxU",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 69",
+          "tgas_burnt": 6.559466391092
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "EU4HQxFFRG3FM7z3Se1YgXdJo2fozdo6nsQ4PfeBCWd6",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 70",
+          "tgas_burnt": 6.658893186198
+        },
+        {
+          "code": "RECIPIENT_NOT_ALLOWED",
+          "detail": "r1.espalier-vault-1105.testnet is not in grant 70",
+          "hash": "CjRK56352ahkyMQwyFvx754kpWjk5rwSpYKGSRbA9Ge",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 70",
+          "tgas_burnt": 2.601711017151
+        },
+        {
+          "code": "RECIPIENT_NOT_ALLOWED",
+          "detail": "r1.espalier-vault-1105.testnet is not in grant 70",
+          "hash": "73cZPE48t6LEUzmNT86qThYXpYgmB4NFKX8yXWPZzozy",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 70",
+          "tgas_burnt": 2.601711017151
+        },
+        {
+          "code": "RECIPIENT_NOT_ALLOWED",
+          "detail": "r1.espalier-vault-1105.testnet is not in grant 70",
+          "hash": "Hw6DXYF9JFUEyGLng7hLZvgeaAYdR7KgSMqyWyLYFPQ1",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 70",
+          "tgas_burnt": 5.034613669843
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "exact method list",
+          "expected": "request_spend, execute_approved only",
+          "observed": "FunctionCall(FunctionCallPermission { allowance: Some(NearToken { inner: 200000000000000000000000 }), receiver_id: \"vault.espalier-vault-1105.testnet\", method_names: [\"request_spend\", \"execute_approved\"] })",
+          "pass": true
+        },
+        {
+          "claim": "receiver is the vault",
+          "expected": "vault.espalier-vault-1105.testnet",
+          "observed": "FunctionCall(FunctionCallPermission { allowance: Some(NearToken { inner: 200000000000000000000000 }), receiver_id: \"vault.espalier-vault-1105.testnet\", method_names: [\"request_spend\", \"execute_approved\"] })",
+          "pass": true
+        },
+        {
+          "claim": "allowance is the granted amount",
+          "expected": "200000000000000000000000",
+          "observed": "FunctionCall(FunctionCallPermission { allowance: Some(NearToken { inner: 200000000000000000000000 }), receiver_id: \"vault.espalier-vault-1105.testnet\", method_names: [\"request_spend\", \"execute_approved\"] })",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F07",
+      "seconds": 36.893463782,
+      "status": "pass",
+      "title": "issued key has exactly the granted methods, receiver and allowance",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5zA56jKt5PQSSiP6BEhW5CZrZtHSjZFiYMFiXzmvJo43",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.793763893774
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7CbQ53T1QNhedcgSPDVA7NMsN35RiLxz7wQkBnZmsxgm",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 72",
+          "tgas_burnt": 6.291695611782
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "one denied event",
+          "expected": "1",
+          "observed": "1",
+          "pass": true
+        },
+        {
+          "claim": "standard",
+          "expected": "Some(\"espalier\")",
+          "observed": "Some(\"espalier\")",
+          "pass": true
+        },
+        {
+          "claim": "version",
+          "expected": "Some(\"1.0.0\")",
+          "observed": "Some(\"1.0.0\")",
+          "pass": true
+        },
+        {
+          "claim": "code",
+          "expected": "Some(\"PER_TX\")",
+          "observed": "Some(\"PER_TX\")",
+          "pass": true
+        },
+        {
+          "claim": "limit",
+          "expected": "Some(\"25000000000000000000000\")",
+          "observed": "Some(\"25000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "attempted",
+          "expected": "Some(\"26000000000000000000000\")",
+          "observed": "Some(\"26000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "detail states the comparison",
+          "expected": "<attempted> > <limit> per-tx",
+          "observed": "26000000000000000000000 > 25000000000000000000000 per-tx",
+          "pass": true
+        }
+      ],
+      "group": "events",
+      "id": "G01",
+      "seconds": 16.568160806,
+      "status": "pass",
+      "title": "denials are NEP-297 events with reason code and numbers",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7C7ZMJCMJGZepYVnp7w2zRLHbC36A5af7pVzwcxYE6t7",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.795463718092
+        },
+        {
+          "code": "PER_TX",
+          "detail": "26000000000000000000000 > 25000000000000000000000 per-tx",
+          "hash": "6kH6kGNkcsr7gdZVSW8jPRXx5bdRDskim9WZKQaycwde",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 74",
+          "tgas_burnt": 2.533633181517
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "vault ledger credited through ft_on_transfer",
+          "expected": "Some(\"35000000000000000000000\")",
+          "observed": "Some(\"35000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "child paid in wNEAR",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "recipient's wNEAR grew by the exact amount",
+          "expected": "5000000000000000000000",
+          "observed": "5000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "unregistered recipient rolls back",
+          "expected": "\"rolled_back\"",
+          "observed": "\"rolled_back\"",
+          "pass": true
+        },
+        {
+          "claim": "spent still one payment",
+          "expected": "5000000000000000000000",
+          "observed": "5000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "window released",
+          "expected": "5000000000000000000000",
+          "observed": "5000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "T01",
+      "seconds": 107.788513164,
+      "status": "pass",
+      "title": "NEP-141 spend and rollback on the real wrap.testnet contract",
+      "txs": [
+        {
+          "code": "",
+          "detail": "",
+          "hash": "G7oZxsUnBpgRtbRbtAqfn8ssM2ja4v9J8ZnE2L1bAVNu",
+          "label": "storage_deposit",
+          "method": "storage_deposit",
+          "outcome": "",
+          "signer": "owner",
+          "tgas_burnt": 2.491713816548
+        },
+        {
+          "code": "",
+          "detail": "",
+          "hash": "E3TsMRS2kPZ6gGPXHiRFfPFL3wKNZ5KoUNRx6F8CMiER",
+          "label": "storage_deposit",
+          "method": "storage_deposit",
+          "outcome": "",
+          "signer": "owner",
+          "tgas_burnt": 2.491713816548
+        },
+        {
+          "code": "",
+          "detail": "",
+          "hash": "FtER5yaXTff3toY5j3GDzcXxYvPUVPSz7puAemSyBRiU",
+          "label": "storage_deposit",
+          "method": "storage_deposit",
+          "outcome": "",
+          "signer": "owner",
+          "tgas_burnt": 2.491030453715
+        },
+        {
+          "code": "",
+          "detail": "",
+          "hash": "5y5gNvGpj19c4TWSozGXFcWoADGBiswfy3vmvorjo6uQ",
+          "label": "near_deposit",
+          "method": "near_deposit",
+          "outcome": "ok",
+          "signer": "owner",
+          "tgas_burnt": 1.941207889425
+        },
+        {
+          "code": "",
+          "detail": "",
+          "hash": "4kBfDf48K8pz6a5gWhTa2caVrPcGpeg76XdrEeRYy2eM",
+          "label": "add_token",
+          "method": "add_token",
+          "outcome": "ok",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 1.911441537635
+        },
+        {
+          "code": "",
+          "detail": "",
+          "hash": "HXGzzCND7Fzh2GrknoT1zeQ55ZQTYWFdk6HNs9jxJM2S",
+          "label": "ft_transfer_call",
+          "method": "ft_transfer_call",
+          "outcome": "ok",
+          "signer": "owner",
+          "tgas_burnt": 6.568317953142
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FcCTZ9Z5t8nKms9y5d2feeuZhkQMSqWiCKN2i8t76JWw",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.espalier-vault-1105.testnet",
+          "tgas_burnt": 5.873527825928
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6dB7NeFqnAEAMEjb5PmfAWrrxHkCpHD9AWH5t9aUUfX8",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 75",
+          "tgas_burnt": 6.377664449688
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "ymzLJh44jrSZ45bWkdVQFLVcLn9J1CgjJNZkeK5BN2y",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 76",
+          "tgas_burnt": 8.57991093603
+        },
+        {
+          "code": "TRANSFER_FAILED",
+          "detail": "",
+          "hash": "9J8yvV53hjQCvtiq3hgicVCDE3Qa8pgvysqb7PrcokZj",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "rolled_back",
+          "signer": "grant 76",
+          "tgas_burnt": 8.695021565654
+        }
+      ]
+    }
+  ],
+  "seconds": 686.550034601,
+  "total": 16,
+  "wasm_sha256": "91909733d24c562aea39c44771e8f55e8868de9bad09d85a2a0903e86163d3e2"
+}

@@ -9,31 +9,31 @@
       "mutant": "cap_checks_leaf_only",
       "what": "subtree bound: cap is checked on the leaf only",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126057) panicked at src/property.rs:429:41:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (801325) panicked at src/property.rs:429:41:"
     },
     {
       "mutant": "cap_ignores_ancestors",
       "what": "subtree bound: headroom walk stops at the leaf",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126136) panicked at src/property.rs:429:41:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (803002) panicked at src/property.rs:429:41:"
     },
     {
       "mutant": "cap_ignores_reserved",
       "what": "in-flight spends are invisible to the cap check",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126213) panicked at src/property.rs:429:41:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (804653) panicked at src/property.rs:429:41:"
     },
     {
       "mutant": "revoke_ignores_ancestors",
       "what": "cascade: lineage walk looks at the grant itself only",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126289) panicked at src/property.rs:374:26:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (806255) panicked at src/property.rs:374:26:"
     },
     {
       "mutant": "rollback_keeps_window",
       "what": "failed spend leaves the window charged",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126391) panicked at src/property.rs:364:17:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (809027) panicked at src/property.rs:364:17:"
     },
     {
       "mutant": "settle_leaf_only",
@@ -51,7 +51,7 @@
       "mutant": "window_undercounts",
       "what": "window forgets spends early",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126753) panicked at src/property.rs:435:41:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (816180) panicked at src/property.rs:435:41:"
     },
     {
       "mutant": "att_per_tx_off",
@@ -87,19 +87,19 @@
       "mutant": "allowlist_off",
       "what": "recipient allowlist not enforced at spend time",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (132200) panicked at src/property.rs:374:26:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (836990) panicked at src/property.rs:374:26:"
     },
     {
       "mutant": "hash_not_checked",
       "what": "execute_approved accepts changed arguments",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (137114) panicked at src/property.rs:879:17:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (838861) panicked at src/property.rs:879:17:"
     },
     {
       "mutant": "approval_not_consumed",
       "what": "approval can be replayed",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (139753) panicked at src/property.rs:890:51:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (840606) panicked at src/property.rs:890:51:"
     },
     {
       "mutant": "denial_charges_budget",
@@ -111,7 +111,7 @@
       "mutant": "no_auto_revoke",
       "what": "N denials do not revoke",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (142830) panicked at src/property.rs:374:26:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (845936) panicked at src/property.rs:374:26:"
     }
   ]
 }

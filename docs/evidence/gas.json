@@ -1,0 +1,106 @@
+{
+  "git_commit": "e5617e1",
+  "network": "sandbox",
+  "revoke_by_subtree_size": [
+    {
+      "backlog_after_revoke": 0,
+      "keys_removed": 2,
+      "revoke_detail": "visited 3, backlog 0",
+      "revoke_total_tgas": 4.360066323775,
+      "subtree_grants": 2,
+      "sweep_tgas": []
+    },
+    {
+      "backlog_after_revoke": 0,
+      "keys_removed": 5,
+      "revoke_detail": "visited 9, backlog 0",
+      "revoke_total_tgas": 7.717316378816,
+      "subtree_grants": 5,
+      "sweep_tgas": []
+    },
+    {
+      "backlog_after_revoke": 0,
+      "keys_removed": 13,
+      "revoke_detail": "visited 25, backlog 0",
+      "revoke_total_tgas": 16.716790718522,
+      "subtree_grants": 13,
+      "sweep_tgas": []
+    },
+    {
+      "backlog_after_revoke": 29,
+      "keys_removed": 31,
+      "revoke_detail": "visited 32, backlog 29",
+      "revoke_total_tgas": 11.22873388315,
+      "subtree_grants": 31,
+      "sweep_tgas": [
+        35.195714330683
+      ]
+    }
+  ],
+  "spend_by_depth": [
+    {
+      "denied_total_tgas": 2.472074780597,
+      "depth": 0,
+      "last_receipt_tgas": 0.2231825625,
+      "spend_largest_receipt_tgas": 2.924992205166,
+      "spend_total_tgas": 5.883844493351
+    },
+    {
+      "denied_total_tgas": 2.55978632895,
+      "depth": 1,
+      "last_receipt_tgas": 0.2231825625,
+      "spend_largest_receipt_tgas": 3.199789098949,
+      "spend_total_tgas": 6.362726343904
+    },
+    {
+      "denied_total_tgas": 2.646342874063,
+      "depth": 2,
+      "last_receipt_tgas": 0.2231825625,
+      "spend_largest_receipt_tgas": 3.473275342424,
+      "spend_total_tgas": 6.840313176513
+    },
+    {
+      "denied_total_tgas": 2.732736513488,
+      "depth": 3,
+      "last_receipt_tgas": 0.2231825625,
+      "spend_largest_receipt_tgas": 3.746853734571,
+      "spend_total_tgas": 7.317990512282
+    },
+    {
+      "denied_total_tgas": 2.819226415365,
+      "depth": 4,
+      "last_receipt_tgas": 0.2231825625,
+      "spend_largest_receipt_tgas": 4.021486077154,
+      "spend_total_tgas": 7.796737430851
+    },
+    {
+      "denied_total_tgas": 2.905812579694,
+      "depth": 5,
+      "last_receipt_tgas": 0.2231825625,
+      "spend_largest_receipt_tgas": 4.296404738825,
+      "spend_total_tgas": 8.27578054158
+    },
+    {
+      "denied_total_tgas": 2.992322227715,
+      "depth": 6,
+      "last_receipt_tgas": 0.2231825625,
+      "spend_largest_receipt_tgas": 4.570449633624,
+      "spend_total_tgas": 8.753959758509
+    },
+    {
+      "denied_total_tgas": 3.078755359428,
+      "depth": 7,
+      "last_receipt_tgas": 0.2231825625,
+      "spend_largest_receipt_tgas": 4.844622055603,
+      "spend_total_tgas": 9.23227637569
+    },
+    {
+      "denied_total_tgas": 3.165284753593,
+      "depth": 8,
+      "last_receipt_tgas": 0.2231825625,
+      "spend_largest_receipt_tgas": 5.11951685735,
+      "spend_total_tgas": 9.711325245711
+    }
+  ],
+  "wasm_sha256": "91909733d24c562aea39c44771e8f55e8868de9bad09d85a2a0903e86163d3e2"
+}

@@ -349,7 +349,7 @@ impl Vault {
             .and_then(|_| self.check_not_paused())
             .and_then(|_| self.check_live(gid, now))
             .and_then(|_| self.check_terms(&terms, now))
-            .and_then(|_| self.check_attenuation(gid, &terms, now))
+            .and_then(|_| self.check_attenuation(gid, &terms))
             .and_then(|_| self.check_key_free(&child_pk))
             .and_then(|_| self.check_storage_room());
         if let Err(d) = checked {
@@ -822,7 +822,9 @@ impl Vault {
             self.grants.get_mut(&gid).expect("grant").revoked = true;
             events::emit("auto_revoked", json!({"grant": gid, "denied": denied, "max_denials": max}));
             self.enqueue_sweep(gid);
-            self.run_sweep(EAGER_SWEEP);
+            // Kept small: the attacker picks the gas of this call, and if the sweep ran it out of
+            // gas the denial would roll back and the revoke would never land.
+            self.run_sweep(EAGER_SWEEP.min(AUTO_REVOKE_SWEEP));
         }
     }
 
@@ -1270,7 +1272,7 @@ impl Vault {
     }
 
     /// A child must be narrower than its parent in every dimension. Ordered like Terms.
-    fn check_attenuation(&self, parent: GrantId, t: &Terms, now: u64) -> Result<(), Denial> {
+    fn check_attenuation(&self, parent: GrantId, t: &Terms) -> Result<(), Denial> {
         let p = self.grant(parent);
         let wide = |code: &'static str, limit: u128, asked: u128, what: &str| {
             Err(Denial::new(code, format!("child {what} {asked} > parent {limit}"))
@@ -1354,7 +1356,6 @@ impl Vault {
         if self.children.get(&parent).map_or(0, Vec::len) >= MAX_CHILDREN {
             return Err(Denial::new("ATT_NODES", format!("parent already has {MAX_CHILDREN} children")).at(parent));
         }
-        let _ = now;
         Ok(())
     }
 

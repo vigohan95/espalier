@@ -20,9 +20,9 @@ def main():
     checked = mismatched = missing = 0
     for s in report["scenarios"]:
         for t in s["txs"]:
-            signer = vault if t["signer"].startswith("grant") else t["signer"]
-            if t["signer"] == "owner":
-                signer = deploy["owner"]
+            signer = deploy["owner"] if t["signer"] == "owner" else t["signer"]
+            if "." not in signer:
+                signer = vault
             res = rpc("tx", {"tx_hash": t["hash"], "sender_account_id": signer, "wait_until": "NONE"})
             if "result" not in res or "receipts_outcome" not in res["result"]:
                 missing += 1
@@ -41,6 +41,15 @@ def main():
     keys = view["result"]["keys"]
     full = [k for k in keys if k["access_key"]["permission"] == "FullAccess"]
     print(f"vault has {len(keys)} keys, {len(full)} full-access")
+    account = rpc("query", {"request_type": "view_account", "account_id": vault, "finality": "final"})["result"]
+    alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+    n, digest = int(deploy["wasm_sha256"], 16), ""
+    while n:
+        n, r = divmod(n, 58)
+        digest = alphabet[r] + digest
+    print(f"on-chain code_hash {account['code_hash']}, report says {digest}, match: {account['code_hash'] == digest}")
+    if account["code_hash"] != digest:
+        mismatched += 1
     sys.exit(1 if missing or mismatched else 0)
 
 main()

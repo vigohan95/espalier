@@ -291,18 +291,19 @@ impl Env {
     }
 
     pub async fn spend_with_gas(&self, a: &Agent, to: &AccountId, amount: u128, memo: Option<&str>, tgas: u64) -> Result<ExecutionFinalResult> {
-        Ok(a.acct
+        let r = a
+            .acct
             .call(self.vault.id(), "request_spend")
             .args_json(json!({"recipient": to, "amount": amount.to_string(), "memo": memo}))
             .gas(Gas::from_tgas(tgas))
             .transact()
-            .await?)
+            .await?;
+        self.keep("spend", &format!("grant {}", a.grant), "request_spend", &r);
+        Ok(r)
     }
 
     pub async fn spend(&self, a: &Agent, to: &AccountId, amount: u128) -> Result<Decision> {
-        let r = self.spend_tx(a, to, amount, None).await?;
-        self.keep("spend", &format!("grant {}", a.grant), "request_spend", &r);
-        Ok(r.json()?)
+        Ok(self.spend_tx(a, to, amount, None).await?.json()?)
     }
 
     pub async fn revoke_by_owner(&self, id: u64) -> Result<(Decision, ExecutionFinalResult)> {

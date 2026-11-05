@@ -21,8 +21,15 @@ fn cred_dir() -> PathBuf {
     PathBuf::from(std::env::var("HOME").unwrap()).join(".near-credentials/testnet")
 }
 
+/// Reads near-cli and near-workspaces key files alike. The two differ in their field names.
+fn load(path: &std::path::Path, id: &str, worker: &Worker<Testnet>) -> Result<Account> {
+    let file: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(path)?)?;
+    let secret = file["private_key"].as_str().or(file["secret_key"].as_str()).ok_or(anyhow!("no key in {path:?}"))?;
+    Ok(Account::from_secret_key(id.parse()?, secret.parse()?, worker))
+}
+
 fn stored(id: &str, worker: &Worker<Testnet>) -> Result<Account> {
-    Ok(Account::from_file(cred_dir().join(format!("{id}.json")), worker)?)
+    load(&cred_dir().join(format!("{id}.json")), id, worker)
 }
 
 fn names(base: &str) -> (String, String, Vec<String>) {
@@ -135,7 +142,7 @@ pub async fn run(account: &str, key_file: &str, report: Option<&str>) -> Result<
         return Err(anyhow!("refusing to run on anything but a .testnet account"));
     }
     let worker = near_workspaces::testnet().rpc_addr(RPC).await?;
-    let base = Account::from_file(key_file, &worker)?;
+    let base = load(std::path::Path::new(key_file), account, &worker)?;
     let phase = std::env::args()
         .skip_while(|a| a != "--phase")
         .nth(1)
@@ -144,6 +151,21 @@ pub async fn run(account: &str, key_file: &str, report: Option<&str>) -> Result<
     match phase.as_str() {
         "deploy" => {
             deploy(&worker, &base).await?;
+            return Ok(true);
+        }
+        "redeploy" => {
+            // Same account, same state layout: only the code changes. Needs the full-access key,
+            // so this works until the lock phase has run.
+            let vault = stored(&vault_id, &worker)?;
+            let d = vault.deploy(&std::fs::read(crate::wasm_path("espalier_vault"))?).await?;
+            let hash = d.details.outcome().transaction_hash.to_string();
+            d.into_result()?;
+            let path = "docs/evidence/testnet-deploy.json";
+            let mut doc: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(path)?)?;
+            doc["txs"].as_array_mut().unwrap().push(json!({"label": "redeploy", "hash": hash}));
+            doc["wasm_sha256"] = json!(wasm_sha256());
+            std::fs::write(path, serde_json::to_string_pretty(&doc)?)?;
+            println!("{doc}");
             return Ok(true);
         }
         "lock" => {

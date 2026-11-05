@@ -17,6 +17,7 @@ pub const MAX_MEMO_BYTES: usize = 128;
 /// The property test runs with 1, so that revoked grants keep live keys for a while and their
 /// attempts reach the lineage walk instead of being stopped by a key that is already gone.
 pub const EAGER_SWEEP: u32 = if cfg!(test) { 1 } else { 32 };
+pub const AUTO_REVOKE_SWEEP: u32 = 8;
 pub const MAX_SWEEP: u32 = 64;
 
 /// Vault methods a grant can hold. The FC key the vault issues lists exactly these names, so the
