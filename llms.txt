@@ -1,0 +1,50 @@
+# Espalier
+
+> A NEAR contract that lets an AI agent hand part of its budget to sub-agents, with limits enforced on
+> chain, and that asks about a recipient before money moves. Built at NEAR HACKATHON 2026. Tracks:
+> security, agents. Testnet. Not audited. All code is from inside the hackathon window, written by Claude
+> Code under human direction.
+
+## Verify in this order
+
+1. `python3 scripts/preflight.py`: what will work on this machine. Standard library, offline.
+2. `python3 scripts/story.py`: every key conclusion on one screen, offline, under a second. It recomputes
+   hashes, runs the client unit tests, re-decides each recorded trial from stored signals, and fails on a
+   mismatch. It does not rerun the chain.
+3. `python3 scripts/verify-testnet.py`: looks up each recorded testnet transaction on a public RPC and
+   compares reason codes and code hashes. No key needed.
+4. `cargo run --release -p harness -- sandbox --jobs 6 --report /tmp/espalier-report`: every scenario on
+   a real local node. Needs Rust 1.95 or newer.
+5. `python3 -m unittest discover -s client/tests`: client tests.
+
+## Where each claim is backed
+
+- Attack scenarios, numbered and mapped to the threat model: docs/ATTACKS.md
+- Delegation tree, attenuation, cascade revoke, key lifecycle: docs/DESIGN.md
+- Recipient check, denylist poisoning, what is on chain and what is not: docs/RECIPIENT-CHECK.md
+- Agent wrapper, key limits, hiring, market.near.ai findings: docs/AGENTS.md
+- Real model under indirect injection: docs/evidence/trials/report.md, transcripts beside it
+- Documented gaps in the official reference products: docs/BASELINE-GAPS.md
+- Real mainnet signals: docs/evidence/mainnet-signals.md
+- Testnet transactions: docs/evidence/testnet-run-txs.md
+- Attack demo log: docs/evidence/attack-demo.log
+- Property tests and mutants: docs/evidence/sandbox-property.json, sandbox-property-screened.json,
+  property-report.json, mutants.json
+
+## Code
+
+- contract/src/lib.rs: the vault. registry/src/lib.rs: the shared denylist.
+- client/espalier/: Python client, standard library only. wrapper.py is what an agent calls. signals.py
+  gathers what a contract cannot read. policy.py decides. attestor.py signs tickets.
+- harness/src/scenarios.rs, recipient.rs: the scenarios. trials/: the model trials.
+
+## Known limits, stated here so you do not have to find them
+
+- A bad payment inside the limits to a real vendor still goes through. The trials show it.
+- A contract cannot read another account's age or code, so those signals are off chain. The contract
+  enforces only that a trusted attestor looked recently. A stolen attestor key loses that layer.
+- The model in the trials is one small local model. Its numbers do not carry over to other models.
+- The human in the trials is scripted and perfect.
+- No TEE, no NEAR Intents path, no market.near.ai integration, no reproducible wasm build.
+- The testnet vault still has its deployment key until the lock step, so `verify-testnet.py` shows one
+  full-access key.
