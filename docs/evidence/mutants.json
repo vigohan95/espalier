@@ -2,56 +2,56 @@
   "what": "each mutant breaks one line of the contract; the in-process property test must fail",
   "seeds": 4,
   "ops_per_seed": 1500,
-  "caught": 18,
-  "total": 18,
+  "caught": 28,
+  "total": 28,
   "mutants": [
     {
       "mutant": "cap_checks_leaf_only",
       "what": "subtree bound: cap is checked on the leaf only",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (936725) panicked at src/property.rs:429:41:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (1245323) panicked at src/property.rs:508:41:"
     },
     {
       "mutant": "cap_ignores_ancestors",
       "what": "subtree bound: headroom walk stops at the leaf",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (938234) panicked at src/property.rs:429:41:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (1245539) panicked at src/property.rs:508:41:"
     },
     {
       "mutant": "cap_ignores_reserved",
       "what": "in-flight spends are invisible to the cap check",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (938455) panicked at src/property.rs:429:41:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (1247084) panicked at src/property.rs:508:41:"
     },
     {
       "mutant": "revoke_ignores_ancestors",
       "what": "cascade: lineage walk looks at the grant itself only",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (939938) panicked at src/property.rs:374:26:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (1248759) panicked at src/property.rs:899:9:"
     },
     {
       "mutant": "rollback_keeps_window",
       "what": "failed spend leaves the window charged",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (940130) panicked at src/property.rs:364:17:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (1250286) panicked at src/property.rs:419:17:"
     },
     {
       "mutant": "settle_leaf_only",
       "what": "settlement updates only the leaf",
       "caught": true,
-      "first_failure": "assertion `left == right` failed: I2 spent conservation on grant 1"
+      "first_failure": "assertion `left == right` failed: I2 reserved conservation on grant 2"
     },
     {
       "mutant": "rollback_counts_as_spent",
       "what": "failed spend still counts as spent",
       "caught": true,
-      "first_failure": "assertion `left == right` failed: I2 spent conservation on grant 1"
+      "first_failure": "assertion `left == right` failed: I2 spent conservation on grant 4"
     },
     {
       "mutant": "window_undercounts",
       "what": "window forgets spends early",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (945382) panicked at src/property.rs:435:41:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (1253506) panicked at src/property.rs:508:41:"
     },
     {
       "mutant": "att_per_tx_off",
@@ -87,19 +87,19 @@
       "mutant": "allowlist_off",
       "what": "recipient allowlist not enforced at spend time",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (957652) panicked at src/property.rs:374:26:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (1273493) panicked at src/property.rs:508:41:"
     },
     {
       "mutant": "hash_not_checked",
       "what": "execute_approved accepts changed arguments",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (958957) panicked at src/property.rs:879:17:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (1273710) panicked at src/property.rs:1040:21:"
     },
     {
       "mutant": "approval_not_consumed",
       "what": "approval can be replayed",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (960450) panicked at src/property.rs:890:51:"
+      "first_failure": "assertion `left == right` failed"
     },
     {
       "mutant": "denial_charges_budget",
@@ -111,7 +111,67 @@
       "mutant": "no_auto_revoke",
       "what": "N denials do not revoke",
       "caught": true,
-      "first_failure": "thread 'property::random_operations_hold_every_invariant' (962213) panicked at src/property.rs:374:26:"
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (1277063) panicked at src/property.rs:432:26:"
+    },
+    {
+      "mutant": "listed_is_ignored",
+      "what": "the registry says listed and the spend goes on",
+      "caught": true,
+      "first_failure": "assertion `left == right` failed: I11 wrong refusal"
+    },
+    {
+      "mutant": "registry_fails_open",
+      "what": "no answer from the registry counts as clear",
+      "caught": true,
+      "first_failure": "assertion `left == right` failed: I11 wrong refusal"
+    },
+    {
+      "mutant": "garbage_counts_as_clear",
+      "what": "an unreadable answer counts as clear",
+      "caught": true,
+      "first_failure": "I11 spend 11 dispatched without a clear answer on a live lineage"
+    },
+    {
+      "mutant": "screen_skips_liveness",
+      "what": "a revoke during screening does not stop the spend",
+      "caught": true,
+      "first_failure": "I11 spend 30 dispatched without a clear answer on a live lineage"
+    },
+    {
+      "mutant": "held_not_recorded",
+      "what": "funds waiting for the registry are not held",
+      "caught": true,
+      "first_failure": "assertion `left == right` failed: I10 held funds"
+    },
+    {
+      "mutant": "ticket_signature_off",
+      "what": "any signature passes",
+      "caught": true,
+      "first_failure": "I12 bound grant 9 reserved without a valid ticket"
+    },
+    {
+      "mutant": "no_ticket_goes_through",
+      "what": "a bound grant spends with no ticket and no human",
+      "caught": true,
+      "first_failure": "I12 bound grant 9 reserved without a valid ticket"
+    },
+    {
+      "mutant": "att_clearance_off",
+      "what": "attenuation: a child can drop clearance",
+      "caught": true,
+      "first_failure": "I7 widened ATT_CLEARANCE was accepted"
+    },
+    {
+      "mutant": "contact_not_recorded",
+      "what": "settlement does not write the contact",
+      "caught": true,
+      "first_failure": "assertion `left == right` failed: I13 contact of grant 1"
+    },
+    {
+      "mutant": "contact_on_failure",
+      "what": "a failed payment writes a contact",
+      "caught": true,
+      "first_failure": "assertion `left == right` failed: I13 contact of grant 2"
     }
   ]
 }

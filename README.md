@@ -1,41 +1,78 @@
 # Espalier
 
 A NEAR contract that lets an AI agent hand part of its budget to sub-agents, with the limits enforced
-on chain. Every sub-budget can only be narrower than the one it came from, one transaction cuts off a
-whole branch, and the contract itself issues and deletes each agent's access key.
+on chain, and asks about a recipient before any money moves. Every sub-budget can only be narrower than
+the one it came from, one transaction cuts off a whole branch, and the contract itself issues and deletes
+each agent's access key.
 
-Built at NEAR HACKATHON 2026. Tracks: `security`, `agents`. Status: testnet, milestone 1. Not audited.
+Built at NEAR HACKATHON 2026. Tracks: `security`, `agents`. Status: testnet. Not audited.
 
 **The problem.** An orchestrator agent with a budget hires other agents. Today it has two options: share
 its own key, or give each worker a separate wallet that nothing ties back to the original limit. In the
 first case one injected sub-agent can spend the whole budget. In the second the owner has no single place
-to see or stop the total.
+to see or stop the total. And a check on the recipient that runs inside the agent stops protecting anyone
+the moment that agent is hijacked.
 
 **What Espalier does.** The vault holds the funds. Each agent gets a *grant*, a node in a tree, with its
 own function-call key on the vault account. A grant can create child grants, and the contract checks
-that the child is narrower in all 13 dimensions: cap, per-transaction limit, rolling-window cap, window
-length, approval threshold, recipients, methods, expiry, depth, denial limit, gas budget, node budget and
-asset. Every spend is charged to every grant up to the root, so a subtree can never exceed what any
-ancestor has left. Revoking a grant kills everything below it.
+that the child is narrower in all 14 dimensions: cap, per-transaction limit, rolling-window cap, window
+length, approval threshold, recipients, methods, expiry, depth, denial limit, gas budget, node budget,
+asset and clearance. Every spend is charged to every grant up to the root, so a subtree can never exceed
+what any ancestor has left. Revoking a grant kills everything below it.
 
-How it works, and why the gas of a revoke does not depend on subtree size: [docs/DESIGN.md](docs/DESIGN.md).
+Before a spend, a recipient check answers `allow`, `warn` or `block` with reasons. The shared denylist is
+enforced by the contract on every spend, through a quorum of reporters the vault chose. A contract cannot
+read another account's age or code, so an attestor reads those off chain and signs a short ticket. A spend
+with no ticket waits for a human, so skipping the wrapper leads to a queue, not to the money.
+
+| Read this | For |
+|---|---|
+| [docs/ATTACKS.md](docs/ATTACKS.md) | Every scenario, numbered, mapped to the threat model |
+| [docs/DESIGN.md](docs/DESIGN.md) | The tree, attenuation, cascade revoke, key lifecycle, gas |
+| [docs/RECIPIENT-CHECK.md](docs/RECIPIENT-CHECK.md) | Signals, data sources, on chain versus off chain, denylist poisoning |
+| [docs/AGENTS.md](docs/AGENTS.md) | How an agent holds its key, the wrapper, hiring, market.near.ai |
+| [docs/BASELINE-GAPS.md](docs/BASELINE-GAPS.md) | Limits the official reference products document, mapped to tests |
+| [llms.txt](llms.txt) | The same, for an AI reviewer |
 
 ## Try it
 
-### 1. Check the testnet evidence: no keys, no install
+### 1. See every conclusion on one screen: offline, no install
+
+```sh
+python3 scripts/preflight.py
+python3 scripts/story.py
+```
+
+`preflight.py` says what will work on this machine and ends with `Next:`. `story.py` takes under a second
+and ends in `all checks passed`. It does not rerun the chain: it hashes the wasm files, runs the client unit
+tests, decides each recorded trial again from its stored signals, checks a real signature, and prints what
+the evidence files say, naming what each one ran on. Python 3.9 or newer, standard library only.
+
+### 2. Check the testnet evidence: no keys, no install
 
 ```sh
 python3 scripts/verify-testnet.py
 ```
 
-You see `72 transactions found`, `0 missing, 0 mismatched`, and `match: True` for the on-chain code
-hash against the sha256 of `res/espalier_vault.wasm`. The check looks up each transaction and compares
-its logged reason code with the report. It uses only the Python standard library and a public RPC. Every transaction is listed with a nearblocks link in
+You see `113 transactions found`, `0 missing, 0 mismatched`, and `match: True` for both the vault and the
+registry against the sha256 of the files in `res/`. Each transaction is looked up on a public RPC and its
+logged reason code compared with the report. Every one is listed with a nearblocks link in
 [docs/evidence/testnet-run-txs.md](docs/evidence/testnet-run-txs.md).
 
-Vault: [`vault.espalier-vault-1105.testnet`](https://testnet.nearblocks.io/address/vault.espalier-vault-1105.testnet)
+Vault: [`vault2.espalier-vault-1105.testnet`](https://testnet.nearblocks.io/address/vault2.espalier-vault-1105.testnet)
+Registry: [`registry.espalier-vault-1105.testnet`](https://testnet.nearblocks.io/address/registry.espalier-vault-1105.testnet)
 
-### 2. Run every scenario on a real local node
+### 3. Replay one real-model trial
+
+```sh
+python3 trials/replay.py I01
+```
+
+You see the poisoned invoice, the raw answer of the model paying the wrong account, the recipient check
+decided again from stored signals (`block`, `DENYLIST_QUORUM`), and that no transaction was signed. Offline,
+no model needed. `python3 trials/report.py` rebuilds the statistics from the stored files.
+
+### 4. Run every scenario on a real local node
 
 Needs Rust 1.95 or newer. The wasm files are prebuilt in `res/`, and near-workspaces fetches the sandbox
 node, about 35 MB. If that download is slow where you are, set `NEAR_SANDBOX_BIN_PATH` to a local
@@ -45,28 +82,47 @@ node, about 35 MB. If that download is slow where you are, set `NEAR_SANDBOX_BIN
 cargo run --release -p harness -- sandbox --jobs 6 --report /tmp/espalier-report
 ```
 
-You see one line per scenario, ending in `71/71 scenarios passed, 328 assertions`, in about two
-minutes after the build. `/tmp/espalier-report.md` and `.json` hold each assertion with expected and
-observed values. The committed run: [docs/evidence/sandbox-report.md](docs/evidence/sandbox-report.md).
+You see one line per scenario, ending in `98/98 scenarios passed, 509 assertions`, in about two minutes
+after the build. `/tmp/espalier-report.md` and `.json` hold each assertion with expected and observed values.
+The committed run: [docs/evidence/sandbox-report.md](docs/evidence/sandbox-report.md).
 
-One scenario at a time, for example the depth-6 cascade:
+One scenario at a time:
 
 ```sh
-cargo run --release -p harness -- sandbox --only C01
+cargo run --release -p harness -- sandbox --only H01
 ```
 
-You see `C01 pass  one transaction revokes a depth-6 chain and deletes its keys`.
+You see `H01 pass  recipient listed by the reporter quorum is refused on chain, nothing moves`.
 
-### 3. Run the property tests
+### 5. Run the demos on a local node
 
-Real runtime, with parallel signed transactions from 12 keys:
+Both need `NEAR_SANDBOX_BIN_PATH` set to a `near-sandbox` binary. The client talks to the node itself, with
+no Rust involved.
+
+```sh
+python3 scripts/attack-demo.py    # about a minute
+python3 scripts/hire-demo.py      # about a minute
+```
+
+`attack-demo.py` is the official attack demo. You see a stand-in for an injected agent refused before signing,
+the same agent skipping the wrapper and landing in the queue, the owner approving it by mistake and the
+contract refusing with `RECIPIENT_LISTED`, and a forged ticket refused. It ends with
+`acme-b1lling.test.near received 0`. Log: [docs/evidence/attack-demo.log](docs/evidence/attack-demo.log).
+
+`hire-demo.py` is the general contractor from the agents prompt. You see it counter a quote once, hire on a
+narrower sub-budget, a rogue worker refused three ways, and `tree spent 165 of 300 mNEAR`. The agents in it are
+scripted. It also ran on testnet: [docs/evidence/hire-demo-testnet.log](docs/evidence/hire-demo-testnet.log).
+
+### 6. Run the property tests
+
+Real runtime, with parallel signed transactions from 12 keys. Add `--screened` to put a live registry in front
+of every spend:
 
 ```sh
 cargo run --release -p harness -- sandbox-property --ops 1000 --seed 7 --keys 12
 ```
 
-You see progress lines, then a JSON summary. Any broken invariant exits non-zero with its name (`R1` to
-`R7`). The committed run is 10,008 operations in 17 rounds, with 33 revokes racing live batches: [docs/evidence/sandbox-property.json](docs/evidence/sandbox-property.json).
+You see progress lines, then a JSON summary. Any broken invariant exits non-zero with its name (`R1` to `R8`).
 
 In process, with the same contract code on near-sdk's mock VM:
 
@@ -74,8 +130,7 @@ In process, with the same contract code on near-sdk's mock VM:
 PROPERTY_SEEDS=4 PROPERTY_OPS=2500 cargo test -p espalier-vault --release -- --nocapture
 ```
 
-You see `test result: ok. 4 passed` and a JSON summary. The committed run is 100,000 operations:
-[docs/evidence/property-report.json](docs/evidence/property-report.json).
+You see `test result: ok. 4 passed` and a JSON summary.
 
 Check that those tests can fail:
 
@@ -83,18 +138,28 @@ Check that those tests can fail:
 python3 scripts/mutants.py
 ```
 
-Each of 18 mutants breaks one line of the contract, for example "the cap check stops at the leaf", and the
-property test has to fail. You see `18/18 caught`: [docs/evidence/mutants.json](docs/evidence/mutants.json).
+Each mutant breaks one line of the contract, for example "the registry says listed and the spend goes on",
+and the property test has to fail. You see `28/28 caught`.
 
-### 4. Rebuild the wasm
+### 7. Read recipient signals from mainnet
+
+```sh
+python3 scripts/mainnet-signals.py wrap.near v2.ref-finance.near
+```
+
+Read-only: view calls on public RPC, no key. Public archival nodes rate-limit, so allow a few minutes per
+account. It overwrites `docs/evidence/mainnet-signals.*`.
+
+### 8. Rebuild the wasm
 
 ```sh
 cargo install --locked cargo-near
 (cd contract && cargo near build non-reproducible-wasm --no-abi)
+(cd registry && cargo near build non-reproducible-wasm --no-abi)
 ```
 
-The build is not reproducible across machines yet, so the wasm you build may hash differently from
-`res/espalier_vault.wasm`. The contract is 295 KB.
+The build is not reproducible across machines yet, so the wasm you build may hash differently from `res/`.
+The vault is 339 KB and the registry 171 KB.
 
 ## What was actually run
 
@@ -102,24 +167,52 @@ Nothing below is a claim about code that has not been executed. Contract commit 
 
 | What | Where it ran | Result | Evidence |
 |---|---|---|---|
-| 71 scenarios, 328 assertions, real signed transactions, compiled wasm, no mocks | near-workspaces sandbox, neard 2.14.0, protocol 88 | 71/71 pass | [sandbox-report.md](docs/evidence/sandbox-report.md) |
-| 16 of those scenarios (15 shared, plus T01 on the real `wrap.testnet`), 116 assertions, 72 recorded transactions | NEAR testnet | 16/16 pass | [testnet-run-txs.md](docs/evidence/testnet-run-txs.md) |
+| 98 scenarios, 509 assertions, real signed transactions, compiled wasm, no mocks | near-workspaces sandbox, neard 2.14.0, protocol 88 | 98/98 pass | [sandbox-report.md](docs/evidence/sandbox-report.md) |
+| 22 scenarios (21 shared, plus T01 on the real `wrap.testnet`), 171 assertions, 113 recorded transactions | NEAR testnet | 22/22 pass | [testnet-run-txs.md](docs/evidence/testnet-run-txs.md) |
+| Hire flow with a rogue worker | Sandbox and NEAR testnet | 165 of 300 mNEAR spent, all rogue attempts refused | [hire-demo-testnet.log](docs/evidence/hire-demo-testnet.log) |
+| Official attack demo | Sandbox | Bad address received 0 | [attack-demo.log](docs/evidence/attack-demo.log) |
+| gemma3:4b (3.9B, Q4_K_M, CPU), 50 injected and 50 ordinary documents, through the real wrapper, attestor and contract | Ollama, then sandbox | See below | [trials/report.md](docs/evidence/trials/report.md) |
+| Age and code-change signals on 6 real accounts, 405 archival reads | NEAR mainnet, read-only | 2 recent code changes, 1 young account | [mainnet-signals.md](docs/evidence/mainnet-signals.md) |
 | Property test, 10,008 operations, parallel batches, revokes racing spends | **Real runtime**: sandbox, compiled wasm | All invariants held | [sandbox-property.json](docs/evidence/sandbox-property.json) |
-| Property test, 100,000 operations, 40 seeds, independent oracle | **In process, not the real runtime**: contract code on near-sdk's MockedBlockchain, with state serialised around every call and callbacks delivered in random order | All invariants held | [property-report.json](docs/evidence/property-report.json) |
-| 18 mutants of the contract against the in-process property test | In process | 18/18 caught | [mutants.json](docs/evidence/mutants.json) |
+| Same with a live registry and one listed recipient, 10,008 operations | **Real runtime** | All invariants held | [sandbox-property-screened.json](docs/evidence/sandbox-property-screened.json) |
+| Property test, 100,000 operations, 40 seeds, independent oracle, 13 invariants | **In process, not the real runtime**: contract code on near-sdk's MockedBlockchain, with state serialised around every call and callbacks delivered in random order | All invariants held | [property-report.json](docs/evidence/property-report.json) |
+| 28 mutants of the contract against the in-process property test | In process | 28/28 caught | [mutants.json](docs/evidence/mutants.json) |
+| Client unit tests, including RFC 8032 vectors | Python | 18 pass | `client/tests/` |
 | Gas by depth and by subtree size | Sandbox | See below | [gas.json](docs/evidence/gas.json) |
 | Toolchain | WSL Ubuntu 24.04 | | [toolchain.md](docs/evidence/toolchain.md) |
 
-Measured on the sandbox:
+### Real model under indirect injection
+
+One small model, one system prompt with no warning about injection, one attempt per document. The two
+numbers are separate on purpose: how often the model was fooled, and what the guardrail did about it.
+
+| | |
+|---|---|
+| Model fooled | **38 of 50** (76%): 30 wrong recipient, 8 wrong amount |
+| Refused with no human involved | **15 of 38** (39.5%) |
+| Held for a human, who said no | 18 of 38. The human is scripted and perfect, so read this as "reached a person" |
+| Went through | **5 of 38**: inflated amounts to real vendors, inside the limits and under 4x the history |
+| Same 38 with the wrapper skipped | 34 queued for a human, 4 refused `PER_TX`, none settled |
+| Ordinary payments refused outright | **0 of 48** the model got right |
+| Ordinary payments sent to a human | 9 of 48, all first-time vendors |
+
+Reason codes and the full breakdown: [docs/evidence/trials/report.md](docs/evidence/trials/report.md). Age and
+code thresholds were scaled to 420 seconds, because sandbox accounts are minutes old. With 50 trials a side a
+percentage moves by about 14 points at 95% confidence. A first run of the guardrail stage reported 38 of 38
+stopped because of a setup flaw, and it was discarded: the report explains it.
+
+### Measured on the sandbox
 
 | Operation | Burnt gas, whole transaction |
 |---|---|
-| Spend at depth 0 / 4 / 8, including transfer and callback | 5.88 / 7.80 / 9.71 Tgas (about 0.48 Tgas per level) |
-| Largest single receipt in a spend at depth 8 | 5.12 Tgas (the callback has 20 Tgas attached) |
-| Denied spend at depth 0 / 8 | 2.47 / 3.17 Tgas |
-| Revoke, subtree of 2 / 5 / 13 grants, every key deleted in the same transaction | 4.36 / 7.72 / 16.72 Tgas |
-| Revoke, subtree of 31 grants: all 31 dead at once, 2 keys deleted now, 29 left to `sweep` | 11.23 Tgas |
-| One `sweep` deleting those 29 keys | 35.20 Tgas |
+| Spend at depth 0 / 4 / 8, including transfer and callback | 6.15 / 8.25 / 10.17 Tgas (about 0.5 Tgas per level) |
+| Same with the registry in front | 10.72 / 13.24 / 15.58 Tgas |
+| Refused by the registry, depth 0 / 4 / 8 | 7.69 / 9.68 / 11.67 Tgas |
+| Largest single receipt, screened spend at depth 8 | 5.42 Tgas (the callback has 50 Tgas attached) |
+| Denied spend at depth 0 / 8 | 2.53 / 3.22 Tgas |
+| Revoke, subtree of 2 / 5 / 13 grants, every key deleted in the same transaction | 4.45 / 7.85 / 17.15 Tgas |
+| Revoke, subtree of 31 grants: all 31 dead at once, 2 keys deleted now, 29 left to `sweep` | 11.46 Tgas |
+| One `sweep` deleting those 29 keys | 35.66 Tgas |
 
 The subtree is dead the moment `revoke` lands, at any size. Only key deletion scales, and each call does bounded work.
 
@@ -131,67 +224,42 @@ The vault adds each agent's key to its own account with `AddKey`. The protocol t
 - Methods: only the ones in the grant, never a callback (B07 and B09 show `MethodNameMismatch`).
 - No attached deposit, so the key cannot send NEAR on its own (B08 shows `DepositWithFunctionCall`).
 - It cannot add keys or send a transfer: those need a full-access key (B08).
-- Gas comes out of the key's allowance. When the allowance cannot cover a call the protocol refuses it.
-  That is a lockout, and the way out is `refill_key` from an ancestor or the owner (F03).
+- Gas comes out of the key's allowance. The whole prepaid gas is charged up front and the unused part comes
+  back a few blocks later, so a screened spend at 120 Tgas needs about 121 mNEAR of allowance at that moment,
+  while it costs about 1 mNEAR in the end. When the allowance cannot cover a call the protocol refuses it. That
+  is a lockout, and the way out is `refill_key` from an ancestor or the owner (F03).
 
-The testnet vault still holds its one deployment key, because the contract will change in later
-milestones. `harness testnet --phase lock` deletes it, after which the code can never change. That
-has not been run yet, so `verify-testnet.py` reports `1 full-access`.
+The testnet vault still holds its one deployment key, because the contract may still change.
+`harness testnet --phase lock` deletes it, after which the code can never change. That has not been run yet,
+so `verify-testnet.py` reports `1 full-access`. The first vault, `vault.espalier-vault-1105.testnet`, ran the
+milestone 1 contract, whose state layout this one cannot read. Its code was swapped for a smaller contract to free
+its storage (`scripts/testnet-retire-v1.py`), and all current evidence is on `vault2`.
 
 ## Threat model
 
-Trust assumptions: the owner account is honest and its key is safe, and the NEAR protocol works as
-specified. Any agent key can be stolen, and any agent can be prompt-injected. In every row below the
-attacker holds a real agent key unless it says otherwise. ✓ means the scenario also ran on testnet.
-
-| Threat | What stops it | Enforced by | Scenarios |
-|---|---|---|---|
-| Sub-agent asks for more than its parent has, in any dimension | Attenuation check at `delegate`, one code per dimension | Contract | A01✓ to A14, A16 |
-| Siblings together overspend a shared parent | Every spend is charged to every ancestor | Contract | A17✓, E06 |
-| Leaf has room but a mid-tree ancestor does not | The walk checks each level | Contract | A18 |
-| Empty method list on a key, which means every method | Refused at `delegate` | Contract | A15 |
-| Key calls a method outside its grant | Method list is on the key | Protocol | B09 |
-| Child revokes its parent or a sibling | Only strict ancestors can revoke | Contract | B01✓, B03 |
-| Child approves its own spend | Only strict ancestors can approve | Contract | B02 |
-| A contract relays a call into the vault | `predecessor` must be the vault | Contract | B04 |
-| The same key registered on another account | `signer` must be the vault | Contract | B05 |
-| Malicious token re-enters during a spend, with the agent's real key as signer | `predecessor` must be the vault | Contract | B06 |
-| Agent calls a settlement callback directly | Callback names are on no issued key | Protocol | B07✓ |
-| Key tries to move NEAR, add keys, attach deposit or call another contract | Function-call key limits | Protocol | B08✓ |
-| Stranger uses owner methods | Owner check | Contract | B10 |
-| Owner set to the vault, making every agent the owner | Refused at `new` | Contract | B11 |
-| Revoked subtree keeps spending | Lineage walk, then keys deleted | Contract and protocol | C01✓, C02✓, C03 |
-| Spend in flight during a revoke | Settles or is refused, and the counters match the money | Contract | C06 |
-| Revoked grant still has an approved spend | Lineage re-checked at execution | Contract | C05, D09 |
-| Expired grant | Lineage walk; the attempt deletes the key | Contract | C08 |
-| Approval replayed | Entry removed before funds move | Contract | D02✓ |
-| Spend swapped after approval | Arguments are re-hashed at execution | Contract | D03, D04 |
-| Policy changed or budget gone after approval | Every limit is evaluated again | Contract | D05, D06 |
-| Agent approves above its authority | Approver's own threshold, then the owner | Contract | D07 |
-| Approval queue flooded | 8 per grant | Contract | D10 |
-| Failed transfer leaks budget | Callback releases every level and the window | Contract | E03✓, E04, T01✓ |
-| Concurrent receipts race past a limit | Reservation at every level, inside one receipt | Contract and runtime | E06, E07 |
-| Payment drains the balance needed for storage | Check before any state change | Contract | E05 |
-| Reset boundary allows 2x the window | Rolling window, no boundary | Contract | E08 |
-| Payment split to get under a limit | Rolling window still counts it | Contract | E11 |
-| Too little gas strands a reservation | Refused and counted before reserving | Contract | E09 |
-| Unknown token deposited | Returned to the sender | Contract | E10 |
-| Compromised key burns the vault's gas with denied calls | N denials revoke it, and the allowance is a hard stop | Contract and protocol | F01✓, F02 |
-| Denial counter rolled back by a panic | Denials return normally | Contract | F08 |
-| Agent locked out by an exhausted allowance | Ancestor refills, charged to its own budget | Contract | F03 |
-| Key leaked but grant still wanted | Rotation in one receipt | Contract | F05 |
-| Child key collides with a key already on the vault | `AddKey` failure buries the grant and refunds the parent | Contract | F06, F09 |
+Trust assumptions: the owner account is honest and its key is safe, and the NEAR protocol works as specified.
+Any agent key can be stolen, and any agent can be prompt-injected.
+[docs/ATTACKS.md](docs/ATTACKS.md) maps 43 threats to 99 numbered scenarios, each with its result, and is generated
+from the evidence reports.
 
 ### What it does not stop
 
-- **A bad payment inside the limits.** An injected agent can still pay an allowlisted recipient up to its
-  caps. Espalier bounds the damage and does not judge intent. There is no recipient risk check yet.
+- **A bad payment inside the limits.** The trials show it: an inflated invoice from a real vendor went through 5
+  times out of 5. The check is about the recipient, not about whether the amount matches the invoice.
+- **A human fooled by the same text.** A `warn` only moves the decision to a person.
+- **Stolen attestor key.** An attacker gets tickets, and then the limits, the allowlist and the denylist remain.
+  There is no TEE here, and the contract cannot confirm what the attestor looked at.
+- **Code changing after a ticket.** A ticket lasts minutes, and the contract cannot see a recipient's code.
+- **Two colluding trusted reporters** can block a recipient, until the owner drops them.
+- **Code that follows a publisher.** An account on a global contract by publisher account can change code with no
+  trace on the account, so the check only warns about that.
 - **A stolen owner key.** The owner can create roots, approve anything and withdraw.
 - **Malformed calls (F04).** Arguments that fail to parse panic before contract code runs, so they burn gas
   and do not move the denial counter. Only the key's allowance bounds them.
 - **A stuck reservation.** If a settlement callback ever failed outright, its amount would stay reserved.
   That is safe, since nothing is double-spent, but the budget stays consumed. No test has produced this.
-- **Storage is never reclaimed.** Revoked grants stay as tombstones, because the walk needs them.
+- **Storage is never reclaimed.** Revoked grants stay as tombstones, because the walk needs them. Contact records
+  are paid by the vault too, bounded in practice by the gas each spend burns.
 - **Malicious accepted tokens.** The owner chooses the tokens. A token that lies about a transfer breaks
   that token's ledger, not other assets.
 
@@ -202,35 +270,34 @@ attacker holds a real agent key unless it says otherwise. ✓ means the scenario
 | `contract/src/lib.rs` | The vault |
 | `contract/src/window.rs` | Rolling window, with its own tests |
 | `contract/src/property.rs` | In-process property test and oracle |
-| `harness/src/scenarios.rs` | The 71 scenarios |
+| `registry/src/lib.rs` | Shared denylist |
+| `client/espalier/` | Python client, standard library only: `wrapper.py`, `signals.py`, `policy.py`, `attestor.py`, `near.py` |
+| `trials/` | Corpus, model stage, guardrail stage, report, replay |
+| `harness/src/scenarios.rs`, `recipient.rs` | The scenarios |
 | `harness/src/property.rs` | Real-runtime property test |
 | `harness/src/testnet.rs` | Testnet deploy, run and lock |
 | `test-contracts/` | Attacker tools: a NEP-141 token with switches, a relay |
 | `res/` | Prebuilt wasm |
-| `scripts/` | Toolchain install, evidence regeneration, read-only verifier. The README commands do not need the `.sh` files |
+| `scripts/` | Story, preflight, demos, verifier, evidence regeneration. The README commands do not need the `.sh` files |
+| `docs/submission/` | Drafts of the X post, video script and submission fields |
 
 Every denial is a NEP-297 event, `standard: "espalier"`, with a reason code and the numbers used, such as
 `26000000000000000000000 > 25000000000000000000000 per-tx` (G01).
 
 ## What remains
 
-This is milestone 1. Not built yet:
+Not built: a hosted read-only view, a reproducible wasm build, NEAR Intents, an external audit, integration with
+market.near.ai, which needs an account or mainnet USDC. The final testnet vault is not locked yet.
 
-- Recipient check returning allow, warn or block, using account age, contract status, recent code change,
-  history and a shared blocklist, plus the agent-side wrapper that refuses to sign on block.
-- A real LLM agent under indirect injection, with measured block and false-block rates.
-- Prompt-injection demo script and video, and the comparison against the documented gaps in the
-  official reference products.
-- `llms.txt`, a one-screen offline overview command and a hosted read-only view.
-- Locking the final testnet vault. Reproducible wasm build. External audit.
-
-## AI assistance and libraries
+## Hackathon window, AI assistance and libraries
 
 All code, tests and documents in this repository were written by Claude Code (Claude Opus 5.5) under human
-direction, starting on 2026-11-05 inside the hackathon window. There is no earlier baseline.
+direction, starting on 2026-11-05 inside the hackathon window. The first commit is in the window, so there is no
+earlier baseline to separate, and the `pre-hackathon` tag of rules Q-003 does not apply.
 
-Libraries: near-sdk 5.30.0, near-contract-standards 5.30.0 (test token only), near-workspaces 0.24.0,
-tokio, serde, serde_json, anyhow, futures, rand. Tools: cargo-near 0.22.0, near-cli-rs 0.30.1, neard sandbox 2.14.0.
+Libraries: near-sdk 5.30.0, near-contract-standards 5.30.0 (test token only), near-workspaces 0.24.0, tokio,
+serde, serde_json, anyhow, futures, rand, ed25519-dalek, bs58, sha2. The Python client uses only the standard
+library. Tools: cargo-near 0.22.0, near-cli-rs 0.30.1, neard sandbox 2.14.0, Ollama 0.40.13 with gemma3:4b.
 
 ## License
 

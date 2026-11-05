@@ -1,6 +1,6 @@
 {
   "batches": 834,
-  "git_commit": "a56400a",
+  "git_commit": "0b8e36b",
   "harness": "real NEAR runtime: near-workspaces sandbox (neard 2.14.0), compiled wasm, signed transactions, parallel batches",
   "invariants": [
     "R1",
@@ -12,23 +12,24 @@
     "R7"
   ],
   "keys_per_tree": 12,
-  "native_paid_yocto": "33891162412462558365112797",
+  "native_paid_yocto": "33891095494910782467699190",
   "operations": 10008,
   "outcomes": {
-    "denied:ANCESTOR_CAP": 269,
-    "denied:ANCESTOR_WINDOW": 1620,
+    "denied:ANCESTOR_CAP": 264,
+    "denied:ANCESTOR_WINDOW": 1635,
     "denied:CAP": 51,
     "denied:PER_TX": 781,
     "denied:RECIPIENT_NOT_ALLOWED": 1435,
-    "denied:WINDOW": 270,
+    "denied:WINDOW": 268,
     "protocol_refused": 827,
-    "rolled_back": 865,
-    "settled": 3890
+    "rolled_back": 861,
+    "settled": 3886
   },
   "revokes_racing_a_batch": 33,
   "rounds": 17,
-  "seconds": 1384.709032781,
+  "screened": false,
+  "seconds": 1361.565623498,
   "seed": 7,
-  "spends_that_settled_in_the_same_batch_as_their_revoke": 14,
-  "wasm_sha256": "91909733d24c562aea39c44771e8f55e8868de9bad09d85a2a0903e86163d3e2"
+  "spends_that_settled_in_the_same_batch_as_their_revoke": 13,
+  "wasm_sha256": "3218271c471fdd4e4161bfdc4a3d2d50f24631fc854df8b9eff1f27b314803a4"
 }

@@ -1,0 +1,36 @@
+{
+  "batches": 834,
+  "git_commit": "0b8e36b",
+  "harness": "real NEAR runtime: near-workspaces sandbox (neard 2.14.0), compiled wasm, signed transactions, parallel batches",
+  "invariants": [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5",
+    "R6",
+    "R7",
+    "R8"
+  ],
+  "keys_per_tree": 12,
+  "native_paid_yocto": "32179020540560223280432852",
+  "operations": 10008,
+  "outcomes": {
+    "denied:ANCESTOR_WINDOW": 1045,
+    "denied:PER_TX": 760,
+    "denied:RECIPIENT_LISTED": 715,
+    "denied:RECIPIENT_NOT_ALLOWED": 1531,
+    "denied:REVOKED": 31,
+    "denied:WINDOW": 146,
+    "protocol_refused": 940,
+    "rolled_back": 1002,
+    "settled": 3838
+  },
+  "revokes_racing_a_batch": 33,
+  "rounds": 17,
+  "screened": true,
+  "seconds": 1497.542568495,
+  "seed": 8,
+  "spends_that_settled_in_the_same_batch_as_their_revoke": 0,
+  "wasm_sha256": "3218271c471fdd4e4161bfdc4a3d2d50f24631fc854df8b9eff1f27b314803a4"
+}
