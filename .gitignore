@@ -1,0 +1,6 @@
+target/
+.near-credentials/
+.env
+*.log
+node_modules/
+.logs/
