@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = ["contract", "test-contracts/test-ft", "test-contracts/relay", "harness"]
+
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = true
+debug = false
+panic = "abort"
+overflow-checks = true

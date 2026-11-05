@@ -1,0 +1,18 @@
+[package]
+name = "espalier-vault"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "On-chain delegation tree for agent spending on NEAR"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = "5.30.0"
+
+[dev-dependencies]
+near-sdk = { version = "5.30.0", features = ["unit-testing"] }
+rand = { version = "0.8", features = ["small_rng"] }
+serde_json = "1"
