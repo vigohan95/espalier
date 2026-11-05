@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Step 1 proof: build the hello contract with cargo-near and run a sandbox test against it.
-source /mnt/d/income-engine/work/hackathons/near/scripts/env.sh
+source "$(dirname "$0")/env.sh"
 cd "$REPO/toolchain-check"
 export CARGO_TARGET_DIR="$BUILD/hello-target"
 MODE="${1:-all}"

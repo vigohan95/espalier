@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds the three contracts with cargo-near and collects the wasm files into res/ in the repo.
-source /mnt/d/income-engine/work/hackathons/near/scripts/env.sh
+source "$(dirname "$0")/env.sh"
 cd "$REPO"
 set -e
 mkdir -p res "$BUILD/wasm"

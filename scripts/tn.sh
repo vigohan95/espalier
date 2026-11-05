@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Testnet phases. Usage: tn.sh deploy|run|lock [extra harness args]
-source /mnt/d/income-engine/work/hackathons/near/scripts/env.sh
+source "$(dirname "$0")/env.sh"
 cd "$REPO"
 export ESPALIER_WASM_DIR="$BUILD/wasm"
 A=espalier-vault-1105.testnet

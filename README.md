@@ -28,7 +28,7 @@ How it works, and why the gas of a revoke does not depend on subtree size: [docs
 python3 scripts/verify-testnet.py
 ```
 
-You see `@@TN_TX@@ transactions found`, `0 missing, 0 mismatched`, and `match: True` for the on-chain code
+You see `72 transactions found`, `0 missing, 0 mismatched`, and `match: True` for the on-chain code
 hash against the sha256 of `res/espalier_vault.wasm`. The check looks up each transaction and compares
 its logged reason code with the report. It uses only the Python standard library and a public RPC. Every transaction is listed with a nearblocks link in
 [docs/evidence/testnet-run-txs.md](docs/evidence/testnet-run-txs.md).
@@ -45,7 +45,7 @@ node, about 35 MB. If that download is slow where you are, set `NEAR_SANDBOX_BIN
 cargo run --release -p harness -- sandbox --jobs 6 --report /tmp/espalier-report
 ```
 
-You see one line per scenario, ending in `71/71 scenarios passed, @@SB_FACTS@@ assertions`, in about two
+You see one line per scenario, ending in `71/71 scenarios passed, 328 assertions`, in about two
 minutes after the build. `/tmp/espalier-report.md` and `.json` hold each assertion with expected and
 observed values. The committed run: [docs/evidence/sandbox-report.md](docs/evidence/sandbox-report.md).
 
@@ -66,7 +66,7 @@ cargo run --release -p harness -- sandbox-property --ops 1000 --seed 7 --keys 12
 ```
 
 You see progress lines, then a JSON summary. Any broken invariant exits non-zero with its name (`R1` to
-`R7`). The committed run is @@SP_OPS@@ operations: [docs/evidence/sandbox-property.json](docs/evidence/sandbox-property.json).
+`R7`). The committed run is 10,008 operations in 17 rounds, with 33 revokes racing live batches: [docs/evidence/sandbox-property.json](docs/evidence/sandbox-property.json).
 
 In process, with the same contract code on near-sdk's mock VM:
 
@@ -102,9 +102,9 @@ Nothing below is a claim about code that has not been executed. Contract commit 
 
 | What | Where it ran | Result | Evidence |
 |---|---|---|---|
-| 71 scenarios, @@SB_FACTS@@ assertions, real signed transactions, compiled wasm, no mocks | near-workspaces sandbox, neard 2.14.0, protocol 88 | 71/71 pass | [sandbox-report.md](docs/evidence/sandbox-report.md) |
-| 16 of those scenarios (15 shared, plus T01 on the real `wrap.testnet`), @@TN_FACTS@@ assertions, @@TN_TX@@ recorded transactions | NEAR testnet | 16/16 pass | [testnet-run-txs.md](docs/evidence/testnet-run-txs.md) |
-| Property test, @@SP_OPS@@ operations, parallel batches, revokes racing spends | **Real runtime**: sandbox, compiled wasm | All invariants held | [sandbox-property.json](docs/evidence/sandbox-property.json) |
+| 71 scenarios, 328 assertions, real signed transactions, compiled wasm, no mocks | near-workspaces sandbox, neard 2.14.0, protocol 88 | 71/71 pass | [sandbox-report.md](docs/evidence/sandbox-report.md) |
+| 16 of those scenarios (15 shared, plus T01 on the real `wrap.testnet`), 116 assertions, 72 recorded transactions | NEAR testnet | 16/16 pass | [testnet-run-txs.md](docs/evidence/testnet-run-txs.md) |
+| Property test, 10,008 operations, parallel batches, revokes racing spends | **Real runtime**: sandbox, compiled wasm | All invariants held | [sandbox-property.json](docs/evidence/sandbox-property.json) |
 | Property test, 100,000 operations, 40 seeds, independent oracle | **In process, not the real runtime**: contract code on near-sdk's MockedBlockchain, with state serialised around every call and callbacks delivered in random order | All invariants held | [property-report.json](docs/evidence/property-report.json) |
 | 18 mutants of the contract against the in-process property test | In process | 18/18 caught | [mutants.json](docs/evidence/mutants.json) |
 | Gas by depth and by subtree size | Sandbox | See below | [gas.json](docs/evidence/gas.json) |
@@ -114,12 +114,12 @@ Measured on the sandbox:
 
 | Operation | Burnt gas, whole transaction |
 |---|---|
-| Spend at depth 0 / 4 / 8, including transfer and callback | 5.88 / 7.79 / 9.71 Tgas (about 0.48 Tgas per level) |
+| Spend at depth 0 / 4 / 8, including transfer and callback | 5.88 / 7.80 / 9.71 Tgas (about 0.48 Tgas per level) |
 | Largest single receipt in a spend at depth 8 | 5.12 Tgas (the callback has 20 Tgas attached) |
-| Denied spend at depth 0 / 8 | 2.47 / 3.16 Tgas |
-| Revoke, subtree of 2 / 5 / 13 grants, every key deleted in the same transaction | 4.36 / 7.79 / 16.71 Tgas |
-| Revoke, subtree of 31 grants: all 31 dead at once, 2 keys deleted now, 29 left to `sweep` | 11.40 Tgas |
-| One `sweep` deleting those 29 keys | 35.61 Tgas |
+| Denied spend at depth 0 / 8 | 2.47 / 3.17 Tgas |
+| Revoke, subtree of 2 / 5 / 13 grants, every key deleted in the same transaction | 4.36 / 7.72 / 16.72 Tgas |
+| Revoke, subtree of 31 grants: all 31 dead at once, 2 keys deleted now, 29 left to `sweep` | 11.23 Tgas |
+| One `sweep` deleting those 29 keys | 35.20 Tgas |
 
 The subtree is dead the moment `revoke` lands, at any size. Only key deletion scales, and each call does bounded work.
 
@@ -207,7 +207,7 @@ attacker holds a real agent key unless it says otherwise. ✓ means the scenario
 | `harness/src/testnet.rs` | Testnet deploy, run and lock |
 | `test-contracts/` | Attacker tools: a NEP-141 token with switches, a relay |
 | `res/` | Prebuilt wasm |
-| `scripts/` | Toolchain install, evidence regeneration, read-only verifier. The `.sh` files assume WSL with the paths in `scripts/env.sh`; the README commands do not need them |
+| `scripts/` | Toolchain install, evidence regeneration, read-only verifier. The README commands do not need the `.sh` files |
 
 Every denial is a NEP-297 event, `standard: "espalier"`, with a reason code and the numbers used, such as
 `26000000000000000000000 > 25000000000000000000000 per-tx` (G01).
