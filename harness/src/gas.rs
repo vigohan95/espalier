@@ -61,7 +61,7 @@ pub async fn run(root: &Account, report: Option<&str>) -> Result<bool> {
             sweeps.push(tgas(&s));
         }
         let removed = keys - e.key_count().await?;
-        println!("subtree {}: revoke {:.2} Tgas, {}, backlog {backlog}, sweeps {sweeps:?}, keys removed {removed}", width + 1, tgas(&r), d.detail);
+        println!("subtree {}: revoke {:.2} Tgas, {}, sweeps {sweeps:?}, keys removed {removed}", width + 1, tgas(&r), d.detail);
         by_size.push(json!({
             "subtree_grants": width + 1,
             "revoke_total_tgas": tgas(&r),

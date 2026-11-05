@@ -103,6 +103,9 @@ def main():
     shutil.rmtree(WORK, ignore_errors=True)
     os.makedirs(WORK)
     shutil.copytree(f"{REPO}/contract", f"{WORK}/contract")
+    # copytree keeps mtimes, and cargo would then reuse the last mutant's binary as the baseline.
+    for name in (LIB, WIN):
+        os.utime(f"{WORK}/{name}")
     with open(f"{WORK}/contract/Cargo.toml", "a") as f:
         f.write('\n[workspace]\n\n[profile.release]\nopt-level = 2\noverflow-checks = true\n')
     rc, _, secs, out = run_test(seeds, ops)
@@ -115,7 +118,9 @@ def main():
         if src.count(old) != 1:
             sys.exit(f"mutant {name}: pattern found {src.count(old)} times")
         open(f"{WORK}/{path}", "w", encoding="utf8").write(src.replace(old, new))
-        rc, reason, secs, _ = run_test(seeds, ops)
+        rc, reason, secs, out = run_test(seeds, ops)
+        if "error: could not compile" in out:
+            sys.exit(f"mutant {name} does not compile, so it proves nothing")
         caught = rc != 0
         print(f"{'caught  ' if caught else 'SURVIVED'} {name}: {what} ({secs:.0f}s) {reason}", flush=True)
         results.append({"mutant": name, "what": what, "caught": caught, "first_failure": reason})

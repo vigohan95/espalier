@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # In-process property run: JOBS processes, each with its own seeds, merged into one report.
-source /mnt/d/income-engine/work/hackathons/near/scripts/env.sh
+source "$(dirname "$0")/env.sh"
 cd "$REPO"
 export CARGO_TARGET_DIR="$BUILD/prop-target"
 JOBS=${JOBS:-8}; SEEDS=${SEEDS:-5}; OPS=${OPS:-2500}
