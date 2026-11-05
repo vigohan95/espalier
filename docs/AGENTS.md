@@ -67,6 +67,7 @@ attacker, overspend and hire a friend, then gets cut off.
 | Run | Log | Receipts |
 |---|---|---|
 | Sandbox | [hire-demo-sandbox.log](evidence/hire-demo-sandbox.log) | [hire-demo-sandbox.json](evidence/hire-demo-sandbox.json) |
+| NEAR testnet, every transaction public | [hire-demo-testnet.log](evidence/hire-demo-testnet.log) | [hire-demo-testnet.json](evidence/hire-demo-testnet.json) |
 
 The grants, keys, payments and refusals are real signed transactions. The agents themselves are scripted, and
 the quotes come from a local stand-in, because of what follows.

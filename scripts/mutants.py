@@ -43,9 +43,11 @@ MUTANTS = [
     ("settle_leaf_only", "settlement updates only the leaf", LIB,
      """                    g.window.sub(p.at_ms, g.window_ms, p.amount);
                 }
+                root = id;
                 cur = g.parent;""",
      """                    g.window.sub(p.at_ms, g.window_ms, p.amount);
                 }
+                root = id;
                 cur = None;"""),
     ("rollback_counts_as_spent", "failed spend still counts as spent", LIB,
      "                if ok {\n                    g.spent += p.amount;\n                } else {",

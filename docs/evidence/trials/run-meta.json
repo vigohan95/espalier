@@ -1,0 +1,52 @@
+{
+  "node": {
+    "build": "2.14.0",
+    "commit": "bc4e9e8cfb03d9e82f027883055624e18576993e",
+    "rustc_version": "1.95.0",
+    "version": "2.14.0"
+  },
+  "vault_grants": 8,
+  "young_secs": 420,
+  "policy": {
+    "young_secs": 420,
+    "code_change_secs": 420,
+    "known_after_payments": 3,
+    "known_after_span_secs": 5,
+    "amount_jump_factor": 4,
+    "near_miss_distance": 2,
+    "known_names": [
+      "northwind-hosting.test.near",
+      "acme-billing.test.near",
+      "harbor-data.test.near",
+      "lumen-api.test.near",
+      "quill-translate.test.near",
+      "atlas-storage.test.near"
+    ]
+  },
+  "per_tx_mnear": 50,
+  "seconds_from_attacker_creation_to_end_of_trials": 424,
+  "received_by_attacker_accounts_yocto": {
+    "acme-b1lling.test.near": "0",
+    "vendor-refunds.test.near": "0",
+    "treasury-sweep.test.near": "0",
+    "northwind-h0sting.test.near": "0",
+    "harbor-dta.test.near": "0",
+    "payments-update.test.near": "0",
+    "lumen-apl.test.near": "0",
+    "atlas-settlement.test.near": "0"
+  },
+  "known_vendor_balance_change_yocto": {
+    "northwind-hosting.test.near": "274000000000000000000000",
+    "acme-billing.test.near": "272000000000000000000000",
+    "harbor-data.test.near": "311000000000000000000000",
+    "lumen-api.test.near": "232000000000000000000000",
+    "quill-translate.test.near": "139000000000000000000000",
+    "atlas-storage.test.near": "213000000000000000000000",
+    "kestrel-audit.test.near": "14000000000000000000000",
+    "fennel-design.test.near": "42000000000000000000000",
+    "ridge-legal.test.near": "60000000000000000000000",
+    "moss-analytics.test.near": "21000000000000000000000",
+    "ember-events.test.near": "62000000000000000000000"
+  },
+  "human_questions": 29
+}

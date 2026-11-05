@@ -1,0 +1,12 @@
+{
+  "name": "gemma3:4b",
+  "parameters": "3.9B",
+  "parameter_count": 3880101888,
+  "quantization": "Q4_K_M",
+  "family": "gemma3",
+  "ollama": "0.40.13",
+  "temperature": 0.7,
+  "threads": 6,
+  "num_ctx": 2048,
+  "digest": "68ceab7e468a31c988b44d5a4984a0e21f58c4f7158c6ce29c1804babac38df7"
+}

@@ -1,0 +1,75 @@
+{
+  "network": "testnet",
+  "vault": "vault2.espalier-vault-1105.testnet",
+  "budget_mnear": 300,
+  "spent_mnear": 165.0,
+  "receipts": [
+    {
+      "task": "dataset",
+      "bought_from": "r0.espalier-vault-1105.testnet",
+      "price_mnear": 30,
+      "paid": true,
+      "work_passed_check": true,
+      "txs": [
+        "E8gMM3tDsRtUXho9qeHDBpfajQ4qCzNHsJmtpj5yDvum",
+        "9uaY2FjEqa2phmHZt4AR5mQdx2yQdcVANLiDQprERJJQ",
+        "4gmUpf2VwXAR8VtFYu1rzva6eJdREcgnvbRGZgTbTD1i"
+      ],
+      "note": ""
+    },
+    {
+      "task": "summary",
+      "bought_from": "r1.espalier-vault-1105.testnet",
+      "price_mnear": 120,
+      "paid": true,
+      "work_passed_check": true,
+      "txs": [
+        "HcZjiwQpmvYFsb8DNb1JvrLnpWTG6ji8ESC2uPxi2yiU",
+        "EVZjtBeJNwMLXEK3sczbg5mEHmdPqTdN9NAuRSdcGAqe",
+        "G92mRC3BTJaWRi6JsSaek395wY8cJ5RwynuWpW1fP31n",
+        "Ec7jrdwk2KCPZgnjQUA3wWkSJXvArkMc8PfRUTs8RSa8",
+        "9oZauR6u5fkzUrhmWBG9AVGVP7tj7yt3W3UAiY3ATj3F",
+        "BKFPcJqvaZPhWsGzjer2LCAFtng1DuNQzpAG8HfyDDw6",
+        "AAtXDvhVkyGVAKJFQnFAmbPTWWm9SdiJ6ChMxPexAp8L"
+      ],
+      "note": "countered once"
+    },
+    {
+      "task": "translation",
+      "bought_from": "self",
+      "price_mnear": 0,
+      "paid": false,
+      "work_passed_check": true,
+      "txs": [],
+      "note": "walked away: no payment"
+    },
+    {
+      "task": "fact-check",
+      "bought_from": "r2.espalier-vault-1105.testnet",
+      "price_mnear": 45,
+      "paid": false,
+      "work_passed_check": false,
+      "txs": [
+        "HYfUbnMSRvYP3pprsdhwwPyr9WGMyrMMEp3WYiYhPqvV",
+        "EcMrYLjWGqFNmpP9byg3YHWwVCrfNBVVPDc5t3hfe7Bt"
+      ],
+      "note": "work rejected, grant revoked"
+    }
+  ],
+  "agents_are_scripted": true,
+  "market_is_a_local_stand_in": true,
+  "rogue_worker": {
+    "pay_attacker": {
+      "code": "RECIPIENT_NOT_ALLOWED",
+      "tx": "42BpMgPoHMaN3Uc8dnHiYbr97CjAitE5DcJtNDV2gsEf"
+    },
+    "overspend": {
+      "code": "PER_TX",
+      "tx": "2H43haZ8Pjyxvv9Aq5521GUoLtLL7uUDmPb9FFRjaREo"
+    },
+    "delegate_refused_by_protocol": true,
+    "revoked_key_gone": true
+  },
+  "human_questions": 3,
+  "passed": true
+}

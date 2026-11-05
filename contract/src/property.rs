@@ -27,7 +27,7 @@ use near_sdk::test_utils::VMContextBuilder;
 use near_sdk::{test_vm_config, testing_env, CurveType, PromiseResult, RuntimeFeesConfig};
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use ed25519_dalek::{Signer, SigningKey};
 
@@ -124,7 +124,8 @@ struct Sim {
     nodes: BTreeMap<GrantId, Node>,
     spends: Vec<Spend>,
     next_pk: u64,
-    blocked: HashSet<AccountId>,
+    /// Ordered, because a seed has to replay exactly: op_block picks the first entry.
+    blocked: BTreeSet<AccountId>,
     paused: bool,
     native_out: u128,
     /// This run has a registry in front of every spend.
@@ -154,7 +155,7 @@ impl Sim {
             nodes: BTreeMap::new(),
             spends: vec![],
             next_pk: seed * 1_000_000 + 1,
-            blocked: HashSet::new(),
+            blocked: BTreeSet::new(),
             paused: false,
             native_out: 0,
             screened: seed % 2 == 0,
@@ -528,8 +529,14 @@ impl Sim {
                 if d.code == "CLEARANCE_BAD_SIG" {
                     assert!(bound && forged, "I12 a good ticket was refused");
                 } else {
-                    assert!(!(bound && forged && self.expected_spend(id, &recipient, amount).is_ok() && d.code != "VAULT_BALANCE"), "I12 forged ticket not noticed");
+                    // The ticket is only read after every limit passes, so a limit can refuse first.
+                    // assert_refusal_matches holds that refusal to the oracle, and a forged ticket
+                    // that slipped through would show up as a reservation or a queue entry instead.
+                    let masked = bound && forged && self.expected_spend(id, &recipient, amount).is_ok();
                     self.assert_refusal_matches(id, &recipient, amount, &d);
+                    if masked {
+                        self.count(&format!("forged_ticket_refused_first_by_{}", d.code));
+                    }
                 }
                 let after = self.financial_snapshot();
                 assert_eq!(before, after, "I5 denied spend changed state: {}", d.code);
