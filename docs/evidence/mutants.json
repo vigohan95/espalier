@@ -1,0 +1,117 @@
+{
+  "what": "each mutant breaks one line of the contract; the in-process property test must fail",
+  "seeds": 4,
+  "ops_per_seed": 1500,
+  "caught": 18,
+  "total": 18,
+  "mutants": [
+    {
+      "mutant": "cap_checks_leaf_only",
+      "what": "subtree bound: cap is checked on the leaf only",
+      "caught": true,
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126057) panicked at src/property.rs:429:41:"
+    },
+    {
+      "mutant": "cap_ignores_ancestors",
+      "what": "subtree bound: headroom walk stops at the leaf",
+      "caught": true,
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126136) panicked at src/property.rs:429:41:"
+    },
+    {
+      "mutant": "cap_ignores_reserved",
+      "what": "in-flight spends are invisible to the cap check",
+      "caught": true,
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126213) panicked at src/property.rs:429:41:"
+    },
+    {
+      "mutant": "revoke_ignores_ancestors",
+      "what": "cascade: lineage walk looks at the grant itself only",
+      "caught": true,
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126289) panicked at src/property.rs:374:26:"
+    },
+    {
+      "mutant": "rollback_keeps_window",
+      "what": "failed spend leaves the window charged",
+      "caught": true,
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126391) panicked at src/property.rs:364:17:"
+    },
+    {
+      "mutant": "settle_leaf_only",
+      "what": "settlement updates only the leaf",
+      "caught": true,
+      "first_failure": "assertion `left == right` failed: I2 spent conservation on grant 1"
+    },
+    {
+      "mutant": "rollback_counts_as_spent",
+      "what": "failed spend still counts as spent",
+      "caught": true,
+      "first_failure": "assertion `left == right` failed: I2 spent conservation on grant 1"
+    },
+    {
+      "mutant": "window_undercounts",
+      "what": "window forgets spends early",
+      "caught": true,
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (126753) panicked at src/property.rs:435:41:"
+    },
+    {
+      "mutant": "att_per_tx_off",
+      "what": "attenuation: per_tx not checked",
+      "caught": true,
+      "first_failure": "I7 widened ATT_PER_TX was accepted"
+    },
+    {
+      "mutant": "att_cap_nominal",
+      "what": "attenuation: child cap against the nominal cap, not the remainder",
+      "caught": true,
+      "first_failure": "I7 widened ATT_CAP was accepted"
+    },
+    {
+      "mutant": "att_methods_off",
+      "what": "attenuation: methods not checked",
+      "caught": true,
+      "first_failure": "I7 widened ATT_METHODS was accepted"
+    },
+    {
+      "mutant": "att_recipients_off",
+      "what": "attenuation: recipient subset not checked",
+      "caught": true,
+      "first_failure": "I7 widened ATT_RECIPIENTS was accepted"
+    },
+    {
+      "mutant": "att_depth_off",
+      "what": "attenuation: depth not checked",
+      "caught": true,
+      "first_failure": "I7 widened ATT_DEPTH was accepted"
+    },
+    {
+      "mutant": "allowlist_off",
+      "what": "recipient allowlist not enforced at spend time",
+      "caught": true,
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (132200) panicked at src/property.rs:374:26:"
+    },
+    {
+      "mutant": "hash_not_checked",
+      "what": "execute_approved accepts changed arguments",
+      "caught": true,
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (137114) panicked at src/property.rs:879:17:"
+    },
+    {
+      "mutant": "approval_not_consumed",
+      "what": "approval can be replayed",
+      "caught": true,
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (139753) panicked at src/property.rs:890:51:"
+    },
+    {
+      "mutant": "denial_charges_budget",
+      "what": "a denial changes financial state",
+      "caught": true,
+      "first_failure": "assertion `left == right` failed: I5 denied spend changed state: BAD_AMOUNT"
+    },
+    {
+      "mutant": "no_auto_revoke",
+      "what": "N denials do not revoke",
+      "caught": true,
+      "first_failure": "thread 'property::random_operations_hold_every_invariant' (142830) panicked at src/property.rs:374:26:"
+    }
+  ]
+}

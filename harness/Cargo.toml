@@ -1,0 +1,18 @@
+[package]
+name = "harness"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "harness"
+path = "src/main.rs"
+
+[dependencies]
+near-workspaces = "0.24.0"
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rand = { version = "0.8", features = ["small_rng"] }
+futures = "0.3"

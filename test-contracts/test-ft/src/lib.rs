@@ -63,7 +63,7 @@ impl FungibleTokenCore for TestFt {
         self.token.ft_transfer(receiver_id, amount, memo);
         if let Some((target, method, args)) = self.reenter.take() {
             Promise::new(target)
-                .function_call(method, args.into_bytes(), NearToken::from_yoctonear(0), Gas::from_tgas(60))
+                .function_call(method, args.into_bytes(), NearToken::from_yoctonear(0), Gas::from_tgas(8))
                 .detach();
         }
     }

@@ -130,6 +130,11 @@ Agent keys live on the vault account, so their gas is paid from the vault. There
    ancestor's budget (F03). Only an ancestor or the owner can refill, so a compromised key cannot
    extend its own life.
 
+Sizing an allowance: the protocol charges `prepaid gas x gas price` up front against the allowance and
+refunds what was not burnt, so a key must always hold a full call's worth. The sandbox prices gas at
+1e9 yocto (100 Tgas needs 0.1 NEAR of allowance). A key below that is refused before the contract
+runs, whatever it has burnt so far.
+
 **Known limit (F04).** A call with arguments that fail to parse panics in the generated entry point
 before any contract code runs, so it burns gas and does not move the counter. The same goes for a
 call with too little gas to reach it. Those attempts are bounded only by layer 1.

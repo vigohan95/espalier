@@ -1,0 +1,217 @@
+//! The property test on a real node: random operations as signed transactions, submitted in
+//! parallel batches from many keys so that receipts really interleave.
+//!
+//! After every batch the oracle reads every grant from the chain and checks:
+//!   R1 spent + reserved <= cap on every grant
+//!   R2 each grant's counters equal its direct counters plus its children's counters
+//!   R3 a grant's spent equals the sum of settled decisions in that subtree, as seen by the callers
+//!   R4 revoked subtrees see no spend settled from a request sent after the revoke finished
+//!   R5 denied decisions leave spent and reserved where the settled ledger says they should be
+//!   R6 when all receipts are done, nothing is reserved
+//!   R7 the recipients' balances grew by exactly the settled native total
+use crate::env::*;
+use crate::fresh_env;
+use anyhow::{anyhow, Result};
+use futures::future::join_all;
+use near_workspaces::Account;
+use rand::rngs::SmallRng;
+use rand::{Rng, SeedableRng};
+use serde_json::{json, Value};
+use std::collections::{BTreeMap, HashSet};
+use std::time::Instant;
+
+struct Node {
+    agent: Agent,
+    parent: Option<usize>,
+    terms: Tm,
+    settled: u128,
+    dead: bool,
+}
+
+fn lineage(nodes: &[Node], mut i: usize) -> Vec<usize> {
+    let mut out = vec![i];
+    while let Some(p) = nodes[i].parent {
+        out.push(p);
+        i = p;
+    }
+    out
+}
+
+pub async fn run(root: &Account, ops: u64, seed: u64, keys: usize, report: Option<&str>) -> Result<bool> {
+    let started = Instant::now();
+    let mut rng = SmallRng::seed_from_u64(seed);
+    let e = fresh_env(root, 800, 60).await?;
+    let mut t = Tm::root(e.now_ms().await?);
+    t.cap = 3_000 * MILLI;
+    t.per_tx = 40 * MILLI;
+    t.window_cap = 3_000 * MILLI;
+    t.threshold = 40 * MILLI;
+    t.max_denials = 2_000_000;
+    t.gas_budget = 8_000_000 * MILLI;
+    t.key_allowance = 8_000 * MILLI;
+    t.max_depth = 3;
+    let root_agent = e.root(&t).await?;
+    let mut nodes = vec![Node { agent: root_agent, parent: None, terms: t, settled: 0, dead: false }];
+
+    // Build a tree of `keys` grants over at least 3 levels. Caps are random and tight, so that
+    // ancestors really do refuse.
+    while nodes.len() < keys {
+        let idx = if nodes.len() < 3 { nodes.len() - 1 } else { rng.gen_range(0..nodes.len()) };
+        if nodes[idx].terms.max_depth == 0 {
+            continue;
+        }
+        let parent_terms = nodes[idx].terms.clone();
+        let mut c = parent_terms.child();
+        c.key_allowance = 3_000 * MILLI;
+        c.gas_budget = parent_terms.gas_budget / 6;
+        c.cap = rng.gen_range(parent_terms.cap / 3..=parent_terms.cap);
+        c.per_tx = rng.gen_range(5 * MILLI..=parent_terms.per_tx);
+        c.window_cap = rng.gen_range(parent_terms.window_cap / 2..=parent_terms.window_cap);
+        c.max_denials = parent_terms.max_denials;
+        let agent = e.child(&nodes[idx].agent, &c).await?;
+        nodes.push(Node { agent, parent: Some(idx), terms: c, settled: 0, dead: false });
+    }
+
+    let nobody: near_workspaces::AccountId = format!("nobody-here.{}", e.owner.id()).parse()?;
+    let start_balances: Vec<u128> = {
+        let mut v = vec![];
+        for r in &e.recipients {
+            v.push(e.balance(r).await?);
+        }
+        v
+    };
+    let mut done = 0u64;
+    let mut outcomes: BTreeMap<String, u64> = BTreeMap::new();
+    let mut native_out = 0u128;
+    let mut batches = 0u64;
+    let mut revoked_ids: HashSet<usize> = HashSet::new();
+    let mut late_settles = 0u64;
+
+    while done < ops {
+        batches += 1;
+        // One tx per key, all in flight together. Dead keys keep trying: R4 needs attempts to judge.
+        let mut calls = vec![];
+        let mut plan = vec![];
+        for (i, n) in nodes.iter().enumerate() {
+            let amount = match rng.gen_range(0..10) {
+                0 => n.terms.per_tx + 1,
+                _ => rng.gen_range(1..=n.terms.per_tx),
+            };
+            let fails = rng.gen_bool(0.15);
+            let r = rng.gen_range(0..e.recipients.len());
+            let to = if fails { nobody.clone() } else { e.r(r) };
+            plan.push((i, amount));
+            let e2 = e.clone();
+            let agent = n.agent.clone();
+            calls.push(async move { e2.spend_tx(&agent, &to, amount, None).await });
+        }
+        // Occasionally revoke one non-root grant in the same breath as the spends.
+        let revoke_target = if batches % 25 == 0 {
+            let live: Vec<usize> = (1..nodes.len()).filter(|i| !nodes[*i].dead).collect();
+            if live.len() > 2 { Some(live[rng.gen_range(0..live.len())]) } else { None }
+        } else {
+            None
+        };
+        let revoke_fut = async {
+            match revoke_target {
+                Some(i) => e.revoke_by_owner(nodes[i].agent.grant).await.map(|_| ()),
+                None => Ok(()),
+            }
+        };
+        let (results, rv) = tokio::join!(join_all(calls), revoke_fut);
+        rv?;
+        for ((i, amount), r) in plan.into_iter().zip(results) {
+            done += 1;
+            let d: Decision = match r {
+                Ok(r) => r.json()?,
+                Err(err) => {
+                    // A key the sweep deleted between batches is refused by the protocol.
+                    *outcomes.entry("protocol_refused".into()).or_default() += 1;
+                    let in_revoked_subtree = lineage(&nodes, i).iter().any(|x| revoke_target == Some(*x));
+                    if !nodes[i].dead && !in_revoked_subtree {
+                        return Err(anyhow!("live key refused by protocol: {err:?}"));
+                    }
+                    continue;
+                }
+            };
+            *outcomes.entry(if d.outcome == "denied" { format!("denied:{}", d.code) } else { d.outcome.clone() }).or_default() += 1;
+            if d.outcome == "settled" {
+                native_out += amount;
+                if nodes[i].dead {
+                    return Err(anyhow!("R4 spend settled after the revoke finished on node {i}"));
+                }
+                if lineage(&nodes, i).iter().any(|x| revoke_target == Some(*x)) {
+                    late_settles += 1;
+                }
+                for a in lineage(&nodes, i) {
+                    nodes[a].settled += amount;
+                }
+            }
+        }
+        if let Some(target) = revoke_target {
+            revoked_ids.insert(target);
+            for i in 0..nodes.len() {
+                if lineage(&nodes, i).contains(&target) {
+                    nodes[i].dead = true;
+                }
+            }
+        }
+        // R1, R2, R3, R5 from chain state.
+        let mut views: Vec<Value> = vec![];
+        for n in &nodes {
+            views.push(e.grant(n.agent.grant).await?);
+        }
+        let num = |v: &Value, f: &str| -> u128 { v[f].as_str().unwrap().parse().unwrap() };
+        for (i, v) in views.iter().enumerate() {
+            let cap = num(v, "cap");
+            if num(v, "spent") + num(v, "reserved") > cap {
+                return Err(anyhow!("R1 broken on node {i}"));
+            }
+            let kids: u128 = (0..nodes.len()).filter(|c| nodes[*c].parent == Some(i)).map(|c| num(&views[c], "spent")).sum();
+            if num(v, "spent") != num(v, "direct_spent") + kids {
+                return Err(anyhow!("R2 broken on node {i}"));
+            }
+            if num(v, "spent") != nodes[i].settled {
+                return Err(anyhow!("R3/R5 broken on node {i}: chain {} ledger {}", num(v, "spent"), nodes[i].settled));
+            }
+            if num(v, "reserved") != 0 {
+                return Err(anyhow!("R6 reservation left after the batch on node {i}"));
+            }
+        }
+        if batches % 10 == 0 {
+            println!("{done}/{ops} ops, {:.0}s, {outcomes:?}", started.elapsed().as_secs_f64());
+        }
+        if nodes.iter().filter(|n| !n.dead).count() < 2 {
+            println!("tree exhausted at {done} ops");
+            break;
+        }
+    }
+    e.sleep_ms(2000).await;
+    let mut got = 0u128;
+    for (r, s) in e.recipients.iter().zip(&start_balances) {
+        got += e.balance(r).await? - s;
+    }
+    if got != native_out {
+        return Err(anyhow!("R7 recipients got {got}, settled {native_out}"));
+    }
+    let doc = json!({
+        "harness": "real NEAR runtime: near-workspaces sandbox, compiled wasm, signed transactions, parallel batches",
+        "seed": seed,
+        "keys": keys,
+        "operations": done,
+        "batches": batches,
+        "seconds": started.elapsed().as_secs_f64(),
+        "outcomes": outcomes,
+        "revokes": revoked_ids.len(),
+        "spends_settled_in_the_same_batch_as_a_revoke": late_settles,
+        "native_paid_yocto": native_out.to_string(),
+        "invariants": ["R1","R2","R3","R4","R5","R6","R7"],
+        "wasm_sha256": crate::report::wasm_sha256(),
+        "git_commit": crate::report::git_commit(),
+    });
+    println!("{}", serde_json::to_string_pretty(&doc)?);
+    if let Some(p) = report {
+        std::fs::write(format!("{p}.json"), serde_json::to_string_pretty(&doc)?)?;
+    }
+    Ok(true)
+}

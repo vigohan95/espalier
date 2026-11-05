@@ -1,0 +1,5849 @@
+{
+  "assertions": 328,
+  "git_commit": "160220d",
+  "network": "sandbox",
+  "node_version": "Version { version: \"2.14.0\", build: \"2.14.0\", commit: \"bc4e9e8cfb03d9e82f027883055624e18576993e\", rustc_version: \"1.95.0\" }",
+  "passed": 71,
+  "scenarios": [
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_CAP",
+          "observed": "ATT_CAP: child cap 1001000000000000000000000 > parent 1000000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A01",
+      "seconds": 3.8585510039999997,
+      "status": "pass",
+      "title": "child cap above parent's remaining is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "3ibZ7ngSGjxesUP87WUo4eUwMgNLG9hD5u1b79mudAFi",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2452381633.test.near",
+          "tgas_burnt": 5.837657068791
+        },
+        {
+          "code": "ATT_CAP",
+          "detail": "child cap 1001000000000000000000000 > parent 1000000000000000000000000",
+          "hash": "EH5EG1d9re4g3DxX1UWKwYheHHB58UNiQY3gn5kKq8oy",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.442887617391
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_PER_TX",
+          "observed": "ATT_PER_TX: child per_tx 100000000000000000000001 > parent 100000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A02",
+      "seconds": 4.113530998,
+      "status": "pass",
+      "title": "child per-tx limit above parent is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "A8umKfaycp6JrmPBpy12vMaDfmpWF6oLxhtvHKwxm617",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b4084457337.test.near",
+          "tgas_burnt": 5.837723712027
+        },
+        {
+          "code": "ATT_PER_TX",
+          "detail": "child per_tx 100000000000000000000001 > parent 100000000000000000000000",
+          "hash": "8N1SxAfu9ySbkiAAf7WD5kvthE5Vrn82jmNfgUM5erc6",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.443575733475
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_WINDOW_CAP",
+          "observed": "ATT_WINDOW_CAP: child window_cap 600000000000000000000001 > parent 600000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A03",
+      "seconds": 3.613178347,
+      "status": "pass",
+      "title": "child window cap above parent is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BVQNhSo2Y23u1v4hGnaaXvcjzS24RzxEL83t1Wcx74ni",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3679044835.test.near",
+          "tgas_burnt": 5.837723712027
+        },
+        {
+          "code": "ATT_WINDOW_CAP",
+          "detail": "child window_cap 600000000000000000000001 > parent 600000000000000000000000",
+          "hash": "7Sg9xSPJJQNeYoKVAaWiDk3cbpEy9j2KsUB2CX61BoKm",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.447010262535
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_WINDOW_LEN",
+          "observed": "ATT_WINDOW_LEN: child window 3599000 ms < parent 3600000 ms",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A04",
+      "seconds": 4.751027104,
+      "status": "pass",
+      "title": "child with a shorter window is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "4aQQ7gdp65j4DJPwWLZzB7uP3gCf1fgtr4m8r6fzNFqh",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1267684000.test.near",
+          "tgas_burnt": 5.858899411878
+        },
+        {
+          "code": "ATT_WINDOW_LEN",
+          "detail": "child window 3599000 ms < parent 3600000 ms",
+          "hash": "peLk6hPtsmAep7JZt2Ve658UK83rZbj2U3J4EaXFsp2",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.423134690739
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_THRESHOLD",
+          "observed": "ATT_THRESHOLD: child approval_threshold 100000000000000000000001 > parent 100000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A05",
+      "seconds": 4.355934776,
+      "status": "pass",
+      "title": "child approval threshold above parent is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "3ZnDpa1cQXZ7EJ5VjU5XNNLrHR63s7WMCrdPYWxkp84P",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1898073311.test.near",
+          "tgas_burnt": 5.860590355263
+        },
+        {
+          "code": "ATT_THRESHOLD",
+          "detail": "child approval_threshold 100000000000000000000001 > parent 100000000000000000000000",
+          "hash": "6c3UABLvikSKSZCQFPtJPw4QgjBZhF5rf3aZthGagmjb",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.458950458207
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_RECIPIENTS",
+          "observed": "ATT_RECIPIENTS: r2.b2107567404.test.near is not in the parent list",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A06",
+      "seconds": 5.884304107,
+      "status": "pass",
+      "title": "child recipient outside parent's list is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7DLSVMFtXrLePqbLSGPqF1CBq5JTAyHpFf1HcaDQK3X7",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2107567404.test.near",
+          "tgas_burnt": 5.860856928207
+        },
+        {
+          "code": "ATT_RECIPIENTS",
+          "detail": "r2.b2107567404.test.near is not in the parent list",
+          "hash": "ZBZDVd7rdSugu7Xi58HKKAYCQNmo32r1Zn78fSzjpWn",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.49273226892
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_RECIPIENTS",
+          "observed": "ATT_RECIPIENTS: child asked for any recipient under a list",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A07",
+      "seconds": 3.708880924,
+      "status": "pass",
+      "title": "child asking for any recipient under a list is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BB2vFoRrnn4P8KSQ7vpV7PqXXUHDGnASuHERGmBGmPnH",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b82349861.test.near",
+          "tgas_burnt": 5.833154273023
+        },
+        {
+          "code": "ATT_RECIPIENTS",
+          "detail": "child asked for any recipient under a list",
+          "hash": "ADhs8okyykDaPDWg8tY8ZTjpXLhnBk2VBEBfFo4TApKc",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.468984034592
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "reason code",
+          "expected": "ATT_METHODS",
+          "observed": "ATT_METHODS: [\"revoke\"] are not in the parent",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A08",
+      "seconds": 3.681237641,
+      "status": "pass",
+      "title": "child method outside parent's set is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "HUoQt5FimgVfx4VRgLmZZS4tTkUxrRsG5DaU2UavTxHB",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b244024542.test.near",
+          "tgas_burnt": 5.617905591822
+        },
+        {
+          "code": "ATT_METHODS",
+          "detail": "[\"revoke\"] are not in the parent",
+          "hash": "4FREPEDo4SWhThi3FKiq5qR96ksujvuc7WdT3U2iFA5H",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.458726280152
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_EXPIRY",
+          "observed": "ATT_EXPIRY: child expiry 1793949214853 > parent 1793949214852",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A09",
+      "seconds": 3.670577587,
+      "status": "pass",
+      "title": "child expiry after parent is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7SDXgSMxCDqwBRTAcgYanod8Nncd71GHpLpL1oRVk62L",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1990236299.test.near",
+          "tgas_burnt": 5.883790214679
+        },
+        {
+          "code": "ATT_EXPIRY",
+          "detail": "child expiry 1793949214853 > parent 1793949214852",
+          "hash": "HwCkNFGyQWsuddGVWSDGoGiPpmiERAgvxAfYdSDFNbNG",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.523525583132
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "child cannot keep the parent's depth",
+          "expected": "ATT_DEPTH",
+          "observed": "ATT_DEPTH: child max_depth 2 with parent max_depth 2",
+          "pass": true
+        },
+        {
+          "claim": "last level has depth 0 left",
+          "expected": "Some(0)",
+          "observed": "Some(0)",
+          "pass": true
+        },
+        {
+          "claim": "depth 0 cannot delegate",
+          "expected": "ATT_DEPTH",
+          "observed": "ATT_DEPTH: child max_depth 0 with parent max_depth 0",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A10",
+      "seconds": 5.192303206,
+      "status": "pass",
+      "title": "delegation past the depth limit is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9fbFDXuY87A3CX5ahFvAu4PXaP5EmahRgfggPZnCiQpw",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1978591205.test.near",
+          "tgas_burnt": 5.686648982416
+        },
+        {
+          "code": "ATT_DEPTH",
+          "detail": "child max_depth 2 with parent max_depth 2",
+          "hash": "998Tp3vhFoJ4BMrFgZQikz3hJMT4zyYaU1mDU4Zxm6k7",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.484054336775
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5MXH79GzjBrQejg7Jfb8AS9P2G8ryDzUrCjN7uHQ8oBq",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.219139425396
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6bhgXt97yuT3MdQJjPnvzVBGSrtUuDTKt9APTAs7EJuX",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.316827819111
+        },
+        {
+          "code": "ATT_DEPTH",
+          "detail": "child max_depth 0 with parent max_depth 0",
+          "hash": "13qWuzvxSDCzc9xYoY7p9fpVdJiKYtEXDXoPHrK4EtpV",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 3",
+          "tgas_burnt": 2.660325698285
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_DENIALS",
+          "observed": "ATT_DENIALS: child max_denials 26 > parent 25",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A11",
+      "seconds": 3.669841382,
+      "status": "pass",
+      "title": "child denial limit above parent is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "dFqpgNrCoatvDGeRrMUntRsBMP4Dbxq4rzCcwzSCZrG",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3666928774.test.near",
+          "tgas_burnt": 5.883456998499
+        },
+        {
+          "code": "ATT_DENIALS",
+          "detail": "child max_denials 26 > parent 25",
+          "hash": "2kqkvm4pi5RxTVemA4imKFHUfqw3tyhXMDnAfHAhwjfn",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.506132731292
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_GAS",
+          "observed": "ATT_GAS: child key_allowance + gas_budget 200000200000000000000000000000 > parent 8000000000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A12",
+      "seconds": 3.678950488,
+      "status": "pass",
+      "title": "child gas allowance beyond parent's budget is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "F948JWTeYM7Wi7MSCodZ3KcW9ZwjWHAKK8EuUiQgxDfF",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3739768890.test.near",
+          "tgas_burnt": 5.860656998499
+        },
+        {
+          "code": "ATT_GAS",
+          "detail": "child key_allowance + gas_budget 200000200000000000000000000000 > parent 8000000000000000000000000000",
+          "hash": "Fgwctg6VwjdTziNUPqCmMM1FfHo56XTiWZ7AVCypReGB",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.551741105244
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "outcome",
+          "expected": "\"denied\"",
+          "observed": "\"denied\"",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "ATT_NODES",
+          "observed": "ATT_NODES: child node_budget + 1 2500001 > parent 100000",
+          "pass": true
+        },
+        {
+          "claim": "no key was added",
+          "expected": "2",
+          "observed": "2",
+          "pass": true
+        },
+        {
+          "claim": "parent gas budget unchanged",
+          "expected": "String(\"8000000000000000000000000000\")",
+          "observed": "String(\"8000000000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "parent node budget unchanged",
+          "expected": "Number(100000)",
+          "observed": "Number(100000)",
+          "pass": true
+        },
+        {
+          "claim": "denial counted on the parent",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A13",
+      "seconds": 3.653763413,
+      "status": "pass",
+      "title": "child node budget beyond parent's budget is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "DT9KpdqX4AZdpTXB6PMyCXac1B2T6Q9wXDqAY1j3hY44",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1986075907.test.near",
+          "tgas_burnt": 5.883723571443
+        },
+        {
+          "code": "ATT_NODES",
+          "detail": "child node_budget + 1 2500001 > parent 100000",
+          "hash": "5GNtCLrFZdqajf5jRykD76Te3RDPcCfqCiCx8svv2fHM",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.51552883602
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "reason code",
+          "expected": "ATT_ASSET",
+          "observed": "ATT_ASSET: child asset differs from parent",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A14",
+      "seconds": 3.649133355,
+      "status": "pass",
+      "title": "child in another asset is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "32gFtTTuAsewcGCVvT94TeiB8cvDCR1M2kbg58iCnP9X",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b849089917.test.near",
+          "tgas_burnt": 5.666783261358
+        },
+        {
+          "code": "ATT_ASSET",
+          "detail": "child asset differs from parent",
+          "hash": "2abqcXDqGf5kQUn3QsLAbVMarYAfqEdQhyvSoXZAYBbF",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.395665838404
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "empty method list refused",
+          "expected": "BAD_TERMS",
+          "observed": "BAD_TERMS: methods must not be empty: an empty list means all methods at protocol level",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A15",
+      "seconds": 3.644721453,
+      "status": "pass",
+      "title": "empty method list is refused: it would mean every method",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6U2oAWRzpPub7ZbEvKMdtq8GzxrGJSy4K899yacx15Gg",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b158790891.test.near",
+          "tgas_burnt": 5.667316407246
+        },
+        {
+          "code": "BAD_TERMS",
+          "detail": "methods must not be empty: an empty list means all methods at protocol level",
+          "hash": "J33Jk8BJfSRAxfn7v7zFv72AkFbFD9AiWpUFuXzryiyd",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.402771174942
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "nominal cap would pass, remaining does not",
+          "expected": "ATT_CAP",
+          "observed": "ATT_CAP: child cap 900000000000000000000001 > parent 900000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "limit reported is the remainder",
+          "expected": "Some(\"900000000000000000000000\")",
+          "observed": "Some(\"900000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "exactly the remainder is allowed",
+          "expected": "GRANTED",
+          "observed": "GRANTED",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A16",
+      "seconds": 4.799354089,
+      "status": "pass",
+      "title": "cap check uses what is left, not the nominal cap",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "627jQ7bgo2GVjVEe6kinDnHTat5nRtsz4T6HhVvfWA4Z",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b17522108.test.near",
+          "tgas_burnt": 5.665557399716
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "7i5ReWpv9sVhbJb8km1bbbZ4GFqZsDZ5smPy7vDLkCDp",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 5.927004637901
+        },
+        {
+          "code": "ATT_CAP",
+          "detail": "child cap 900000000000000000000001 > parent 900000000000000000000000",
+          "hash": "AeqihZu9nstvnbgH8ZWd89hd7Jv2cQmbATBZ5kzsoMNb",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.446133666465
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "8Ar5MbzvEC5XqJ7ikwuh7me4K18GywP8xpWhLA54f72C",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.193448341919
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "children together are promised twice the parent",
+          "expected": "60000000000000000000000",
+          "observed": "60000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "spend inside the shared cap settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "spend inside the shared cap settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "spend inside the shared cap settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "next spend hits the parent",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 30000000000000000000000 + 10000000000000000000000 > 30000000000000000000000 cap on grant 1",
+          "pass": true
+        },
+        {
+          "claim": "blocking grant is the root",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        },
+        {
+          "claim": "root total equals its cap",
+          "expected": "30000000000000000000000",
+          "observed": "30000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A17",
+      "seconds": 6.240849003,
+      "status": "pass",
+      "title": "oversubscribed siblings stop exactly at the parent's cap",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "51rJKv3an2mDzV4QAX3nk7RyNs3h4j7X6bqYaPJWBRmn",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1521203583.test.near",
+          "tgas_burnt": 5.685955001002
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "3C1JD8sfB6SR1qBBJWBAS55pmdbuFowgFzqcrDmtXMMK",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.215506341793
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7E3HupSJMX43xCqnc7zLKRGn5QuLxztZYDfcAMBQtCFP",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.248126511558
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "4LnYGbGGWFMVx3EXH3Zf8eaS9n3RGFJ6qN8EvuNWtmSA",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 2",
+          "tgas_burnt": 6.470481151092
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "4bb2Uha7nKbbNtup166m92boGRcka8bRk6HDMLeAjrdC",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 3",
+          "tgas_burnt": 6.472232516988
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "5GH7S79bLczoYuYLX8ifth4sp4fW5SboVYBZMaLJpTta",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 2",
+          "tgas_burnt": 6.473838255072
+        },
+        {
+          "code": "ANCESTOR_CAP",
+          "detail": "30000000000000000000000 + 10000000000000000000000 > 30000000000000000000000 cap on grant 1",
+          "hash": "AMeoa2B2WtoyjQbsHvnaDKcvoNkefDWVrPgGS28fu3YE",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 3",
+          "tgas_burnt": 2.613851696212
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "mid-tree limit binds",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 100000000000000000000000 + 100000000000000000000000 > 150000000000000000000000 cap on grant 2",
+          "pass": true
+        },
+        {
+          "claim": "blocking grant is the middle one",
+          "expected": "Some(2)",
+          "observed": "Some(2)",
+          "pass": true
+        },
+        {
+          "claim": "leaf has only spent nothing",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "view reports the lineage minimum",
+          "expected": "Some(\"50000000000000000000000\")",
+          "observed": "Some(\"50000000000000000000000\")",
+          "pass": true
+        }
+      ],
+      "group": "attenuation",
+      "id": "A18",
+      "seconds": 5.717429672,
+      "status": "pass",
+      "title": "a mid-tree ancestor limit binds a leaf with room of its own",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "Er2gzFfNJsquufk3aPqxhsidjKsmaZdFsmL4E94DgBjH",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3838327653.test.near",
+          "tgas_burnt": 5.668209052708
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "56Cv6fF5XHaWvQ1z3i1CzEke1dfm2siY9ahEMsXaYo6p",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.191884801663
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5namVt4sTVbzscuE7QrFthjxrDKYDyfYVgc8X7cegkwZ",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.288955305622
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BsmpdLJ593pvxbPfFGQmhfzFdZnUQpb7ihnKRbcfGne1",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.311073404827
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "E4EWCh8VHwoMbmpeCnPSxyo5f7D8XcyShuctDTjCoNQK",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 4",
+          "tgas_burnt": 6.930146484367
+        },
+        {
+          "code": "ANCESTOR_CAP",
+          "detail": "100000000000000000000000 + 100000000000000000000000 > 150000000000000000000000 cap on grant 2",
+          "hash": "3L93osaCtxzDwNWA7QNZfkEVegCX5ycw9TL4SnWX7Fvi",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 3",
+          "tgas_burnt": 2.689668702403
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "reason code",
+          "expected": "NOT_ANCESTOR",
+          "observed": "NOT_ANCESTOR: grant 2 is not above grant 1",
+          "pass": true
+        },
+        {
+          "claim": "parent still live",
+          "expected": "Some(true)",
+          "observed": "Some(true)",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B01",
+      "seconds": 4.169754713,
+      "status": "pass",
+      "title": "child cannot revoke its parent",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "D2RJp4sbAiyT2kF5tw5L3iGBU9BcV9pXrHkAX2opKrc7",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1658358938.test.near",
+          "tgas_burnt": 5.668542268888
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "Aatvri1r73MHFTdgGtJCT6jzrWhWbnTuWVMmvZBmJuKS",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.189187760392
+        },
+        {
+          "code": "NOT_ANCESTOR",
+          "detail": "grant 2 is not above grant 1",
+          "hash": "FcyiqTs9US5p81pxWcT3mZSH6S8RE8ZCE41u6sCSmViP",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.393922319171
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "self-approval refused",
+          "expected": "NOT_ANCESTOR",
+          "observed": "NOT_ANCESTOR: grant 2 is not above grant 2",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B02",
+      "seconds": 4.457190444,
+      "status": "pass",
+      "title": "child cannot approve its own queued spend",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "481S2Zx6NcvR3MRSGhnJZFNshYgTLLFTqf3xQYBPLowS",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b918342245.test.near",
+          "tgas_burnt": 5.648064284664
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "CfCaW1anMPZfVdtHpLqe1FeThHzCXJWNj4Hvuj8PVfjU",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.164038921958
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "20000000000000000000000 > 5000000000000000000000 approval threshold",
+          "hash": "FNuWsxkpgJsnM9SEvXJvKnbEidQwTVxpb8DtCTaSxYXo",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.790853508132
+        },
+        {
+          "code": "NOT_ANCESTOR",
+          "detail": "grant 2 is not above grant 2",
+          "hash": "3Pg3ufEnMXQMLBcHwaCaoXzjBGmkqcdwXQgWdnqDHzYu",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "denied",
+          "signer": "child",
+          "tgas_burnt": 2.518423758677
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "reason code",
+          "expected": "NOT_ANCESTOR",
+          "observed": "NOT_ANCESTOR: grant 2 is not above grant 3",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B03",
+      "seconds": 4.707486191,
+      "status": "pass",
+      "title": "sibling cannot revoke sibling",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "czi3kANXSXc92Rq2diAnwZ4rQykVYKK51Vzvm5v12wr",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2719985248.test.near",
+          "tgas_burnt": 5.668475625652
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "JLzNZJnXrfWLfK5TRsy4yRxNzCW9QXKjVQjdrHJoY4s",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.19204599834
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "J9cesbeBzcoQVPvfAmYMxiaQFpg1w8a5gFvV5Ntqb3kY",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.222499867953
+        },
+        {
+          "code": "NOT_ANCESTOR",
+          "detail": "grant 2 is not above grant 3",
+          "hash": "G2m4WrBxxoWD7xCAVkFU4cWRCohRAyL96JGnzE4AzZLp",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.47869521552
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "reason code",
+          "expected": "NOT_DIRECT_KEY",
+          "observed": "NOT_DIRECT_KEY: caller is not a key on the vault account",
+          "pass": true
+        },
+        {
+          "claim": "nothing spent",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B04",
+      "seconds": 4.953689987,
+      "status": "pass",
+      "title": "contract relaying a call is not an agent",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "21d39221wrhgmxrP3msT8L1hxuAwsYopwZinQJRcw53w",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b947222880.test.near",
+          "tgas_burnt": 5.667183120774
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "key registered on the attacker account",
+          "expected": "true",
+          "observed": "true",
+          "pass": true
+        },
+        {
+          "claim": "reason code",
+          "expected": "NOT_DIRECT_KEY",
+          "observed": "NOT_DIRECT_KEY: caller is not a key on the vault account",
+          "pass": true
+        },
+        {
+          "claim": "nothing spent",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B05",
+      "seconds": 5.204008897,
+      "status": "pass",
+      "title": "same key on another account is not the agent",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5UM4suTvzyenqQPTdrD759rLwAXotD1VXwohiVRiDHzX",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1950146274.test.near",
+          "tgas_burnt": 5.705088912124
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "switch set",
+          "expected": "true",
+          "observed": "true",
+          "pass": true
+        },
+        {
+          "claim": "re-entrant call was refused",
+          "expected": "Some(String(\"NOT_DIRECT_KEY\"))",
+          "observed": "Some(String(\"NOT_DIRECT_KEY\"))",
+          "pass": true
+        },
+        {
+          "claim": "exactly one spend settled",
+          "expected": "100",
+          "observed": "100",
+          "pass": true
+        },
+        {
+          "claim": "recipient got one payment",
+          "expected": "100",
+          "observed": "100",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B06",
+      "seconds": 6.847895727,
+      "status": "pass",
+      "title": "malicious token re-entering mid-spend gets nothing",
+      "txs": [
+        {
+          "code": "",
+          "detail": "",
+          "hash": "28wb1PMafghMZ9rpW2ytsMgDS9U2QJE4v6iweCPzzQYA",
+          "label": "add_token",
+          "method": "add_token",
+          "outcome": "ok",
+          "signer": "owner.b1397899992.test.near",
+          "tgas_burnt": 1.999084980632
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7vSyifio1resEES2Ed1WGdeQqqBdDSUz4TF7CtXteY88",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1397899992.test.near",
+          "tgas_burnt": 5.751509836136
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "protocol rejects the callback name for this key",
+          "expected": "MethodNameMismatch",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(MethodNameMismatch { method_name: \"on_spend_settled\" }) })) } }",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B07",
+      "seconds": 5.473445648,
+      "status": "pass",
+      "title": "agent key cannot call settlement callbacks",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5TGXUnWUX2SopFKyZPL9o77wt9VwCV4pe6wyh19zCQ2A",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b142440924.test.near",
+          "tgas_burnt": 5.684956618122
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "plain transfer refused",
+          "expected": "protocol error",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(RequiresFullAccess) })) } }",
+          "pass": true
+        },
+        {
+          "claim": "adding a key refused",
+          "expected": "protocol error",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(RequiresFullAccess) })) } }",
+          "pass": true
+        },
+        {
+          "claim": "attached deposit refused",
+          "expected": "DepositWithFunctionCall",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(DepositWithFunctionCall) })) } }",
+          "pass": true
+        },
+        {
+          "claim": "other receiver refused",
+          "expected": "ReceiverMismatch",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(ReceiverMismatch { tx_receiver: AccountId(\"r0.b4034057580.test.near\"), ak_receiver: \"vault.b4034057580.test.near\" }) })) } }",
+          "pass": true
+        },
+        {
+          "claim": "recipient balance unchanged",
+          "expected": "1000000000000000000000000",
+          "observed": "1000000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B08",
+      "seconds": 13.421628662,
+      "status": "pass",
+      "title": "agent key cannot transfer, add keys, attach deposit or leave the vault",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "D77RpsErEdRT6d6s9H5JuSNwyczVtMGoP9FsCze1kBUC",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b4034057580.test.near",
+          "tgas_burnt": 5.686449052708
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "protocol stops it",
+          "expected": "MethodNameMismatch",
+          "observed": "Error { repr: Custom { kind: Rpc(BroadcastTxFailure), error: ServerError(HandlerError(InvalidTransaction { context: InvalidAccessKeyError(MethodNameMismatch { method_name: \"delegate\" }) })) } }",
+          "pass": true
+        },
+        {
+          "claim": "contract never ran: counter still zero",
+          "expected": "Some(0)",
+          "observed": "Some(0)",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B09",
+      "seconds": 6.322294589,
+      "status": "pass",
+      "title": "method subset is enforced by the protocol before the contract runs",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "AfyMwz2NDB42mwE3fvJZcQCfFx3e3aShMLGBcVnupidv",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1642534122.test.near",
+          "tgas_burnt": 5.704489123
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5PRE8MNzBGzGRM8uBtaWgiVES5CKnU7PAuQUoV1QHpPL",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.170086517474
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "pause by stranger fails",
+          "expected": "failure",
+          "observed": "1",
+          "pass": true
+        },
+        {
+          "claim": "vault not paused",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B10",
+      "seconds": 3.166861562,
+      "status": "pass",
+      "title": "stranger cannot use owner methods",
+      "txs": []
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "init refused",
+          "expected": "failure",
+          "observed": "true",
+          "pass": true
+        }
+      ],
+      "group": "impersonation",
+      "id": "B11",
+      "seconds": 3.641315416,
+      "status": "pass",
+      "title": "vault refuses to initialise with itself as owner",
+      "txs": []
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "tree has 7 levels",
+          "expected": "7",
+          "observed": "7",
+          "pass": true
+        },
+        {
+          "claim": "deepest grant reports depth 6",
+          "expected": "Some(6)",
+          "observed": "Some(6)",
+          "pass": true
+        },
+        {
+          "claim": "deepest grant can spend before revoke",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "one transaction",
+          "expected": "\"REVOKED\"",
+          "observed": "\"REVOKED\"",
+          "pass": true
+        },
+        {
+          "claim": "tx succeeded",
+          "expected": "true",
+          "observed": "true",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "every level is dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "every level's key is gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "spendable is zero",
+          "expected": "Some(\"0\")",
+          "observed": "Some(\"0\")",
+          "pass": true
+        },
+        {
+          "claim": "root untouched",
+          "expected": "Some(true)",
+          "observed": "Some(true)",
+          "pass": true
+        },
+        {
+          "claim": "root still spends",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        }
+      ],
+      "group": "revocation",
+      "id": "C01",
+      "seconds": 9.606144989,
+      "status": "pass",
+      "title": "one transaction revokes a depth-6 chain and deletes its keys",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2shjRG36eygRPPBQ9etF7rFZRvpQMfaWoPKtNkBVAtYj",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3725489028.test.near",
+          "tgas_burnt": 5.70482233918
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2SvVD5vF3jKCWezZK9BavBTnaV8P9fGZQtiach4SfZcb",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.2470210527
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "C7qZRG3uZSMKx9AwnfTrhYHRbpBcHkjCtUq3HBT5Bos6",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.343281141999
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FHCSEzcZ5UH3A8gfmigdMKvM9C7doiPMSFfUW5taeSf5",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 3",
+          "tgas_burnt": 6.43279983808
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FFSyeftbFCjvvUgPrv79dJm4L2vuHCJgG5DPqwSt5YVK",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 4",
+          "tgas_burnt": 6.517251986587
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9GjCERGzQWy193kDdvryy2p3UKe8VrK85ZzEQPaFgkcd",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 5",
+          "tgas_burnt": 6.602454488566
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "AdyZJanvfq7zxKG33E1grW5B1oKBh7v1vmfBpuZRCYE4",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 6",
+          "tgas_burnt": 6.690767847107
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "6FvKspa7RqG6rpEThSvVRDYd1d6xfSLT3epE5KmUfUhT",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 7",
+          "tgas_burnt": 9.075818653672
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 11, backlog 0",
+          "hash": "ANVzkkdWUYsRNjWfxyrVvTAhL2DK65Zamr2tyMyuk3Jx",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "owner.b3725489028.test.near",
+          "tgas_burnt": 9.169145630504
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "74ptmkoh53vAuZ6m2JLx87nb168S6VZ5Bg4TxFLk4p93",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 5.995831088353
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "deleted key is rejected by the protocol",
+          "expected": "protocol error",
+          "observed": "Failed to query access key\n\nCaused by:\n    handler error: [Access key for public key ed25519:7MiKr2HZeq6CU86R5aRdrahan52mWwG8bopbPUhKBj76 does not exist while viewing]",
+          "pass": true
+        },
+        {
+          "claim": "nothing spent",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        }
+      ],
+      "group": "revocation",
+      "id": "C02",
+      "seconds": 7.440917674,
+      "status": "pass",
+      "title": "a deleted key cannot sign anything",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "DC4she3mrx5w5T2sUH7HYAsZfHMyEi9yPH7SsKj5oPwT",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2252097924.test.near",
+          "tgas_burnt": 5.686449052708
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "Gbx21NS12GerGgZyBfoSP5ykwWFeSHD8QR5DEbVYUVud",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.2196610527
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "AvPj4wND3rBccvKxnRVwzZKdCRBVwXNodLPMydertL1t",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.319067504067
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 3, backlog 0",
+          "hash": "62dq5tDGLrYJdS1q1LqkYMBDSKBNyqbDxySyJqcXR9cU",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "owner.b2252097924.test.near",
+          "tgas_burnt": 4.423906323775
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "revoke stays far below the 300 Tgas limit",
+          "expected": "< 100 Tgas",
+          "observed": "11.89 Tgas, visited 32, backlog 29",
+          "pass": true
+        },
+        {
+          "claim": "the sweep left work for later",
+          "expected": "> 0",
+          "observed": "29",
+          "pass": true
+        },
+        {
+          "claim": "unswept key cannot delegate",
+          "expected": "ANCESTOR_REVOKED",
+          "observed": "ANCESTOR_REVOKED: grant 2 is revoked",
+          "pass": true
+        },
+        {
+          "claim": "its own attempt reaped the key",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "unswept key cannot spend",
+          "expected": "ANCESTOR_REVOKED",
+          "observed": "ANCESTOR_REVOKED: grant 2 is revoked",
+          "pass": true
+        },
+        {
+          "claim": "its own attempt reaped the key",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "anyone may sweep",
+          "expected": "true",
+          "observed": "true",
+          "pass": true
+        },
+        {
+          "claim": "backlog cleared",
+          "expected": "Some(0)",
+          "observed": "Some(0)",
+          "pass": true
+        },
+        {
+          "claim": "31 keys gone",
+          "expected": "31",
+          "observed": "31",
+          "pass": true
+        }
+      ],
+      "group": "revocation",
+      "id": "C03",
+      "seconds": 34.311991802,
+      "status": "pass",
+      "title": "a subtree too wide for one sweep is dead at once, keys reaped after",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "Afde2gMAQTj3xQTvRsya2hogkEfBT9mUvFAjiqZBC7YT",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1584315633.test.near",
+          "tgas_burnt": 5.723328912124
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5takcBq7BkV9VeZCCSMJatVxJKQwcY9tZoDq5eSVufYy",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.271204772778
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "47T8ArnUCtZwsNnTrDGgay7GyPmNho3ATEW7ragHf9Rt",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.358262973938
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "ARUMGDNAXqeKmMijW4VdMcXnGeSghMyUTuChsemzWuzC",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.381114148739
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6oWdUcZUUDGHA7U2fYwW3rWgMpAPywXZpmStK7cWkY4H",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.381795215775
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "3RHJoJHpu2UzsfZtN1yoao5ak3upeyUP14fAaih3oXgT",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.385000641343
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2uwkBJLSADr2pnw6SZHG4rQe5mUXyTcELTyW7r2FxK8d",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.386784201419
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "E37ogiVbU2sKQKFd1dpsZ211h24Y9Ho5FcWnWALpkDzz",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.385379438871
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "AyEugxweKm6LKAtFfwMegdCj3XAVmrsEL7uqjHXvzqMu",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.386347647751
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "D858Ry1JiHEo8Sx64CoYgds4cP8dDptj3aM3gAXsMmNd",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.391033392829
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "51drR21ZhtGfJPsxRfFbuVvCsd8XAGin5jd6HBKggmhu",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.392028752657
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "3Ch8Ck8iVckJ6rRKTp62J2itbaD7xRAe6wxPMLDpNw55",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.393661748385
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "4zhD587nxQViJXNDJPLuMtxrmXxuvu3AaA8jcLVuES5Z",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.392756398729
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BbbVnXdAetFzke8XBMfYkSaaxWqg8VDXUy6ase6VwgDd",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.392943812165
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2eYzHfcj1LBvtucGJam1o8JgWbuU5vTckXRihAYiLinK",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.397153000053
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "D19gZhgQHKpFZR2C2P7icMpkpocbEp36vknxKjniHN4Y",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.393262548505
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "G52FS9EBun6DeC8iEawyQwsRqEus3RiPCXKEyZiMkk7o",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.396409558397
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "EefN8Fuz5pvAuVmJmSSsssTvwxNqFGTd6Z8qmZQPSkHG",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.401171638317
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "ANWM7b891hqQpZG9trfc2GL53o5SSif4GTSrfRiqo5up",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.399761939233
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "8Tn9GMVNvgGfLGBY8MV4NoEkyyrBtzhKhYtEXSkGQn5X",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.403570444949
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "ErxiR8aHRXF7RqBHs3vS3hJALuC4knYmgSiNhjDRECSq",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.405073445229
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7L27FNyB7TxfTd7kEBVJwMxgmGSHwQDoZz9cu2kRn4Ki",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.401895643501
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BpTGXczD9jsxnf1iV98Xuf2rYmNq9BFhb7zLgNiwpbTG",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.405811107497
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "4Q2CuDD4jodobXMEeQu8oXsmACVgEA9mjMSgjG3tFTdG",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.406899438753
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "3RSjpc2gpBT15y565MAHnuSLQifkAbq6h4ejW9miDqdq",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.407935936381
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "D2syFeAZshv92XZySSwv183QagReTQhNinAvzQQDYnuy",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.412810733873
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "22JrWjo7M2wgfhsf2mYLyaXvfHCkUspy6zQFHdgoc66L",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.406197799117
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FWcKHYT6KVWWCrAFFoZQ4RPwbhHqZNgBoU9MmnLXsYE6",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.411992421421
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "72LuQLLb63xoWpPRtx1F5k1ZCHPQXu2fKs3WgH7MXHRz",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.413120244965
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9iy2z4afioHU4tm1eVvHHS3ykU18vA4NK1wFWDYKvtbx",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.413989723125
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "DKsJCT5BdRTxbJwYZk6LwvyXUhNDiaksqA1JpacCuCz6",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.413929487005
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "GakPES4iJYVQkZnLoyPvYBmuGNcwvW1ScBH7pPqUxdqi",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.411156338105
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 32, backlog 29",
+          "hash": "5zWFqpz8gQzcXeczx2i75cYTTjuJ5MKmoZnHeJ5H7Fk6",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "owner.b1584315633.test.near",
+          "tgas_burnt": 11.886204850515
+        },
+        {
+          "code": "ANCESTOR_REVOKED",
+          "detail": "grant 2 is revoked",
+          "hash": "4baBL6nXkzCgCtpZWo8FXZz7PzUdre5SWMMWa6yxHnD8",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 4",
+          "tgas_burnt": 3.38606314753
+        },
+        {
+          "code": "ANCESTOR_REVOKED",
+          "detail": "grant 2 is revoked",
+          "hash": "9bGzqjtywb8JAYQZsQmK9QCKmyVtEdLCKiVfeZ6Y7JYR",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 5",
+          "tgas_burnt": 3.307762799712
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "mid-tree key revokes its child",
+          "expected": "REVOKED",
+          "observed": "REVOKED: visited 3, backlog 0",
+          "pass": true
+        },
+        {
+          "claim": "target dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "target's child dead",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "sibling keeps working",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        }
+      ],
+      "group": "revocation",
+      "id": "C04",
+      "seconds": 6.235443066,
+      "status": "pass",
+      "title": "ancestor key revokes a subtree and siblings keep working",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "AE6NvQVtvbR2unyYgoQ33DkWdWgtPMR2zHmQFbZcQmnQ",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b100881486.test.near",
+          "tgas_burnt": 5.70372976401
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FzNevbYra2iWNDthxKj2n785NbF4MjstDMGpY5HuM7to",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.24546357854
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "8Wn3JobzxSefjnBgswrEjqmL2L7T2hpj1B9SLC2EZwW3",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.343233425099
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "UDW8Sdnd6pBaTPZzwdZcz6hb5YrSYMj4SwEiXZcE4ue",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 3",
+          "tgas_burnt": 6.430842504504
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "121NbmmHmhMbiRYfbWN5oC4La9SFvJMV1jfzFWZCB5v6",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.364296751112
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 3, backlog 0",
+          "hash": "WqsmiQnMZ91KH4mvxL36ajiWj6ZjNEpt9XhJw6VVxSF",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 4.716274917118
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "2sMeXJ1GhYbEEUSJ8KxTGcgEEqt6VvvKC9U3qt6E8yoG",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 5",
+          "tgas_burnt": 7.018289189095
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "execution re-checks the lineage",
+          "expected": "REVOKED",
+          "observed": "REVOKED: grant 2 is revoked",
+          "pass": true
+        },
+        {
+          "claim": "no funds moved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        }
+      ],
+      "group": "revocation",
+      "id": "C05",
+      "seconds": 5.458627912,
+      "status": "pass",
+      "title": "approved spend is dead once its grant is revoked",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "JC1yJRNGPJsdsGCaK7MJjUUj3yBdBJMxdePrDFseh8He",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2704091855.test.near",
+          "tgas_burnt": 5.70494315161
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "ETp3sqJ5kQTV3snAWNogfm6s1D3mWzaUph2iTpuuZgKQ",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.246640180171
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "Cvhgp1hTHNoPdUiKgQAmZsxqZ7wUVZA2Z94LpLR7nHGB",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.819336942883
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "8TqD4KerSruSK2oe6bnhYUZkBqmNZC73Yfy5Z9mGaxir",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "owner.b2704091855.test.near",
+          "tgas_burnt": 2.164943840319
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 1, backlog 0",
+          "hash": "CibgepTPt8BkVSgv2p1mcehf51uVEdajDmWzPgV2bJ4r",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "owner.b2704091855.test.near",
+          "tgas_burnt": 3.281958210529
+        },
+        {
+          "code": "REVOKED",
+          "detail": "grant 2 is revoked",
+          "hash": "CpwgNuZ7ANkT9rnSbTNbqd8GWhPdx2axNym3GLw1KUgm",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "owner.b2704091855.test.near",
+          "tgas_burnt": 2.200785007483
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "recipient received exactly what settled",
+          "expected": "5000000000000000000000",
+          "observed": "5000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "counters match the money",
+          "expected": "10000000000000000000000",
+          "observed": "10000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing left reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        }
+      ],
+      "group": "revocation",
+      "id": "C06",
+      "seconds": 9.71982309,
+      "status": "pass",
+      "title": "spend racing a revoke settles or is refused, never half",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2ACCrayJLA6tYddDWqU3f6zAUWo6gyTa6WRmA5RLSQY4",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b498485237.test.near",
+          "tgas_burnt": 5.684356828998
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6MCuC1LcPudZ2jYjzCjUFCVpMQU5G1bcijhqjZ7oe3yx",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.218158703192
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "8DzUpA9FeKzXQZWZvB7LdBeQUCrKeZNGc5D1c4mSTbRr",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.315685013975
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "CJHF3jKtdX8FZSpLh86Erbm44XKiE87ALMtR42MTbWTw",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 3",
+          "tgas_burnt": 6.972689189095
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 3, backlog 0",
+          "hash": "AxRuD3c1Ro67adAmm4zbAvzE566nJaEenMU3X7TzJoRL",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "owner.b498485237.test.near",
+          "tgas_burnt": 4.426403714102
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "revoked",
+          "expected": "REVOKED",
+          "observed": "REVOKED: visited 5, backlog 0",
+          "pass": true
+        },
+        {
+          "claim": "delegation by a reaped key is impossible",
+          "expected": "protocol error",
+          "observed": "Error { repr: Full { kind: Rpc(QueryFailure), message: \"Failed to query access key\", error: ServerError(HandlerError(UnknownAccessKey { public_key: ed25519:8Bwr3Fg3LhYagwbUeATnkaajFmDqbJ3P9FNMHkmvGdUG, block_height: 289, block_hash: 5pGC1fD2KQTVhtT598hTy3QfzUidjqZvvjVyeFLyoTEC })) } }",
+          "pass": true
+        }
+      ],
+      "group": "revocation",
+      "id": "C07",
+      "seconds": 7.304179164,
+      "status": "pass",
+      "title": "revoked parent cannot delegate",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "DtmVbCCaZ24BKgAaFjCFoBiPR55LfhjU1AKCgNK3hBLt",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b246413176.test.near",
+          "tgas_burnt": 5.703196618122
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "DQ8g5uUtR8vN3nkTLtvv7SyrUFtdtHE6f5DNWpMvQzgt",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.245106502436
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "CBCjXYXrSuRu1sjkLgEBMXJJYer6kzLo4dA5wU2xwDRX",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.335067445071
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "4MmwVtqyZFTb6ftq9rmHoaqNsfsroQC835EKq34iqJdb",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 3",
+          "tgas_burnt": 6.431030915628
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 5, backlog 0",
+          "hash": "Gqvki5HM9vepBF6Tu8ktoVocVDvMQsyBhp6QMG7XMMeA",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "owner.b246413176.test.near",
+          "tgas_burnt": 5.624938402845
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "expired",
+          "expected": "EXPIRED",
+          "observed": "EXPIRED: grant 2 expired at 1793862847521",
+          "pass": true
+        },
+        {
+          "claim": "key reaped by the attempt",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        }
+      ],
+      "group": "revocation",
+      "id": "C08",
+      "seconds": 9.645361849,
+      "status": "pass",
+      "title": "expiry stops a grant and reaps its key",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "8zMK1NMLgMYTqiq8Azz6owgZve1XuwYMx4M1T47p7YUn",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1872646203.test.near",
+          "tgas_burnt": 5.705088912124
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "4N1aRyHvfSTDD85TvRQyNNdWDQRGqdf8qqjDPNG5Ks7d",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.247087695936
+        },
+        {
+          "code": "EXPIRED",
+          "detail": "grant 2 expired at 1793862847521",
+          "hash": "6DHHTBN6axK8vebFax4dFfBWybeWD8EfRHcejYB7QUy8",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 3.211316101283
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "request is queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "nothing moved yet",
+          "expected": "1000000000000000000000000",
+          "observed": "1000000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing reserved yet",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "cannot execute before approval",
+          "expected": "APPROVAL_NOT_APPROVED",
+          "observed": "APPROVAL_NOT_APPROVED: approval 1 is still waiting",
+          "pass": true
+        },
+        {
+          "claim": "owner approves the hash",
+          "expected": "APPROVED",
+          "observed": "APPROVED",
+          "pass": true
+        },
+        {
+          "claim": "execution settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "recipient paid",
+          "expected": "50000000000000000000000",
+          "observed": "50000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D01",
+      "seconds": 5.422519189,
+      "status": "pass",
+      "title": "above threshold queues; funds move only after approval",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "39wv5CaV575WTsZZeXhcgpgecmVRAPpXLfdcvQfDab4n",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1890895248.test.near",
+          "tgas_burnt": 5.723116508374
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "ASPc7RtUuDJq5rSQp1cc4CwTmN4X9na3CPHTHb452i4Q",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.272824461847
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "APFkXMH7RzMwpzkqLeGS7AtNPfKvkdRNiBMoUDHo5hrY",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.833140356283
+        },
+        {
+          "code": "APPROVAL_NOT_APPROVED",
+          "detail": "approval 1 is still waiting",
+          "hash": "7K3Cs2GV6JeASbqSjvbixFNsHr1UUyi5E7ckfymiVvQ7",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.431275807216
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "83jWYycR85uFqGiQ4ifbWvPM8fyz7uVP7bioY9jhYC6G",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "owner.b1890895248.test.near",
+          "tgas_burnt": 2.174125547019
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "9vg4m2Qok1c2hZ1mDX8VH1Co4FQenY4K7G9UFdsABkgn",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "settled",
+          "signer": "grant 2",
+          "tgas_burnt": 6.912918383856
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "first execution settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "replay refused",
+          "expected": "APPROVAL_NOT_FOUND",
+          "observed": "APPROVAL_NOT_FOUND: no approval 1",
+          "pass": true
+        },
+        {
+          "claim": "spent once",
+          "expected": "50000000000000000000000",
+          "observed": "50000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D02",
+      "seconds": 5.293760786,
+      "status": "pass",
+      "title": "approval cannot be replayed",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6HaKMESMvLrfmkNd97emA1VJB7dvf3WfXMh8qvqtVTce",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2382769977.test.near",
+          "tgas_burnt": 5.686103362486
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9ZdUUumKPKm7jidRnMLaAJM2A2iDjT4guotaxT9wNUa3",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.218959305331
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "9w7HjF3SNfnG4H1AnjdsERfwqQ4k7mF415NzW2y8pynA",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.805656942883
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "2rwmPxv3Ad45DkqMLXqKc7cDFkqxzhFmU7u237M1wGGn",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "owner.b2382769977.test.near",
+          "tgas_burnt": 2.155823840319
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "9ihNL3LSZwS9vUUvM545TLZyFXwBPnAxt9ZJKorBtPqg",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "settled",
+          "signer": "grant 2",
+          "tgas_burnt": 6.830776677156
+        },
+        {
+          "code": "APPROVAL_NOT_FOUND",
+          "detail": "no approval 1",
+          "hash": "4h9DxdZPkyQBzcDu2GbREKdk1papBDhcnUMFbhv83wFA",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.393047387809
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "other recipient",
+          "expected": "APPROVAL_HASH_MISMATCH",
+          "observed": "APPROVAL_HASH_MISMATCH: arguments are not the approved spend",
+          "pass": true
+        },
+        {
+          "claim": "other amount",
+          "expected": "APPROVAL_HASH_MISMATCH",
+          "observed": "APPROVAL_HASH_MISMATCH: arguments are not the approved spend",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D03",
+      "seconds": 5.326656847,
+      "status": "pass",
+      "title": "changed recipient at execution fails the hash",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2ZWHp8ShC1AiUQU92UFJNeah2vrdZPfHwvskYR8SqMHt",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2356369745.test.near",
+          "tgas_burnt": 5.704676578666
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "97JajbjsH1QpswFYgG9hAcNFPLWarAfXHP6Xs2D8NLjP",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.245997607735
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "8BeMqiNmU426wsNG5iPUDzoiZNu1v1Vczmv6AK4tGRMJ",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.819213529483
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "9GUPYah7QDPik7bfXGbqdUyNFj9wcBZzRxNsmr2NgXAU",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "owner.b2356369745.test.near",
+          "tgas_burnt": 2.164882133619
+        },
+        {
+          "code": "APPROVAL_HASH_MISMATCH",
+          "detail": "arguments are not the approved spend",
+          "hash": "34p8avCqS6EUTNNVU7B6HqC3VoHqeeAm9NC39YTuTakB",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.44719906092
+        },
+        {
+          "code": "APPROVAL_HASH_MISMATCH",
+          "detail": "arguments are not the approved spend",
+          "hash": "Fd5LhzBHup885BPUR8No5xVqMVczvVd1iM6qp3ev84SD",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.44719906092
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "hash of a different spend",
+          "expected": "APPROVAL_HASH_MISMATCH",
+          "observed": "APPROVAL_HASH_MISMATCH: hash is not the hash of this spend",
+          "pass": true
+        },
+        {
+          "claim": "still unapproved",
+          "expected": "Null",
+          "observed": "Null",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D04",
+      "seconds": 5.058762892,
+      "status": "pass",
+      "title": "approving with the hash of another spend fails",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "DVTgY78y2Vb1YBxD214aUGMPmxo612xS2REomYJZmM9x",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3766873250.test.near",
+          "tgas_burnt": 5.704876508374
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "C3mf8X6qkLArMTvaCbyNwTAe6gNtRxidEorVt1WNXGmq",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.246519235039
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "Cfdnxcc7y1ZCYcgWC1QAU41AKW748gxhXC9xN87H9zQS",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.819336942883
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "60000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "GnDKxrkJghZzhXdGpqQaRqtWsnR19BWkwk1dbyi5Pymb",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.902270090088
+        },
+        {
+          "code": "APPROVAL_HASH_MISMATCH",
+          "detail": "hash is not the hash of this spend",
+          "hash": "cVD1oFRKgapqBYt9FkHpbYTA68M4m7SsFqZU159n7q4",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "denied",
+          "signer": "owner.b3766873250.test.near",
+          "tgas_burnt": 2.124019365
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "re-checked at execution",
+          "expected": "RECIPIENT_BLOCKED",
+          "observed": "RECIPIENT_BLOCKED: r0.b2342161222.test.near is blocked by the owner",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D05",
+      "seconds": 5.118354169,
+      "status": "pass",
+      "title": "recipient blocked after approval: refused at execution",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "GQeecBmkjTxzkgrJuf2GMsukczZW3jaGm26RS2idFyWz",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2342161222.test.near",
+          "tgas_burnt": 5.704143432778
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6mNMkUB2RHGF4HPpivhYC82P3aiN92UV4bzFpCwyiSGK",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.246319305331
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "9nUTq5MfjocPSzFzcvHXnKgW9Ma5pQZMRXpyPgKKLvgZ",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.819954009883
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "7ikrxniYJAF4KkQszesvj4TYdcHJQp5UFhSdPZP9mMV7",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "owner.b2342161222.test.near",
+          "tgas_burnt": 2.165252373819
+        },
+        {
+          "code": "",
+          "detail": "",
+          "hash": "DXu5txErN9vsShaucB3gmuVYdQQSZRjjGJ7YQwEdHBXZ",
+          "label": "block_recipient",
+          "method": "block_recipient",
+          "outcome": "ok",
+          "signer": "owner.b2342161222.test.near",
+          "tgas_burnt": 1.949846993198
+        },
+        {
+          "code": "RECIPIENT_BLOCKED",
+          "detail": "r0.b2342161222.test.near is blocked by the owner",
+          "hash": "GCKY5McARrLQFGtpN37TDGauAhGbqik18taXMLDbjiFq",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.597241622835
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "budget re-checked at execution",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 20000000000000000000000 + 50000000000000000000000 > 60000000000000000000000 cap on grant 1",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D06",
+      "seconds": 5.690623941,
+      "status": "pass",
+      "title": "budget consumed after approval: refused at execution",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "EVkUzjCW526apRc4TCWtMsNcapLnJYUSAC6x1ZCqTDgN",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1608286735.test.near",
+          "tgas_burnt": 5.701335744097
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "45XdrfHALdV4NfShuV6xfCS6eabh73xw1Q7xGr9M9UEJ",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.245113272033
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "AqHMKUCswc3X3MpwdoxfrPrjguXb4TP3vt8246Yc27BX",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.819460356283
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "4KJLj5HSQybf7A4gXsmPuVkputX411ekEckH7ZFFL2rX",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "owner.b1608286735.test.near",
+          "tgas_burnt": 2.165005547019
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "6DeAdefraaHhSrzoaEMqdVdkBANR8CwCC82h7Y5xLfpr",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 5.993952148174
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "13riu2L5u2Xbo91Qh3Y1nNtqEn68KMeSgNyct4DTUWuu",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 5.995476433414
+        },
+        {
+          "code": "ANCESTOR_CAP",
+          "detail": "20000000000000000000000 + 50000000000000000000000 > 60000000000000000000000 cap on grant 1",
+          "hash": "21XzxbwGgynYfwvVbqCgbd4dnGGJ1Yz8fPh5bLDJYEy4",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.724892484437
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "parent approves within its own threshold",
+          "expected": "APPROVED",
+          "observed": "APPROVED",
+          "pass": true
+        },
+        {
+          "claim": "settles without any human",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "above the parent's threshold",
+          "expected": "APPROVER_LIMIT",
+          "observed": "APPROVER_LIMIT: 30000000000000000000000 > 20000000000000000000000 approver threshold",
+          "pass": true
+        },
+        {
+          "claim": "the next level up can",
+          "expected": "APPROVED",
+          "observed": "APPROVED",
+          "pass": true
+        },
+        {
+          "claim": "above every agent",
+          "expected": "APPROVER_LIMIT",
+          "observed": "APPROVER_LIMIT: 50000000000000000000000 > 40000000000000000000000 approver threshold",
+          "pass": true
+        },
+        {
+          "claim": "only the owner can",
+          "expected": "APPROVED",
+          "observed": "APPROVED",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D07",
+      "seconds": 7.025547937,
+      "status": "pass",
+      "title": "approval climbs the tree, bounded by the approver's own threshold",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FSzz94z8LWWosGSLnXCWrHLhWB6qtZYfdVXe1S8VQPd7",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b874851360.test.near",
+          "tgas_burnt": 5.684810857608
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "CPDK1LdqqGSEoBgio8yaBQNqqt1ESfDw7fa8vRD9LiRJ",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.217656885531
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FEdNbqsgKoDxYUeqV8hGHyntDpXaDuhD9AmEWfJ4ug6d",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.314639418097
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "15000000000000000000000 > 5000000000000000000000 approval threshold",
+          "hash": "8xi8QzKQx2bGzdY6wAdpeL2UHSn6VWG3WASV2zBQJpJo",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 3",
+          "tgas_burnt": 2.890383392085
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "vKe82TdHp26C7Co1tZguP4nJbV5ShqXQ9LZrfmfQigB",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "mid",
+          "tgas_burnt": 2.528071764969
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "8rVUKNYgRP3Svx42bVFm2CSjfZrUuqHsqZq9To65xSfc",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "settled",
+          "signer": "grant 3",
+          "tgas_burnt": 7.333982762222
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "30000000000000000000000 > 5000000000000000000000 approval threshold",
+          "hash": "25T4adQJ1SABayPPP54KRNDgsiLaxP12dkvEnsstP6tN",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 3",
+          "tgas_burnt": 2.896637285913
+        },
+        {
+          "code": "APPROVER_LIMIT",
+          "detail": "30000000000000000000000 > 20000000000000000000000 approver threshold",
+          "hash": "3cmkqab5gfxZjv8CkAtwh6ftf8BoYu1HWiLM5KtdLWep",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "denied",
+          "signer": "mid",
+          "tgas_burnt": 2.668370661066
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "np4MsotfNn5rLhnPGmd6BG4De8TTYMagt7k81xbmNYS",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "root",
+          "tgas_burnt": 2.532121111269
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 5000000000000000000000 approval threshold",
+          "hash": "5wURMkjbpv21pA57VbqGEzg8NdmnVEbuRU17bE73EtL1",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 3",
+          "tgas_burnt": 2.97968147643
+        },
+        {
+          "code": "APPROVER_LIMIT",
+          "detail": "50000000000000000000000 > 40000000000000000000000 approver threshold",
+          "hash": "CUhb6K3PVAuiCyUjHg8DjU3hnEyHobdpg7Ausc7mwu15",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "denied",
+          "signer": "root",
+          "tgas_burnt": 2.667763584574
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "c8yuEzn7R4R7zQRkS9g2gYaMTEHmSKhkEarKLZ9e9f9",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "owner.b874851360.test.near",
+          "tgas_burnt": 2.160175067867
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "approval expired",
+          "expected": "APPROVAL_EXPIRED",
+          "observed": "APPROVAL_EXPIRED: approval 1 expired",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D08",
+      "seconds": 21.654591044,
+      "status": "pass",
+      "title": "expired approval is refused",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6iA4bDzrKRsTcPkFgZSNkES1WNius6YbsTAwkpHmuWTj",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3725361898.test.near",
+          "tgas_burnt": 5.723116508374
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "B36x8kijgnJhmwa8X7wAwToNWsQgN1sburLnX9QGokmr",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.273879235039
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "2BsrTqsXRKyc4tGsznrsQ22c6a9XdiUcGVssbSoNEfjG",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.833016942883
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "C1yvurXD8bZfuwAsqVzC37x9ZeyFmutrdhynNHa2mqGC",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "owner.b3725361898.test.near",
+          "tgas_burnt": 2.174063840319
+        },
+        {
+          "code": "APPROVAL_EXPIRED",
+          "detail": "approval 1 expired",
+          "hash": "GzuibZAr8e3zpjYSaJxvK86PCzxX3whePqZ2DwxytSyz",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.42590764167
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "approval died with the approver",
+          "expected": "APPROVER_REVOKED",
+          "observed": "APPROVER_REVOKED: grant 2 is revoked",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D09",
+      "seconds": 5.828739508,
+      "status": "pass",
+      "title": "approval dies with its approver",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "7h2zoAXgGdoGFH1LkBgfxcxvUrZ6dojBbciYvL5NjWda",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2267370595.test.near",
+          "tgas_burnt": 5.704676578666
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FcTJcb3FqNQ5c3owSDef77k1rELwahcYn1tDMR4N2tcw",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.245464461847
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "HRFypzd2eYBayXQ1j8RvqBqZSaAiV3SazQZSix3g3kL5",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.343823465201
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "15000000000000000000000 > 5000000000000000000000 approval threshold",
+          "hash": "4eYeFmpyty9ny2oZZSukP5S2LtKyHcFVPs3dLzo8Bmp2",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 3",
+          "tgas_burnt": 2.904947159875
+        },
+        {
+          "code": "APPROVED",
+          "detail": "",
+          "hash": "5HBdEVWH68QtKSvCkQC9u4P1WdmC3LSnoz5ANAC1cosS",
+          "label": "approve",
+          "method": "approve",
+          "outcome": "allowed",
+          "signer": "mid",
+          "tgas_burnt": 2.537596437049
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 3, backlog 0",
+          "hash": "2qceYzQA4KU34pRsdaxzShy2aACQ9mTmciKyDTtBQoEF",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "owner.b2267370595.test.near",
+          "tgas_burnt": 4.453645559195
+        },
+        {
+          "code": "APPROVER_REVOKED",
+          "detail": "grant 2 is revoked",
+          "hash": "8UWxrQ19tmtCFiNH4CqcXdMAiQp1Bb6mpAAfLrKRDHpD",
+          "label": "execute_approved",
+          "method": "execute_approved",
+          "outcome": "denied",
+          "signer": "owner.b2267370595.test.near",
+          "tgas_burnt": 2.288812777992
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "first queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "queued",
+          "expected": "\"queued\"",
+          "observed": "\"queued\"",
+          "pass": true
+        },
+        {
+          "claim": "ninth refused",
+          "expected": "QUEUE_FULL",
+          "observed": "QUEUE_FULL: 8 approvals already waiting",
+          "pass": true
+        }
+      ],
+      "group": "approval",
+      "id": "D10",
+      "seconds": 8.364058531,
+      "status": "pass",
+      "title": "queue is bounded per grant",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "GXHdBh4CGZkfciia4sJmvCnD3Edj8gjFj4XT49HtPQEA",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b212099450.test.near",
+          "tgas_burnt": 5.702917571136
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "FmtAHo61wSDPoQ6PvJsE8wsNKtbK1QQRZBTzaiWmJZZ7",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.244162042047
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "2ouZ8wifzs99TtotJ2jRrMQcZKqoYxUzcjvL4Hi7fHV7",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.818329761693
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "J5Xx4FSsGkHsmFzy7mbp9Z4Kjd54dFien1GT6SbeeQvW",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.901648065144
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "CE8XHm121zkx3H1EcKv9ZvLhpXkHtpwmgC5uvAwCqNmj",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 2.983050992627
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "2oZEh9Pud8cG3fnpGz8TihWgyJEuChnx8n6tK2qBtrvB",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 3.06317768243
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "DSnPx4Rnt56kFrDGG8oojo6YUB4LU1dzxHCqm4Y5AF31",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 3.143945299157
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "83Wj2dTgXsgx88CXkfZfsQumtNrSPrRsh9qZYRUVzp5Y",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 3.223686939152
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "EeyDvEJBSmtiwwrBZ8seXud2qEPZSExSw5zv1LhYeiTd",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 3.303917296211
+        },
+        {
+          "code": "NEEDS_APPROVAL",
+          "detail": "50000000000000000000000 > 10000000000000000000000 approval threshold",
+          "hash": "J4dVo748VVzVidX7ejg5iYf6f1rgmK7YRNUcv2ZT8CUe",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "queued",
+          "signer": "grant 2",
+          "tgas_burnt": 3.384146830514
+        },
+        {
+          "code": "QUEUE_FULL",
+          "detail": "8 approvals already waiting",
+          "hash": "BZ9Guv29o7MWhNQSQGHqVKY3Dv9iPc2cKf9PsW98jnSk",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 3.1927242894
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "settled",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "recipient delta is exact",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "every level counts it",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing stays reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "every level counts it",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing stays reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "every level counts it",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing stays reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "every level counts it",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "nothing stays reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "reservation lists headroom at all 4 levels",
+          "expected": "Some(4)",
+          "observed": "Some(4)",
+          "pass": true
+        },
+        {
+          "claim": "memo is in the event",
+          "expected": "Some(\"task-42\")",
+          "observed": "Some(\"task-42\")",
+          "pass": true
+        },
+        {
+          "claim": "settlement event emitted",
+          "expected": "1",
+          "observed": "1",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E01",
+      "seconds": 5.487987317,
+      "status": "pass",
+      "title": "native spend moves the exact amount and settles every level",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "a636oY232M11Zw6XBTceD2ZJsbKKFhn6z9h4gAReziB",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1765857678.test.near",
+          "tgas_burnt": 5.702637742195
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "14Bo6qUPLCkBUHg7k3GUaXPz33LBByaR9wW5HnWRdq6u",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.246821122992
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BZcRh7ckt3NeiAF6KkXhuB9gi137evU3eJyi2L29JbZx",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.343547714943
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5Dj38w3D6Vi3AXJHhvYV2F7dAAGyzNGQ68fHkbqbE7YF",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 3",
+          "tgas_burnt": 6.432333335428
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "settled",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "recipient holds the tokens",
+          "expected": "100",
+          "observed": "100",
+          "pass": true
+        },
+        {
+          "claim": "vault ledger",
+          "expected": "900",
+          "observed": "900",
+          "pass": true
+        },
+        {
+          "claim": "vault real token balance",
+          "expected": "900",
+          "observed": "900",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E02",
+      "seconds": 7.123107589,
+      "status": "pass",
+      "title": "NEP-141 spend settles through a real token contract",
+      "txs": [
+        {
+          "code": "",
+          "detail": "",
+          "hash": "6YfkWgBDzLFKk7tWWTxjsfBwybj1mu7mmUYdkqMoDbRn",
+          "label": "add_token",
+          "method": "add_token",
+          "outcome": "ok",
+          "signer": "owner.b2482807480.test.near",
+          "tgas_burnt": 2.00768706182
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "ABru8djLknGiYogpn6EfCCFdWkpUDbVf68vyBchobnpt",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2482807480.test.near",
+          "tgas_burnt": 5.76926737431
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5Z3vBh4CzFd7e6AQy2BcYyBy3tGCnU2iTJSdmqcSSQ58",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.246103110016
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "8iN3Q1ukWyaGF8s6poUE9nWgBENrjQHYCL9fwtH5jaVA",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 2",
+          "tgas_burnt": 8.332599020254
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "rolled back",
+          "expected": "\"rolled_back\"",
+          "observed": "\"rolled_back\"",
+          "pass": true
+        },
+        {
+          "claim": "reason",
+          "expected": "TRANSFER_FAILED",
+          "observed": "TRANSFER_FAILED",
+          "pass": true
+        },
+        {
+          "claim": "spent stays zero",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "reserved released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "window released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "spent stays zero",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "reserved released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "window released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "spent stays zero",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "reserved released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "window released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "refund came back: vault lost only gas",
+          "expected": "< 40 milliNEAR",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "the same budget is usable again",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E03",
+      "seconds": 6.965723853,
+      "status": "pass",
+      "title": "failed native transfer rolls back all levels and the window",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9xvdCoy2XLStVrVxuXMzbSV2sLKCgoZeQY5VZ3gSdup7",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b945646964.test.near",
+          "tgas_burnt": 5.702863401942
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "954mV6kghuHMubsQS2sLMQKMqhDkgyuR2TPtvi7xuFs5",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.245118843776
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9MpmChMrTPjE6dfcNbRUecA8oXvF8oSyjfGhBP71JrTS",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.342311938379
+        },
+        {
+          "code": "TRANSFER_FAILED",
+          "detail": "",
+          "hash": "ARdugcgxFBjCJipkSNRUqh3uKJknSziWWtR64agPMjL5",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "rolled_back",
+          "signer": "grant 3",
+          "tgas_burnt": 7.249899638997
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "6QY5Fo5H6u2BiH9EwPaZxUDG2tviqvpU6cVasizr3p2Q",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 3",
+          "tgas_burnt": 7.019343633444
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "rolled back",
+          "expected": "\"rolled_back\"",
+          "observed": "\"rolled_back\"",
+          "pass": true
+        },
+        {
+          "claim": "ledger restored",
+          "expected": "1000",
+          "observed": "1000",
+          "pass": true
+        },
+        {
+          "claim": "spent zero",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "window released",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "works again",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E04",
+      "seconds": 7.601542791,
+      "status": "pass",
+      "title": "failed ft_transfer rolls back and restores the token ledger",
+      "txs": [
+        {
+          "code": "",
+          "detail": "",
+          "hash": "7iVspK8YcRBGRPRw23ENyDWJcbSnDzPvwBFTBTKiy9Em",
+          "label": "add_token",
+          "method": "add_token",
+          "outcome": "ok",
+          "signer": "owner.b2898361902.test.near",
+          "tgas_burnt": 1.999084980632
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "JASAX79cvAmcas4QdL474m9YwZsDeWYnXGm9uEHshRmc",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2898361902.test.near",
+          "tgas_burnt": 5.752309554968
+        },
+        {
+          "code": "TRANSFER_FAILED",
+          "detail": "",
+          "hash": "GXkTAb5mnfBwnKsqHtrpPMczJuZUTtL1zwAujbwddmxw",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "rolled_back",
+          "signer": "grant 1",
+          "tgas_burnt": 7.621071489129
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "CWUmwGkiUrz2h76qvbif9jzzcn7pAdYPwbQVk7boKUZj",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 7.782857684419
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "more than free balance is refused",
+          "expected": "VAULT_BALANCE",
+          "observed": "VAULT_BALANCE: 27495662074172761800000000 > 26894742955391439600000000 free in vault",
+          "pass": true
+        },
+        {
+          "claim": "nothing reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "all but a sliver settles",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "balance still covers storage",
+          "expected": "> 2961280000000000000000000",
+          "observed": "3204641571066183700000000",
+          "pass": true
+        },
+        {
+          "claim": "contract still answers",
+          "expected": "true",
+          "observed": "\"202401571066183700000000\"",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E05",
+      "seconds": 4.665948976,
+      "status": "pass",
+      "title": "balance check keeps storage funded",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6LBkUkAK3bQBcSCgmBWKLCA7VzFaFeg9nktWgBfFKXSH",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3667719285.test.near",
+          "tgas_burnt": 5.72898599659
+        },
+        {
+          "code": "VAULT_BALANCE",
+          "detail": "27495662074172761800000000 > 26894742955391439600000000 free in vault",
+          "hash": "FcLyXL7ZiKrTqbZMTXbwiydbGzhH38AZ1CfjT8WLq5P8",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.522945642136
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "7G6UAiyKd2t2X3FumeYjb4YcYP8a8ufcw5aoZ3GPWgnx",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 6.016610513842
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "the only refusal is the shared cap",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 50000000000000000000000 + 10000000000000000000000 > 50000000000000000000000 cap on grant 1",
+          "pass": true
+        },
+        {
+          "claim": "the only refusal is the shared cap",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 50000000000000000000000 + 10000000000000000000000 > 50000000000000000000000 cap on grant 1",
+          "pass": true
+        },
+        {
+          "claim": "the only refusal is the shared cap",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 50000000000000000000000 + 10000000000000000000000 > 50000000000000000000000 cap on grant 1",
+          "pass": true
+        },
+        {
+          "claim": "the only refusal is the shared cap",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 50000000000000000000000 + 10000000000000000000000 > 50000000000000000000000 cap on grant 1",
+          "pass": true
+        },
+        {
+          "claim": "the only refusal is the shared cap",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 50000000000000000000000 + 10000000000000000000000 > 50000000000000000000000 cap on grant 1",
+          "pass": true
+        },
+        {
+          "claim": "the only refusal is the shared cap",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 50000000000000000000000 + 10000000000000000000000 > 50000000000000000000000 cap on grant 1",
+          "pass": true
+        },
+        {
+          "claim": "the only refusal is the shared cap",
+          "expected": "ANCESTOR_CAP",
+          "observed": "ANCESTOR_CAP: 50000000000000000000000 + 10000000000000000000000 > 50000000000000000000000 cap on grant 1",
+          "pass": true
+        },
+        {
+          "claim": "exactly 5 of 12 got through",
+          "expected": "5",
+          "observed": "5",
+          "pass": true
+        },
+        {
+          "claim": "the other 7 were refused",
+          "expected": "7",
+          "observed": "7",
+          "pass": true
+        },
+        {
+          "claim": "root spent equals its cap",
+          "expected": "50000000000000000000000",
+          "observed": "50000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "recipient got exactly the cap",
+          "expected": "50000000000000000000000",
+          "observed": "50000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E06",
+      "seconds": 15.203725755,
+      "status": "pass",
+      "title": "12 concurrent spends from 12 keys stop exactly at the shared cap",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9oLdADbPvv1CAhdDgV1cevQFR1sCDXGTiNyrazqqaQr3",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3779917968.test.near",
+          "tgas_burnt": 5.70372849835
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BBB4wks72zbcMBAXrAhPkmSRzyBGJWDXwtUgut8FEJas",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.231190095202
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "CkJbzb2cqRvWSGTQ7dMjHEn1Krw9f5YeqfoRonUr1vWo",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.260547231067
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "225YL23JNY4nekMXdBkjXDBKehdMDpW6ZBerbtN2QiX1",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.262382624771
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9waKvHR8czvNSd3tC8ye7DHne9hKpJKfanePxg1hoC5C",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.263607533523
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2gZLFLzkQRjiRrWmZvdDU128Tj5LuwgHXxrxGEEpDcPb",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.266994788167
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6QhmnKxuXw7Wh9BpA1DbwjMg9Z2JqjiCUTLJF2sdkBT3",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.264842963171
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BmSpAzceDS5DoNEpMwC13dZ1DfGPnYQSNzMe9wJGPiWW",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.266752404915
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "4QcsXrTVrG3ZQMdWDgM9hBBG3mkqgPFLHBQicKYfMxAt",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.267486951091
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "AHUaWiX9Q2mSVgdU11ZeUygxBoYU6tgoz8ytAaCaXD9X",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.270274454953
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "5q2LMQPbg12q8hgRwW81ut2PCbeJTmWV5A2uVZ7aAvTV",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.272614341209
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "3YujVQ1oYf984joytv7gQrJRSBq7hSuCLFK98KsJKvvA",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.274441507353
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9n9Br67xsrCwJ7H6azFaMp64Mg4tUQzfoL6RDZfeKe6v",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.275345541265
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "each spend ends the way its recipient dictates",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "each spend ends the way its recipient dictates",
+          "expected": "\"rolled_back\"",
+          "observed": "\"rolled_back\"",
+          "pass": true
+        },
+        {
+          "claim": "each spend ends the way its recipient dictates",
+          "expected": "\"rolled_back\"",
+          "observed": "\"rolled_back\"",
+          "pass": true
+        },
+        {
+          "claim": "each spend ends the way its recipient dictates",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "each spend ends the way its recipient dictates",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "each spend ends the way its recipient dictates",
+          "expected": "\"rolled_back\"",
+          "observed": "\"rolled_back\"",
+          "pass": true
+        },
+        {
+          "claim": "each spend ends the way its recipient dictates",
+          "expected": "\"rolled_back\"",
+          "observed": "\"rolled_back\"",
+          "pass": true
+        },
+        {
+          "claim": "each spend ends the way its recipient dictates",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "each spend ends the way its recipient dictates",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "each spend ends the way its recipient dictates",
+          "expected": "\"rolled_back\"",
+          "observed": "\"rolled_back\"",
+          "pass": true
+        },
+        {
+          "claim": "root spent is the sum of successes",
+          "expected": "27000000000000000000000",
+          "observed": "27000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "root reserved is zero",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "window holds successes only",
+          "expected": "27000000000000000000000",
+          "observed": "27000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "children add up to the parent",
+          "expected": "27000000000000000000000",
+          "observed": "27000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E07",
+      "seconds": 7.237819352,
+      "status": "pass",
+      "title": "interleaved success and failure callbacks leave exact counters",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2wxsdmJwjBpAo4vwa2E5DE8Sz3H64RTCEyVqmeXcZ4Vr",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2564153274.test.near",
+          "tgas_burnt": 5.686382409472
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "8f9YrAoxcANDxw6f8fQsxszGD52nL2v79udD6Kk9HUTG",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.218273063328
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2jfvh9PazdwpZ7NP4A3aVXwJLDw964DcXDMMCXzVGQZt",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.249593295009
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "first spend",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "second spend fills the window",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "window is full",
+          "expected": "WINDOW",
+          "observed": "WINDOW: 100000000000000000000000 + 30000000000000000000000 > 100000000000000000000000 in rolling window on grant 1",
+          "pass": true
+        },
+        {
+          "claim": "only the first spend has aged out",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "the second still counts: a fixed reset would have allowed this",
+          "expected": "WINDOW",
+          "observed": "WINDOW: 90000000000000000000000 + 20000000000000000000000 > 100000000000000000000000 in rolling window on grant 1",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E08",
+      "seconds": 13.827526141,
+      "status": "pass",
+      "title": "rolling window has no reset to straddle",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "F7hgPt1YEAA1cN8VkBkbCxKK15mTjGybKX9sL5D8oFvq",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2901102301.test.near",
+          "tgas_burnt": 5.685032691526
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "vXP972UeN2gnr2b4x1iLAmJo3y33DPMavLSVT7qJmfk",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 5.957937922276
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "BM9KfdrH3EWjdsugzSqjAQP7Q9EZz5tfmvXAAbbnU6vD",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 5.963461585018
+        },
+        {
+          "code": "WINDOW",
+          "detail": "100000000000000000000000 + 30000000000000000000000 > 100000000000000000000000 in rolling window on grant 1",
+          "hash": "7Hfkpe36wweAfSQ19nGQWLPr9B3KkbrxaWn38L3Y2rrY",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.528085261651
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "6BFLwqCd9dE8XGXEJAhXSgWGhioq4RieYPQ5MbMmafxn",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 5.964502912486
+        },
+        {
+          "code": "WINDOW",
+          "detail": "90000000000000000000000 + 20000000000000000000000 > 100000000000000000000000 in rolling window on grant 1",
+          "hash": "7CnkWN2vACGkunQ4sgSaRxozKY9aYLET7ZT2w49ysFAb",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.527261390827
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "reason code",
+          "expected": "GAS_TOO_LOW",
+          "observed": "GAS_TOO_LOW: 30.0 Tgas < 50.0 Tgas prepaid gas",
+          "pass": true
+        },
+        {
+          "claim": "counted",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        },
+        {
+          "claim": "nothing reserved",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E09",
+      "seconds": 3.6868650450000002,
+      "status": "pass",
+      "title": "too little gas is a counted refusal, not a stuck reservation",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "A16njNfMFDrMVtHvCkGFs8Ljaef1J3Utj2erDWEmBHx9",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3808075022.test.near",
+          "tgas_burnt": 5.705088912124
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "sender keeps the tokens",
+          "expected": "1000",
+          "observed": "1000",
+          "pass": true
+        },
+        {
+          "claim": "vault holds none",
+          "expected": "0",
+          "observed": "0",
+          "pass": true
+        },
+        {
+          "claim": "no ledger entry",
+          "expected": "None",
+          "observed": "None",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E10",
+      "seconds": 4.565754386,
+      "status": "pass",
+      "title": "tokens the owner did not accept are returned",
+      "txs": []
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "one large payment hits per-tx",
+          "expected": "PER_TX",
+          "observed": "PER_TX: 80000000000000000000000 > 75000000000000000000000 per-tx",
+          "pass": true
+        },
+        {
+          "claim": "split part",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "split part",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "the third part hits the window",
+          "expected": "WINDOW",
+          "observed": "WINDOW: 150000000000000000000000 + 75000000000000000000000 > 150000000000000000000000 in rolling window on grant 1",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E11",
+      "seconds": 5.562475958,
+      "status": "pass",
+      "title": "splitting a payment does not get past the window",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "CY62Lx4VxtrZEZMLeGWAijHpHUZSVVkBzTtFR1SVd8VS",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b4170973784.test.near",
+          "tgas_burnt": 5.686335379678
+        },
+        {
+          "code": "PER_TX",
+          "detail": "80000000000000000000000 > 75000000000000000000000 per-tx",
+          "hash": "XynX3RQVFFShRRxhLPPVV4HdbUVEfeuQwGvTk4vua9n",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.489107312299
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "5EERstv5FvP1gVc51onyQ5tNDjkX44dRMDGsFHgfrvzY",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 5.957937922276
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "39uzwwWixtZGhfPy94tYkzkeJBuBVtBSkhVgASyynBM7",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 1",
+          "tgas_burnt": 5.958996433414
+        },
+        {
+          "code": "WINDOW",
+          "detail": "150000000000000000000000 + 75000000000000000000000 > 150000000000000000000000 in rolling window on grant 1",
+          "hash": "ATVcJ2TV7h3z34JAMHG4HYjA3VmXN22fqjBvssFUBLHp",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.525203672179
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "over the free balance",
+          "expected": "VAULT_BALANCE",
+          "observed": "VAULT_BALANCE: 500000000000000000000000000 > 27001912767736268200000000 free in vault",
+          "pass": true
+        },
+        {
+          "claim": "settled",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "paid",
+          "expected": "100000000000000000000000",
+          "observed": "100000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "spend",
+      "id": "E12",
+      "seconds": 3.803942896,
+      "status": "pass",
+      "title": "owner withdrawal respects the same balance floor",
+      "txs": [
+        {
+          "code": "VAULT_BALANCE",
+          "detail": "500000000000000000000000000 > 27001912767736268200000000 free in vault",
+          "hash": "4RrT5gfgZhiXEdmAzVPBQfYur5wRLiu2SCSG5uBqgBpz",
+          "label": "withdraw",
+          "method": "withdraw",
+          "outcome": "denied",
+          "signer": "owner.b353800823.test.near",
+          "tgas_burnt": 2.054841720087
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "DpQR3kJwBbYAPt2Loq6PTbpdR4d1aa1gs6ZFGCk79U2F",
+          "label": "withdraw",
+          "method": "withdraw",
+          "outcome": "settled",
+          "signer": "owner.b353800823.test.near",
+          "tgas_burnt": 5.186836410512
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "injected payment outside the list",
+          "expected": "RECIPIENT_NOT_ALLOWED",
+          "observed": "RECIPIENT_NOT_ALLOWED: r1.b4026734525.test.near is not in grant 2",
+          "pass": true
+        },
+        {
+          "claim": "counter",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        },
+        {
+          "claim": "injected payment outside the list",
+          "expected": "RECIPIENT_NOT_ALLOWED",
+          "observed": "RECIPIENT_NOT_ALLOWED: r1.b4026734525.test.near is not in grant 2",
+          "pass": true
+        },
+        {
+          "claim": "counter",
+          "expected": "Some(2)",
+          "observed": "Some(2)",
+          "pass": true
+        },
+        {
+          "claim": "injected payment outside the list",
+          "expected": "RECIPIENT_NOT_ALLOWED",
+          "observed": "RECIPIENT_NOT_ALLOWED: r1.b4026734525.test.near is not in grant 2",
+          "pass": true
+        },
+        {
+          "claim": "grant revoked by the vault itself",
+          "expected": "Some(true)",
+          "observed": "Some(true)",
+          "pass": true
+        },
+        {
+          "claim": "key gone from the account",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "its subtree is dead too",
+          "expected": "Some(false)",
+          "observed": "Some(false)",
+          "pass": true
+        },
+        {
+          "claim": "subtree key gone as well",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "further attempts cannot even be signed",
+          "expected": "protocol error",
+          "observed": "unable to broadcast the transaction to the network\n\nCaused by:\n    handler error: [An error happened during transaction execution: InvalidAccessKeyError(AccessKeyNotFound { account_id: AccountId(\"vault.b4026734525.test.near\"), public_key: ed25519:437jM9wDNc8h7Hut4X6DTNhGWpB4xRnTpVZ1GGXfkd9d })]",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F01",
+      "seconds": 10.871140594,
+      "status": "pass",
+      "title": "N denied attempts revoke the grant and delete its key",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "AyNVPsTYK4ozZJmwghN63euRBMXsG7ezQzHVBJvgapf8",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b4026734525.test.near",
+          "tgas_burnt": 5.705022268888
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "Etodbc4jsph6KkwgYBa9ZHZedVDwBUiES4EBq4QHJrpZ",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.430459865004
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "BDXrTALre4nvgwMeiUCD3S7wZxUr5PeFt8yHktQYxwnc",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.544656627682
+        },
+        {
+          "code": "RECIPIENT_NOT_ALLOWED",
+          "detail": "r1.b4026734525.test.near is not in grant 2",
+          "hash": "H6Yup5zWGteZVbn89WvdkUGi49v5PwX7cjnzD3JCRvFi",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.567990466237
+        },
+        {
+          "code": "RECIPIENT_NOT_ALLOWED",
+          "detail": "r1.b4026734525.test.near is not in grant 2",
+          "hash": "6p9YtzHcrW1qxcVSLWQDtCfyj5FsZEPozWDmuMtxSxCJ",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.567990466237
+        },
+        {
+          "code": "RECIPIENT_NOT_ALLOWED",
+          "detail": "r1.b4026734525.test.near is not in grant 2",
+          "hash": "ABEXAa5EE3iF3yyhnXFWGGJF4GpyrQds8pGxdkBmRQDp",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 4.925150411056
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "the attack really ran",
+          "expected": ">= 3 attempts reached the contract",
+          "observed": "55",
+          "pass": true
+        },
+        {
+          "claim": "each attempt was counted",
+          "expected": "Some(55)",
+          "observed": "Some(55)",
+          "pass": true
+        },
+        {
+          "claim": "protocol stopped the key",
+          "expected": "NotEnoughAllowance",
+          "observed": "after 55 attempts: unable to broadcast the transaction to the network\n\nCaused by:\n    handler error: [An error happened during transaction execution: InvalidAccessKeyError(NotEnoughAllowance { account_id: AccountId(\"vault.b1995219669.test.near\"), public_key: ed25519:J87VXCvejYh7MuaBYoutU5gsGKG8dT7Cn975bnD7Ti7o, allowance: NearToken { inner: 60689614520316000000000 }, cost: NearToken { inner: 60919131078959200000000 } })]",
+          "pass": true
+        },
+        {
+          "claim": "vault lost no more than the allowance",
+          "expected": "<= 75 milliNEAR",
+          "observed": "0",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F02",
+      "seconds": 37.42458101,
+      "status": "pass",
+      "title": "protocol allowance is a hard stop on gas drain",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "CBbkaUiWDCmYoH1a8ECWAR4YjVLB5xDEgpihj2mbMMVj",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1995219669.test.near",
+          "tgas_burnt": 5.724633245788
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "8pFPLadusur2nosCF85A9rcpuze3o58uKFU9C3U8z7iY",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.275158493621
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "the key was really used up",
+          "expected": ">= 1 attempt",
+          "observed": "35",
+          "pass": true
+        },
+        {
+          "claim": "child is locked out",
+          "expected": "true",
+          "observed": "true",
+          "pass": true
+        },
+        {
+          "claim": "refilled",
+          "expected": "KEY_CHANGED",
+          "observed": "KEY_CHANGED",
+          "pass": true
+        },
+        {
+          "claim": "paid from the parent's budget",
+          "expected": "300000000000000000000000",
+          "observed": "300000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "same key works again",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "a grant cannot refill itself",
+          "expected": "NOT_ANCESTOR",
+          "observed": "NOT_ANCESTOR: grant 2 is not above grant 2",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F03",
+      "seconds": 27.967920108,
+      "status": "pass",
+      "title": "parent refills a locked-out child, paid from its own budget",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "GUVtw8voKwk59mMbPAgLDnqi7HWw215TGyvLzynf6z1Z",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1977239654.test.near",
+          "tgas_burnt": 5.721660448555
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "ANKNGFm1b4k76eJpR7BMmw3n83yYbbWV7qxahwek6LCr",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.275158493621
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "5GtMFrZ8p94YrcoLZzcWSEwwzg2Fw3i6QkPmeH3iEEW",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 2",
+          "tgas_burnt": 6.543737860507
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "bad JSON fails inside the entry point",
+          "expected": "true",
+          "observed": "true",
+          "pass": true
+        },
+        {
+          "claim": "known limit: counter did not move",
+          "expected": "Some(0)",
+          "observed": "Some(0)",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F04",
+      "seconds": 3.707770769,
+      "status": "pass",
+      "title": "malformed args die before the counter and only the allowance bounds them",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "6rYekgcsfCqyCYPLkH9Y95RRutm41dyvxKkuGLf5Tz3Z",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2460618835.test.near",
+          "tgas_burnt": 5.723462198596
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "rotated",
+          "expected": "KEY_CHANGED",
+          "observed": "KEY_CHANGED",
+          "pass": true
+        },
+        {
+          "claim": "old key gone",
+          "expected": "false",
+          "observed": "false",
+          "pass": true
+        },
+        {
+          "claim": "new key on the account",
+          "expected": "true",
+          "observed": "true",
+          "pass": true
+        },
+        {
+          "claim": "new key spends under the same grant",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        },
+        {
+          "claim": "history carried over",
+          "expected": "7000000000000000000000",
+          "observed": "7000000000000000000000",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F05",
+      "seconds": 5.861061117,
+      "status": "pass",
+      "title": "rotation swaps the key and keeps the grant's history",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "2faY9WhLcSnek15zqU93WdSp6BmXxRdJFeV1jR7qKNDp",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3079124118.test.near",
+          "tgas_burnt": 5.686848912124
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "EauUTDeeFYJ3yFjMgiAEj7ei3boNEHQ2BBASebpA3SEs",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.219794339172
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "EU9yecULx4d836VKW5svxE6rW6m3BS77r5h7AvgfxxT5",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 2",
+          "tgas_burnt": 6.470777860507
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "EhxpQg74LPK1Lob4yk8HYyuFFGZE5dMjkhDRJ3EKcXH3",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 2",
+          "tgas_burnt": 6.473414136025
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "reason code",
+          "expected": "KEY_ADD_FAILED",
+          "observed": "KEY_ADD_FAILED",
+          "pass": true
+        },
+        {
+          "claim": "grant is dead",
+          "expected": "Some(true)",
+          "observed": "Some(true)",
+          "pass": true
+        },
+        {
+          "claim": "gas budget refunded",
+          "expected": "8000000000000000000000000000",
+          "observed": "8000000000000000000000000000",
+          "pass": true
+        },
+        {
+          "claim": "node budget refunded",
+          "expected": "Some(100000)",
+          "observed": "Some(100000)",
+          "pass": true
+        },
+        {
+          "claim": "no grant owns the vault's own key",
+          "expected": "None",
+          "observed": "None",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F06",
+      "seconds": 3.980555502,
+      "status": "pass",
+      "title": "AddKey failure buries the grant and refunds the parent",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9qwQ3dF57eh9jAJb53ooRmocRf4ffiByYPooFZQFMrvY",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b2935721928.test.near",
+          "tgas_burnt": 5.705022268888
+        },
+        {
+          "code": "KEY_ADD_FAILED",
+          "detail": "",
+          "hash": "HnRePJvrnRU84bySS5aSySYoZbZJSxM5Vn6hponzqb4o",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 6.773959781187
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "exact method list",
+          "expected": "request_spend, execute_approved only",
+          "observed": "FunctionCall(FunctionCallPermission { allowance: Some(NearToken { inner: 200000000000000000000000 }), receiver_id: \"vault.b1789861265.test.near\", method_names: [\"request_spend\", \"execute_approved\"] })",
+          "pass": true
+        },
+        {
+          "claim": "receiver is the vault",
+          "expected": "vault.b1789861265.test.near",
+          "observed": "FunctionCall(FunctionCallPermission { allowance: Some(NearToken { inner: 200000000000000000000000 }), receiver_id: \"vault.b1789861265.test.near\", method_names: [\"request_spend\", \"execute_approved\"] })",
+          "pass": true
+        },
+        {
+          "claim": "allowance is the granted amount",
+          "expected": "200000000000000000000000",
+          "observed": "FunctionCall(FunctionCallPermission { allowance: Some(NearToken { inner: 200000000000000000000000 }), receiver_id: \"vault.b1789861265.test.near\", method_names: [\"request_spend\", \"execute_approved\"] })",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F07",
+      "seconds": 3.908920182,
+      "status": "pass",
+      "title": "issued key has exactly the granted methods, receiver and allowance",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "Ecj23Zn3aPKWyeuGTuBLQKdKocW95BLvEmL6765rBYwo",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1789861265.test.near",
+          "tgas_burnt": 5.70382269064
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "72nTD6euuxdLiDmQBRgN6t5pjk8JbmWumnXtnkMXqTJU",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.18360739432
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "transaction status is success",
+          "expected": "true",
+          "observed": "true",
+          "pass": true
+        },
+        {
+          "claim": "yet the spend was refused",
+          "expected": "PER_TX",
+          "observed": "PER_TX: 101000000000000000000000 > 100000000000000000000000 per-tx",
+          "pass": true
+        },
+        {
+          "claim": "and the counter persisted",
+          "expected": "Some(1)",
+          "observed": "Some(1)",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F08",
+      "seconds": 3.619084227,
+      "status": "pass",
+      "title": "a denial is a successful transaction, so its counter persists",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9qepu1E527NuP78HidSvV4N843YRRuqYMswALTVqHFM",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3902631981.test.near",
+          "tgas_burnt": 5.686848912124
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "reason code",
+          "expected": "KEY_IN_USE",
+          "observed": "KEY_IN_USE: this public key already belongs to a grant",
+          "pass": true
+        }
+      ],
+      "group": "keys",
+      "id": "F09",
+      "seconds": 4.1008828489999996,
+      "status": "pass",
+      "title": "a key already in use cannot be issued twice",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "GiH4U5wYJJPNepBG6zTS8mvJNZmidBPmjp5cdkqv5UV3",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b1411056541.test.near",
+          "tgas_burnt": 5.705022268888
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "CoR9nftapXWtwbRw1toijMMUpW5njKrLvghYeny1p6xs",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.247154339172
+        },
+        {
+          "code": "KEY_IN_USE",
+          "detail": "this public key already belongs to a grant",
+          "hash": "6KEp5ApWABtudnFQ4tyrPrfV45upLfuVp7Bxiqup8YgX",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.623888677408
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "one denied event",
+          "expected": "1",
+          "observed": "1",
+          "pass": true
+        },
+        {
+          "claim": "standard",
+          "expected": "Some(\"espalier\")",
+          "observed": "Some(\"espalier\")",
+          "pass": true
+        },
+        {
+          "claim": "version",
+          "expected": "Some(\"1.0.0\")",
+          "observed": "Some(\"1.0.0\")",
+          "pass": true
+        },
+        {
+          "claim": "code",
+          "expected": "Some(\"PER_TX\")",
+          "observed": "Some(\"PER_TX\")",
+          "pass": true
+        },
+        {
+          "claim": "limit",
+          "expected": "Some(\"25000000000000000000000\")",
+          "observed": "Some(\"25000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "attempted",
+          "expected": "Some(\"26000000000000000000000\")",
+          "observed": "Some(\"26000000000000000000000\")",
+          "pass": true
+        },
+        {
+          "claim": "detail states the comparison",
+          "expected": "<attempted> > <limit> per-tx",
+          "observed": "26000000000000000000000 > 25000000000000000000000 per-tx",
+          "pass": true
+        }
+      ],
+      "group": "events",
+      "id": "G01",
+      "seconds": 3.676773355,
+      "status": "pass",
+      "title": "denials are NEP-297 events with reason code and numbers",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "F5svRB1PjhgFLcxehCXCmXYD7VnuZx1Z9KYuvPjtQqTH",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b436309921.test.near",
+          "tgas_burnt": 5.684976231564
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "spend stopped",
+          "expected": "PAUSED",
+          "observed": "PAUSED: vault is paused",
+          "pass": true
+        },
+        {
+          "claim": "delegation stopped",
+          "expected": "PAUSED",
+          "observed": "PAUSED: vault is paused",
+          "pass": true
+        },
+        {
+          "claim": "a pause is not the agent's fault: not counted",
+          "expected": "Some(0)",
+          "observed": "Some(0)",
+          "pass": true
+        },
+        {
+          "claim": "revoke still works while paused",
+          "expected": "REVOKED",
+          "observed": "REVOKED: visited 1, backlog 0",
+          "pass": true
+        },
+        {
+          "claim": "back to normal",
+          "expected": "\"settled\"",
+          "observed": "\"settled\"",
+          "pass": true
+        }
+      ],
+      "group": "controls",
+      "id": "P01",
+      "seconds": 6.682790147,
+      "status": "pass",
+      "title": "pause stops spending and delegation but not revocation",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "9TMTL8BHoQxCBkRXbqHpzSAR4WmHo5h9SHMPx7e7qmDj",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b3813850285.test.near",
+          "tgas_burnt": 5.704489123
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "DFy1BZvgEUTwVpu4gZB2gP8aU5LLmHqVZjtcpW5PQCD5",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 1",
+          "tgas_burnt": 6.24668783652
+        },
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "AheGLAHmnEqHjDu2aHaLHhLcYzyQpFp1BvZHFEQ7wir5",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "allowed",
+          "signer": "grant 2",
+          "tgas_burnt": 6.344602488135
+        },
+        {
+          "code": "",
+          "detail": "",
+          "hash": "24VsqciGYXeJd9dkG9pvhbzPEcD8fr2j9o34nfWv1mqj",
+          "label": "pause",
+          "method": "pause",
+          "outcome": "ok",
+          "signer": "owner.b3813850285.test.near",
+          "tgas_burnt": 1.824538270856
+        },
+        {
+          "code": "PAUSED",
+          "detail": "vault is paused",
+          "hash": "Cs9vgyii3bQ63TJwtAfEBMZUcNYG3n2faLstehwumyXD",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 3",
+          "tgas_burnt": 2.358871151038
+        },
+        {
+          "code": "PAUSED",
+          "detail": "vault is paused",
+          "hash": "G7XPLgS7eRqoEYEVC1rkyJr8P711ZZPkerkZmgLdSvNE",
+          "label": "delegate",
+          "method": "delegate",
+          "outcome": "denied",
+          "signer": "grant 2",
+          "tgas_burnt": 2.267343412544
+        },
+        {
+          "code": "REVOKED",
+          "detail": "visited 1, backlog 0",
+          "hash": "FcfZic8DCHZQXQK2QmB65DYDr9YLVvnqBpbUi9Bh61Ks",
+          "label": "revoke",
+          "method": "revoke",
+          "outcome": "allowed",
+          "signer": "owner.b3813850285.test.near",
+          "tgas_burnt": 3.279383159181
+        },
+        {
+          "code": "",
+          "detail": "",
+          "hash": "8grADjqTNQt49UEgSKeovbZVQXQBvGAyrgCmP7KH18GZ",
+          "label": "unpause",
+          "method": "unpause",
+          "outcome": "ok",
+          "signer": "owner.b3813850285.test.near",
+          "tgas_burnt": 1.8253293194
+        },
+        {
+          "code": "SETTLED",
+          "detail": "",
+          "hash": "89x2PAzBPP6bo8MCdSNoC9JThD6Nehif8Fkifpfs9Cvy",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "settled",
+          "signer": "grant 2",
+          "tgas_burnt": 6.507257860507
+        }
+      ]
+    },
+    {
+      "error": "",
+      "facts": [
+        {
+          "claim": "blocked although allowlisted",
+          "expected": "RECIPIENT_BLOCKED",
+          "observed": "RECIPIENT_BLOCKED: r0.b4066830120.test.near is blocked by the owner",
+          "pass": true
+        }
+      ],
+      "group": "controls",
+      "id": "P02",
+      "seconds": 4.02648468,
+      "status": "pass",
+      "title": "blocklist overrides an allowlist",
+      "txs": [
+        {
+          "code": "GRANTED",
+          "detail": "",
+          "hash": "4ayYXDvJGn7sXBpfJ3uz3upCF1wd4ND7Ev4zTyTqjPoJ",
+          "label": "create_root",
+          "method": "create_root",
+          "outcome": "allowed",
+          "signer": "owner.b4066830120.test.near",
+          "tgas_burnt": 5.906123712027
+        },
+        {
+          "code": "",
+          "detail": "",
+          "hash": "EnG3nGk3uWBSP3EXZPbq6nw6xAyV8CtQRu786GumXiiM",
+          "label": "block_recipient",
+          "method": "block_recipient",
+          "outcome": "ok",
+          "signer": "owner.b4066830120.test.near",
+          "tgas_burnt": 1.949846993198
+        },
+        {
+          "code": "RECIPIENT_BLOCKED",
+          "detail": "r0.b4066830120.test.near is blocked by the owner",
+          "hash": "92z521qTrUaczrXLmVun5ccJAxKc8sdcD8MTEzuR4YSe",
+          "label": "spend",
+          "method": "request_spend",
+          "outcome": "denied",
+          "signer": "grant 1",
+          "tgas_burnt": 2.400208858943
+        }
+      ]
+    }
+  ],
+  "seconds": 99.32224576,
+  "total": 71,
+  "wasm_sha256": "c33b562a2cd7bd954c4dcef50719f23ad8c44b5f8276946987a0d638349bdf89"
+}
