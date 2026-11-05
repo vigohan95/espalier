@@ -36,6 +36,7 @@ reason code, and each has a scenario in `harness/src/scenarios.rs`.
 | max_denials | at most parent | `ATT_DENIALS` | A11 |
 | key_allowance + gas_budget | carved out of parent's gas budget | `ATT_GAS` | A12 |
 | node_budget + 1 | carved out of parent's node budget | `ATT_NODES` | A13 |
+| clearance_required | once on, stays on below | `ATT_CLEARANCE` | H20 |
 
 Terms never change after creation, because no method writes them. That is what lets the leaf's
 recipient list and expiry stand in for all its ancestors' at spend time: the subset relation was
@@ -73,9 +74,13 @@ on_spend_settled (a later receipt)
   failure: release reserved and the window on every level, restore the token ledger
 ```
 
-The vault balance check is `account_balance - (storage_usage + 4096 bytes) * byte_cost - gas_floor`.
-Native funds in flight have already left `account_balance`, so they need no separate tracking. Token
-balances are tracked in a ledger that is debited at reservation and credited back on rollback.
+The vault balance check is `account_balance - (storage_usage + 4096 bytes) * byte_cost - gas_floor -
+native_held`. Native funds that were dispatched have already left `account_balance`. Native funds waiting
+for the registry have not, so `native_held` counts them. Token balances are tracked in a ledger that is
+debited at reservation and credited back on rollback.
+
+With a registry configured there is one more receipt between the reservation and the transfer:
+[RECIPIENT-CHECK.md](RECIPIENT-CHECK.md) has the flow, the tickets and the denylist.
 
 If `on_spend_settled` itself ever failed, the reservation would stay: it would consume budget and no
 funds would be double-spent. That failure is on the safe side. The callback has 20 Tgas attached

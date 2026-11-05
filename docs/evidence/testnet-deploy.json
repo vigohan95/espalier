@@ -1,19 +1,26 @@
 {
+  "first_block": 276324479,
   "owner": "owner.espalier-vault-1105.testnet",
+  "registry": "registry.espalier-vault-1105.testnet",
+  "registry_wasm_sha256": "4f0b39b07b60888ce2bd97f7d57df8d5093f10fa13baf39e7f30acbca733c064",
   "txs": [
     {
-      "hash": "91xMMds7QLQDuw4ubdFyL8zEVFMvQkpDQ5Xza7B5nrPK",
+      "hash": "FWbkSy287A469qG5CVeBF2fkHD5onxb7ZK9azkXUTQ6",
+      "label": "deploy registry"
+    },
+    {
+      "hash": "HiBSaNdgtS6dSe3ur4i3iZLA7u5CfizU4XCurLzqz49A",
+      "label": "init registry"
+    },
+    {
+      "hash": "A1C6wxD4n3Apv541mrYQUMCjFquhTRkfg66w7WbxoMJN",
       "label": "deploy"
     },
     {
-      "hash": "CZfBR8vZbABCJKv5HzxSa5As7vKW12Bg7XSdqSEBWtyh",
+      "hash": "5cPLs3YxzB4tun4fVVTskvNFT74F4rieAUBrvyvGqGsC",
       "label": "init"
-    },
-    {
-      "hash": "74rhqe3GEgjimFx6BCLrXYBFAwKVjG45Pn8iPSpJHRaB",
-      "label": "redeploy"
     }
   ],
-  "vault": "vault.espalier-vault-1105.testnet",
-  "wasm_sha256": "91909733d24c562aea39c44771e8f55e8868de9bad09d85a2a0903e86163d3e2"
+  "vault": "vault2.espalier-vault-1105.testnet",
+  "wasm_sha256": "3218271c471fdd4e4161bfdc4a3d2d50f24631fc854df8b9eff1f27b314803a4"
 }

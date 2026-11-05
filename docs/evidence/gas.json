@@ -1,12 +1,12 @@
 {
-  "git_commit": "e5617e1",
+  "git_commit": "0e02c97",
   "network": "sandbox",
   "revoke_by_subtree_size": [
     {
       "backlog_after_revoke": 0,
       "keys_removed": 2,
       "revoke_detail": "visited 3, backlog 0",
-      "revoke_total_tgas": 4.360066323775,
+      "revoke_total_tgas": 4.446174145886,
       "subtree_grants": 2,
       "sweep_tgas": []
     },
@@ -14,7 +14,7 @@
       "backlog_after_revoke": 0,
       "keys_removed": 5,
       "revoke_detail": "visited 9, backlog 0",
-      "revoke_total_tgas": 7.717316378816,
+      "revoke_total_tgas": 7.850410074633,
       "subtree_grants": 5,
       "sweep_tgas": []
     },
@@ -22,7 +22,7 @@
       "backlog_after_revoke": 0,
       "keys_removed": 13,
       "revoke_detail": "visited 25, backlog 0",
-      "revoke_total_tgas": 16.716790718522,
+      "revoke_total_tgas": 17.14822671922,
       "subtree_grants": 13,
       "sweep_tgas": []
     },
@@ -30,77 +30,97 @@
       "backlog_after_revoke": 29,
       "keys_removed": 31,
       "revoke_detail": "visited 32, backlog 29",
-      "revoke_total_tgas": 11.22873388315,
+      "revoke_total_tgas": 11.458171301199,
       "subtree_grants": 31,
       "sweep_tgas": [
-        35.195714330683
+        35.664805511429
       ]
+    }
+  ],
+  "screened_spend_by_depth": [
+    {
+      "clean_largest_receipt_tgas": 3.152598280445,
+      "clean_total_tgas": 10.721338660469,
+      "depth": 0,
+      "listed_total_tgas": 7.687408207184
+    },
+    {
+      "clean_largest_receipt_tgas": 4.28342360111,
+      "clean_total_tgas": 13.238757683212,
+      "depth": 4,
+      "listed_total_tgas": 9.67702754672
+    },
+    {
+      "clean_largest_receipt_tgas": 5.42026886399,
+      "clean_total_tgas": 15.583699597156,
+      "depth": 8,
+      "listed_total_tgas": 11.669361981056
     }
   ],
   "spend_by_depth": [
     {
-      "denied_total_tgas": 2.472074780597,
+      "denied_total_tgas": 2.526454429567,
       "depth": 0,
       "last_receipt_tgas": 0.2231825625,
-      "spend_largest_receipt_tgas": 2.924992205166,
-      "spend_total_tgas": 5.883844493351
+      "spend_largest_receipt_tgas": 2.979624440228,
+      "spend_total_tgas": 6.147814053455
     },
     {
-      "denied_total_tgas": 2.55978632895,
+      "denied_total_tgas": 2.614099228246,
       "depth": 1,
       "last_receipt_tgas": 0.2231825625,
-      "spend_largest_receipt_tgas": 3.199789098949,
-      "spend_total_tgas": 6.362726343904
+      "spend_largest_receipt_tgas": 3.254871256832,
+      "spend_total_tgas": 6.803923049968
     },
     {
-      "denied_total_tgas": 2.646342874063,
+      "denied_total_tgas": 2.700788953393,
       "depth": 2,
       "last_receipt_tgas": 0.2231825625,
-      "spend_largest_receipt_tgas": 3.473275342424,
-      "spend_total_tgas": 6.840313176513
+      "spend_largest_receipt_tgas": 3.5289818474,
+      "spend_total_tgas": 7.289401115323
     },
     {
-      "denied_total_tgas": 2.732736513488,
+      "denied_total_tgas": 2.787488551612,
       "depth": 3,
       "last_receipt_tgas": 0.2231825625,
-      "spend_largest_receipt_tgas": 3.746853734571,
-      "spend_total_tgas": 7.317990512282
+      "spend_largest_receipt_tgas": 3.803034845048,
+      "spend_total_tgas": 7.76799146083
     },
     {
-      "denied_total_tgas": 2.819226415365,
+      "denied_total_tgas": 2.874198022903,
       "depth": 4,
       "last_receipt_tgas": 0.2231825625,
-      "spend_largest_receipt_tgas": 4.021486077154,
-      "spend_total_tgas": 7.796737430851
+      "spend_largest_receipt_tgas": 4.078295648504,
+      "spend_total_tgas": 8.247799485217
     },
     {
-      "denied_total_tgas": 2.905812579694,
+      "denied_total_tgas": 2.960917367266,
       "depth": 5,
       "last_receipt_tgas": 0.2231825625,
-      "spend_largest_receipt_tgas": 4.296404738825,
-      "spend_total_tgas": 8.27578054158
+      "spend_largest_receipt_tgas": 4.353748154108,
+      "spend_total_tgas": 8.727809084824
     },
     {
-      "denied_total_tgas": 2.992322227715,
+      "denied_total_tgas": 3.047646584701,
       "depth": 6,
       "last_receipt_tgas": 0.2231825625,
-      "spend_largest_receipt_tgas": 4.570449633624,
-      "spend_total_tgas": 8.753959758509
+      "spend_largest_receipt_tgas": 4.628428914584,
+      "spend_total_tgas": 9.207148961047
     },
     {
-      "denied_total_tgas": 3.078755359428,
+      "denied_total_tgas": 3.134385675208,
       "depth": 7,
       "last_receipt_tgas": 0.2231825625,
-      "spend_largest_receipt_tgas": 4.844622055603,
-      "spend_total_tgas": 9.23227637569
+      "spend_largest_receipt_tgas": 4.902954996932,
+      "spend_total_tgas": 9.68615973487
     },
     {
-      "denied_total_tgas": 3.165284753593,
+      "denied_total_tgas": 3.221134638787,
       "depth": 8,
       "last_receipt_tgas": 0.2231825625,
-      "spend_largest_receipt_tgas": 5.11951685735,
-      "spend_total_tgas": 9.711325245711
+      "spend_largest_receipt_tgas": 5.178474145772,
+      "spend_total_tgas": 10.166265596929
     }
   ],
-  "wasm_sha256": "91909733d24c562aea39c44771e8f55e8868de9bad09d85a2a0903e86163d3e2"
+  "wasm_sha256": "3218271c471fdd4e4161bfdc4a3d2d50f24631fc854df8b9eff1f27b314803a4"
 }

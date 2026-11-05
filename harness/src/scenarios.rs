@@ -384,6 +384,15 @@ async fn b07(e: Env) -> Result<()> {
         .await;
     let text = err_text(r).unwrap_or_default();
     e.check("protocol rejects the callback name for this key", text.contains("MethodNameMismatch"), "MethodNameMismatch", &text);
+    let r = root
+        .acct
+        .call(e.vault_id(), "on_screened")
+        .args_json(json!({"spend_id": 1}))
+        .gas(Gas::from_tgas(50))
+        .transact()
+        .await;
+    let text = err_text(r).unwrap_or_default();
+    e.check("the screening callback is out of reach too", text.contains("MethodNameMismatch"), "MethodNameMismatch", &text);
     Ok(())
 }
 async fn b08(e: Env) -> Result<()> {
