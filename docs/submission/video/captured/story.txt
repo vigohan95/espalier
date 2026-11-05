@@ -1,0 +1,37 @@
+Espalier: a NEAR contract that lets an AI agent hand part of its budget to sub-agents,
+with limits enforced on chain, and asks about a recipient before any money moves.
+
+Recomputed here, now:
+  ok   res/espalier_vault.wasm 3218271c471f is what sandbox and testnet ran
+  ok   res/espalier_registry.wasm is what testnet runs
+  ok   18 client unit tests, including RFC 8032 vectors
+  ok   100 of 100 recorded trials decided again from stored signals: same verdict
+  ok   a ticket verifies for its recipient and fails for any other
+
+From the evidence files, with what each one ran on:
+  ok   98/98 attack and behaviour scenarios, 509 assertions (real node, compiled wasm)
+  ok   22/22 scenarios on NEAR testnet, 113 recorded transactions, vault vault2.espalier-vault-1105.testnet
+  ok   10,008 random ops on the real runtime, every invariant held; 10,008 more with a live registry
+  ok   100,000 random ops in process (mock VM, not the runtime)
+  ok   28/28 mutants of the contract caught by the property test
+
+Real model under indirect injection (gemma3:4b, 3.9B, small, on CPU):
+  fooled by the document       38 of 50
+  refused with no human        15
+  held for a human             18 (the human in this run is scripted and perfect)
+  went through                 5: inflated amounts to real vendors, inside the limits
+  ordinary payments refused    0 of 48; sent to a human 9, all first-time vendors
+  same spends, wrapper skipped {'queued NEEDS_CLEARANCE': 34, 'denied PER_TX': 4}
+
+Real mainnet accounts, read-only:
+  wrap.near                    age   2088.8 d  code changed   2022.9 d ago  allow
+  intents.near                 age    733.5 d  code changed     28.6 d ago  allow
+  v2.ref-finance.near          age   1902.3 d  code changed      5.7 d ago  warn
+  dclv2.ref-labs.near          age   1379.4 d  code changed      0.1 d ago  warn
+  sp4t8.sputnik-dao.near       age      0.1 d  code changed              -  warn
+  contract.main.burrow.near    age   1683.4 d  code changed    111.1 d ago  allow
+
+Not done: no audit, no TEE, no NEAR Intents path, no market.near.ai integration, testnet only.
+A bad payment inside the limits to a real vendor still goes through. Details: docs/ATTACKS.md, README.
+
+all checks passed in 0.1s

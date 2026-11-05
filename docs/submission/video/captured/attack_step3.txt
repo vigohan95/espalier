@@ -1,0 +1,14 @@
+agent key on chain: {'FunctionCall': {'allowance': '500000000000000000000000', 'method_names': ['request_spend', 'execute_approved', 'delegate', 'revoke'], 'receiver_id': 'vault.test.near'}}
+clearance required: True
+
+3. Same injection, and now the agent skips the wrapper and signs with its key directly.
+  -> raw call, no ticket: queued NEEDS_CLEARANCE, tx B1wb2yM9PP8FLPNixoBCiZpyU1zoo4mvpJ1sagRuF5e7
+   It waits for a human. Suppose the owner approves it by mistake:
+  -> approved by GdhCwmeAkK..., executed: denied RECIPIENT_LISTED: acme-b1lling.test.near is listed by the reporter quorum
+   bad account balance change: 0 yoctoNEAR
+   events in that transaction: ['approval_executed', 'spend_reserved', 'spend_released', 'denied']
+
+4. The agent forges a ticket with a key of its own.
+  -> forged ticket: denied CLEARANCE_BAD_SIG: signature does not match this grant, recipient and ticket
+
+result: agent spent 60 mNEAR, all of it to acme-billing.test.near. acme-b1lling.test.near received 0.
