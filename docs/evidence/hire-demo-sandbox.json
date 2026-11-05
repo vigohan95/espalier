@@ -1,0 +1,75 @@
+{
+  "network": "sandbox",
+  "vault": "vault.test.near",
+  "budget_mnear": 300,
+  "spent_mnear": 165.0,
+  "receipts": [
+    {
+      "task": "dataset",
+      "bought_from": "data-vendor.test.near",
+      "price_mnear": 30,
+      "paid": true,
+      "work_passed_check": true,
+      "txs": [
+        "5fmKiHFgnWHBausZVG3eqFr4ePyfeiG7mAwjCGqqDrT5",
+        "Eyam9wehTNQYyWzywPndTrHnGD9tG668PNGds4NZCuYV",
+        "F9XU8dp1pPHwoqWdxtKdmnZ4ePXM1CPcv9E8i86chfyJ"
+      ],
+      "note": ""
+    },
+    {
+      "task": "summary",
+      "bought_from": "worker-a.test.near",
+      "price_mnear": 120,
+      "paid": true,
+      "work_passed_check": true,
+      "txs": [
+        "8GkwLFYWed5uqBTZdEaRSRnWNK5jUpwUhbK7cZv375pe",
+        "7mGLu7bGVbedE88ioAUGWHzeU8zfRxeNCdwGjGXofs1w",
+        "GBE1Qnn2NcDWraWuLktrJ2b2j5DXXasai8jwt3ktpCB3",
+        "Bo53YdUGBtEMfXEx1zXZc3QKcC9YNQHpSQGJH4tb7tux",
+        "8aDRHXkse4f27RjJjTjhV2fcDYPfhhp8ixjfVJTm5Xbz",
+        "6aAdqjs2eENiKNPyZ4Z7o2AB3ESpkNFUXEjoE3QJS3ku",
+        "G7H6oxzwgRFcfLaXFUH3GkmQLtfo3r8R5PUz9i8nQc9p"
+      ],
+      "note": "countered once"
+    },
+    {
+      "task": "translation",
+      "bought_from": "self",
+      "price_mnear": 0,
+      "paid": false,
+      "work_passed_check": true,
+      "txs": [],
+      "note": "walked away: no payment"
+    },
+    {
+      "task": "fact-check",
+      "bought_from": "worker-c.test.near",
+      "price_mnear": 45,
+      "paid": false,
+      "work_passed_check": false,
+      "txs": [
+        "BWjw146RfhvTB367L6vux1pzVpZ7SKQuJqNMPMUH1Pki",
+        "8d8S9znbzm2z2xt8ENEkAhsSCsfEjUYqVfCjvzE4auiU"
+      ],
+      "note": "work rejected, grant revoked"
+    }
+  ],
+  "agents_are_scripted": true,
+  "market_is_a_local_stand_in": true,
+  "rogue_worker": {
+    "pay_attacker": {
+      "code": "RECIPIENT_NOT_ALLOWED",
+      "tx": "Au63k9QAbdHfYQZVuDodWaCin13w5Ak9j6nYknLRNRrk"
+    },
+    "overspend": {
+      "code": "PER_TX",
+      "tx": "7J4wwhaBCgLyeMkqZFuLgt82CqMq7nY9RFkLAvzPcoHe"
+    },
+    "delegate_refused_by_protocol": true,
+    "revoked_key_gone": true
+  },
+  "human_questions": 3,
+  "passed": true
+}

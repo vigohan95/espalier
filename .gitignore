@@ -5,3 +5,4 @@ target/
 node_modules/
 .logs/
 __pycache__/
+!docs/evidence/*.log

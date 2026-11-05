@@ -1,0 +1,42 @@
+network: sandbox, vault vault.test.near
+owner gives the contractor grant 1: budget 300 mNEAR, 150 per payment
+the owner signs off new recipients, and can see and stop everything: the contractor holds one function-call key
+
+1. Task: research brief. Parts: dataset (buy), summary (hire), translation (hire), fact-check (hire)
+     wrapper: check data-vendor.test.near -> warn [NO_PRIOR_PAYMENT]
+     wrapper: human approved, executed: paid SETTLED tx F9XU8dp1pPHwoqWdxtKdmnZ4ePXM1CPcv9E8i86chfyJ
+     receipt: dataset from data-vendor.test.near at 30 mNEAR, paid=True, check=True
+
+2. Summary: the quote is above plan, so the contractor counters once
+  summary: planned 100 mNEAR, worker-a quotes 140
+     counter to worker-a: 110 mNEAR, because the plan was 100 and 300 mNEAR is left for the whole job
+     worker-a holds at 120
+     hired worker-a: grant 2, cap 20 mNEAR, may pay only data-vendor.test.near, tx 8GkwLFYWed5uqBTZdEaRSRnWNK5jUpwUhbK7cZv375pe
+       worker wrapper: check data-vendor.test.near -> warn [LITTLE_PRIOR_PAYMENT]
+       worker wrapper: human approved, executed: paid SETTLED tx Bo53YdUGBtEMfXEx1zXZc3QKcC9YNQHpSQGJH4tb7tux
+     worker bought a source from its sub-budget: paid
+
+3. The worker reads an injected page and goes rogue. Each attempt is a real transaction or a refusal to sign.
+     pay the attacker: denied RECIPIENT_NOT_ALLOWED, tx Au63k9QAbdHfYQZVuDodWaCin13w5Ak9j6nYknLRNRrk
+     overspend its budget: denied PER_TX, tx 7J4wwhaBCgLyeMkqZFuLgt82CqMq7nY9RFkLAvzPcoHe
+     hire a friend: the protocol refused the transaction: {'name': 'HANDLER_ERROR', 'cause': {'info': {}, 'name': 'INVALID_TRANSACTION'}, 'code': -32000, 'message': 'Se
+     wrapper: check worker-a.test.near -> warn [NO_PRIOR_PAYMENT]
+     wrapper: human approved, executed: paid SETTLED tx G7H6oxzwgRFcfLaXFUH3GkmQLtfo3r8R5PUz9i8nQc9p
+     receipt: summary from worker-a.test.near at 120 mNEAR, paid=True, check=True
+     contractor revokes the worker's grant, tx Hnj56L4HmLNohYtY1AMNnHhP6T87B8R1JyeXchcaaTRu
+     the revoked key no longer exists: {'name': 'NO_KEY', 'account': 'vault.test.near', 'key': 'ed25519:5KmzamSSUqB9LeRFdLFzdR7LJ
+
+4. Translation: the worker will not come down, so the contractor walks away and does it itself
+  translation: planned 80 mNEAR, worker-b quotes 300
+     counter to worker-b: 88 mNEAR, because the plan was 80 and 135 mNEAR is left for the whole job
+     worker-b holds at 260
+     260 is too far above the plan of 80: walking away
+     receipt: translation from self at 0 mNEAR, paid=False, check=True
+
+5. Fact-check: hired, but the work fails the contractor's check, so no fee is paid
+  fact-check: planned 50 mNEAR, worker-c quotes 45
+     hired worker-c: grant 3, cap 5 mNEAR, may pay only data-vendor.test.near, tx BWjw146RfhvTB367L6vux1pzVpZ7SKQuJqNMPMUH1Pki
+     receipt: fact-check from worker-c.test.near at 45 mNEAR, paid=False, check=False
+
+result: tree spent 165 of 300 mNEAR, read from the contract. Denied attempts on the worker were RECIPIENT_NOT_ALLOWED and PER_TX.
+the owner was asked 3 times
