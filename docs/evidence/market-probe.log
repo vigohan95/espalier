@@ -1,0 +1,36 @@
+vault wasm sha256 3218271c471fdd4e4161bfdc4a3d2d50f24631fc854df8b9eff1f27b314803a4
+PASS  setup: root and two bidder grants exist  [root 1, A 2, B 3]
+PASS  P1 cross-contract get_grant + contact answer in one callback  [gas burnt 8.45 Tgas, GrantView 701 bytes]
+PASS  P3 signature by the grant key verifies on chain against the pk the vault returns
+PASS  P1 allowlist is visible to the probe and contains it
+PASS  P1 nothing credited before any payment
+PASS  P3 signature by another grant's key is rejected
+PASS  P3 a signature does not carry over to a different payload
+PASS  P1 cross-contract vault_info tells the probe that the caller is the vault's owner  [['owner.test.near', True]]
+PASS  P1 and that another caller is not  [['owner.test.near', False]]
+PASS  P2 preview_spend says a deposit that fits would go through  [WITHIN_POLICY]
+PASS  P2 preview_spend says a deposit over the limits would be refused  [PER_TX]
+PASS  P2 request_spend to a contract account settles (registry screen on)  [settled SETTLED, gas 11.49 Tgas]
+PASS  P2 market balance rose by exactly the deposit  [60.0 mNEAR]
+PASS  P2 vault.contact(grant, market) records it  [{'count': 1, 'total': '60000000000000000000000', 'first_ms': 1793976138381, 'last_ms': 1793976138381}]
+PASS  P2 probe credits exactly the settled amount  [60000000000000000000000]
+PASS  P1 spendable seen by the probe is the lineage minimum  [40.0 mNEAR (A has 40 left, root has 90)]
+PASS  P2 the same payment is never credited twice
+PASS  P2 a grant that paid nothing gets no credit
+PASS  P2 sibling deposit over the parent's remainder is refused by the vault  [ANCESTOR_CAP blocking grant 1]
+PASS  P2 a deposit that fits the parent's remainder settles
+PASS  P2 bidder key cannot pay anyone but the market  [RECIPIENT_NOT_ALLOWED]
+PASS  P2 contact of a non-root grant is its own payments only  [A 60.0 mNEAR]
+PASS  P2 contact of the root aggregates the whole tree (so roots cannot be bidders)  [root 110.0 mNEAR = A 60 + B 50, root itself paid 0]
+PASS  P3 the grant key cannot send a transaction to the market, so bids must be relayed and signed  [protocol: ReceiverMismatch]
+PASS  P4 refund transfer to the vault succeeds
+PASS  P4 vault balance and available_native rise by the refund  [balance +25.0 mNEAR]
+PASS  P4 grant counters do not move on a refund (budget is not restored)  [spent 60.0, spendable 40.0]
+PASS  P4 contact total is unchanged by a refund, so it is never credited again
+PASS  revoke A by its parent  [REVOKED]
+PASS  P6 probe sees a revoked grant as not live, in the next call
+PASS  P6 credit of a revoked grant is still there to be returned  [35.0 mNEAR]
+PASS  P6 revoked key cannot top up  [the vault deleted the key in the revoke, so the protocol has nothing to check]
+PASS  P6 revoking an ancestor makes the child not live  [live False, own revoked flag True]
+PASS  P5 on a clearance-bound grant a deposit with no ticket is queued, not paid  [NEEDS_CLEARANCE]
+34/34 checks passed
