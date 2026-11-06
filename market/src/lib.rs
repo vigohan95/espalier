@@ -142,6 +142,9 @@ pub struct Task {
     pub grant: Option<u64>,
     pub result_hash: Option<String>,
     pub reject_hash: Option<String>,
+    /// Spent by the winner's grant and everything below it, as last read from the vault. This is
+    /// how much of the price has already been charged to the poster's branch of the tree.
+    pub drawn: u128,
     /// Forwarded to the winner so far.
     pub paid: u128,
     /// Drawn by the winner's grant and not payable: before acceptance, or beyond the price.
@@ -182,6 +185,7 @@ pub struct GrantLite {
     pub clearance_required: bool,
     pub pk: String,
     pub key_live: bool,
+    pub spent: U128,
     pub direct_spent: U128,
     pub gas_left: U128,
     pub nodes_left: u32,
@@ -230,6 +234,9 @@ pub struct TaskView {
     pub grant: Option<u64>,
     pub result_hash: Option<String>,
     pub reject_hash: Option<String>,
+    /// Spent by the winner's grant and its own hires, as last read from the vault.
+    pub drawn: U128,
+    /// Of that, forwarded to the winner.
     pub paid: U128,
     pub held: U128,
     pub refunded: U128,
@@ -480,6 +487,7 @@ impl Market {
                 grant: None,
                 result_hash: None,
                 reject_hash: None,
+                drawn: 0,
                 paid: 0,
                 held: 0,
                 refunded: 0,
@@ -677,6 +685,7 @@ impl Market {
         // Anything this grant paid before it was bound is not part of the task.
         self.seen.insert(key, g.direct_spent.0);
         task.grant = Some(grant_id);
+        task.drawn = g.spent.0.min(task.price);
         task.status = Status::Awarded;
         self.release_poster_bond(&mut task);
         emit(
@@ -922,6 +931,9 @@ impl Market {
             Ok(Some(g)) => g,
         };
         let before = Self::commitment(&task);
+        // What the winner and its own hires have spent is charged to the poster already, so it is
+        // no longer a promise.
+        task.drawn = g.spent.0.min(task.price);
         let key = (task.spec.vault.clone(), grant);
         let seen = self.seen.get(&key).copied().unwrap_or(0);
         let fresh = g.direct_spent.0.saturating_sub(seen);
@@ -951,13 +963,15 @@ impl Market {
                 let worker = task.bids[task.winner.unwrap() as usize].worker.clone();
                 self.credit(&worker, pay);
             }
-            if task.status == Status::Accepted && (task.paid == task.price || !g.live) {
+            // Finished when nothing more can be drawn: the grant is used up, by the winner or by
+            // its hires, or it is gone.
+            if task.status == Status::Accepted && (task.drawn == task.price || !g.live) {
                 task.status = Status::Paid;
             }
         }
         emit(
             "claim",
-            json!({"task": task_id, "grant": grant, "counted": U128(fresh), "paid_now": U128(pay), "paid": U128(task.paid), "held": U128(task.held), "status": task.status}),
+            json!({"task": task_id, "grant": grant, "counted": U128(fresh), "paid_now": U128(pay), "paid": U128(task.paid), "held": U128(task.held), "drawn": U128(task.drawn), "status": task.status}),
         );
         self.settle_stat(&task, before);
         self.tasks.insert(task_id, task);
@@ -1138,11 +1152,11 @@ impl Market {
     }
 
     /// Budget a task still claims on its poster: the whole maximum until a winner is known, then
-    /// the price less what was already drawn. Nothing once the task is final.
+    /// the price less what the winner's branch has already spent. Nothing once the task is final.
     fn commitment(task: &Task) -> (bool, u128) {
         match task.status {
             Status::Open => (true, task.spec.max_budget.0),
-            Status::Awarding | Status::Awarded | Status::Delivered | Status::Accepted => (true, task.price - task.paid),
+            Status::Awarding | Status::Awarded | Status::Delivered | Status::Accepted => (true, task.price - task.drawn),
             _ => (false, 0),
         }
     }
@@ -1395,6 +1409,7 @@ impl Market {
             grant: t.grant,
             result_hash: t.result_hash.clone(),
             reject_hash: t.reject_hash.clone(),
+            drawn: U128(t.drawn),
             paid: U128(t.paid),
             held: U128(t.held),
             refunded: U128(t.refunded),
@@ -1453,6 +1468,8 @@ mod tests {
         want.extend(11u128.to_le_bytes());
         want.extend(42u64.to_le_bytes());
         assert_eq!(got, want);
+        // The Python client asserts the same hash for the same spec, in client/tests/test_market.py.
+        assert_eq!(hex(&near_sdk::env::sha256(&got)), "08a724c89a95c3591d5e913e127f254566f6dc42685e98ce21d17778f5a0729b");
     }
 
     #[test]
@@ -1481,6 +1498,7 @@ mod tests {
             grant: None,
             result_hash: None,
             reject_hash: None,
+            drawn: 0,
             paid: 0,
             held: 0,
             refunded: 0,
@@ -1490,7 +1508,8 @@ mod tests {
         t.price = 60;
         assert_eq!(Market::commitment(&t), (true, 60));
         t.status = Status::Accepted;
-        t.paid = 25;
+        t.paid = 10;
+        t.drawn = 25;
         assert_eq!(Market::commitment(&t), (true, 35));
         for s in [Status::Paid, Status::Rejected, Status::Failed, Status::NoAward, Status::Defaulted, Status::Void] {
             t.status = s;

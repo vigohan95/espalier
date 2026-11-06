@@ -1,11 +1,13 @@
 //! Runs the scenarios and the real-runtime property test, and writes the evidence reports.
 //!   harness sandbox [--only A01,B02] [--group market] [--report docs/evidence/sandbox-report]
 //!   harness sandbox-property --ops 2000 --seed 7 [--report docs/evidence/sandbox-property]
+//!   harness market-property --waves 6 --seed 7 [--report docs/evidence/market-property]
 //!   harness gas [--report docs/evidence/gas]
 //!   harness testnet --account NAME --key-file PATH [--report docs/evidence/testnet-run]
 mod env;
 mod gas;
 mod market;
+mod market_property;
 mod property;
 mod recipient;
 mod report;
@@ -140,6 +142,12 @@ async fn main() -> Result<()> {
             let keys = arg("--keys").and_then(|v| v.parse().ok()).unwrap_or(8);
             let screened = std::env::args().any(|a| a == "--screened");
             property::run(&worker.root_account()?, ops, seed, keys, screened, arg("--report").as_deref()).await?
+        }
+        "market-property" => {
+            let worker = sandbox_worker().await?;
+            let waves = arg("--waves").and_then(|v| v.parse().ok()).unwrap_or(4);
+            let seed = arg("--seed").and_then(|v| v.parse().ok()).unwrap_or(1);
+            market_property::run(&worker.root_account()?, waves, seed, arg("--report").as_deref()).await?
         }
         "gas" => {
             let worker = sandbox_worker().await?;

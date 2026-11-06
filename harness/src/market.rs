@@ -438,7 +438,7 @@ impl Mk {
 const DEADLINES: [&str; 5] = ["commit_end_ms", "reveal_end_ms", "award_end_ms", "deliver_end_ms", "review_end_ms"];
 
 /// Pushes one deadline and every later one out by `by` ms.
-fn shift(mut s: Value, from: &str, by: u64) -> Value {
+pub fn shift(mut s: Value, from: &str, by: u64) -> Value {
     let start = DEADLINES.iter().position(|d| *d == from).unwrap();
     for d in &DEADLINES[start..] {
         s[*d] = json!(s[*d].as_u64().unwrap() + by);
@@ -447,7 +447,7 @@ fn shift(mut s: Value, from: &str, by: u64) -> Value {
 }
 
 /// Sets the windows after the reveal, in ms after reveal_end.
-fn after_reveal(mut s: Value, award: u64, deliver: u64, review: u64) -> Value {
+pub fn after_reveal(mut s: Value, award: u64, deliver: u64, review: u64) -> Value {
     let r = s["reveal_end_ms"].as_u64().unwrap();
     s["award_end_ms"] = json!(r + award);
     s["deliver_end_ms"] = json!(r + deliver);
@@ -456,7 +456,7 @@ fn after_reveal(mut s: Value, award: u64, deliver: u64, review: u64) -> Value {
 }
 
 /// The same deadlines under a new brief and nonce, so several tasks can share one timetable.
-fn twin(mut s: Value) -> Value {
+pub fn twin(mut s: Value) -> Value {
     s["spec_hash"] = json!(hexs(&rand::random::<[u8; 32]>()));
     s["nonce"] = json!(rand::random::<u32>());
     s
@@ -554,7 +554,11 @@ async fn m02(e: Env) -> Result<()> {
         (70, 30, 20),
     );
     e.eq("the root was charged exactly the level-1 price", spent(e.grant(m.gc.grant).await?), 120);
-    e.eq("level 2's task is paid in part and still open for its remainder", m.status(t2.id).await?.as_str(), "Accepted");
+    let v2 = m.task(t2.id).await?;
+    e.eq("level 2's task is finished: its grant of 50 is used up, 30 by itself and 20 by its hire", (v2["status"].as_str().unwrap().to_string(), mn(&v2["paid"]), mn(&v2["drawn"])), ("Paid".to_string(), 30, 50));
+    e.eq("and so is level 1's", m.status(t1.id).await?.as_str(), "Paid");
+    let st = m.stat(m.gc.grant).await?;
+    e.eq("the general contractor has nothing left promised", (st["open"].as_u64(), mn(&st["committed"])), (Some(0), 0));
     m.solvent("market holds at least what it owes").await
 }
 

@@ -20,10 +20,12 @@ jobs:
           python-version: "3.12"
       - name: Preflight
         run: python3 scripts/preflight.py
-      - name: Story (hashes, client tests, recorded trials, signature)
+      - name: Story (hashes, client tests, recorded trials, signature, swarm model against the recorded runs)
         run: python3 scripts/story.py
       - name: Client unit tests
         run: python3 -m unittest discover -s client/tests
+      - name: The 25-agent subcontracting run on the Python model
+        run: python3 scripts/swarm-sim.py --offline
       - name: Replay one real-model trial
         run: python3 trials/replay.py I01
       - name: Rebuild trial statistics from stored files
@@ -36,21 +38,27 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Unit tests and property test (2 seeds x 1000 ops)
+      - name: Vault unit tests and property test (2 seeds x 1000 ops)
         env:
           PROPERTY_SEEDS: "2"
           PROPERTY_OPS: "1000"
         run: cargo test -p espalier-vault --release
+      - name: Market unit tests, with the shared pricing vectors
+        run: cargo test -p espalier-market --release
 
   sandbox:
     name: every scenario on a real local node
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Run all scenarios against near-sandbox (prebuilt wasm in res/)
+      - name: Run all vault and market scenarios against near-sandbox (prebuilt wasm in res/)
+        env:
+          # Bidding windows are real time. A shared runner is slower than a desk machine.
+          MARKET_COMMIT_MS: "26000"
+          MARKET_REVEAL_MS: "20000"
         run: cargo run --release -p harness -- sandbox --jobs 4 --report "$RUNNER_TEMP/espalier-report"
       - name: Upload the report
         if: always()
@@ -60,18 +68,42 @@ jobs:
           path: ${{ runner.temp }}/espalier-report.*
           if-no-files-found: warn
 
+  swarm:
+    name: 25 scripted agents, three levels of hiring, on a real local node
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch the sandbox node (neard 2.14.0)
+        run: |
+          curl -sSL --retry 3 https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore/Linux-x86_64/2.14.0/near-sandbox.tar.gz | tar xz -C "$RUNNER_TEMP"
+          echo "NEAR_SANDBOX_BIN_PATH=$(find "$RUNNER_TEMP" -name near-sandbox -type f | head -1)" >> "$GITHUB_ENV"
+      - name: Run the swarm with signed transactions and compare the result with the Python model
+        run: python3 scripts/swarm-sim.py --sandbox --unit 60
+
   testnet-evidence:
-    name: testnet transactions still match the report
+    name: testnet transactions still match the reports
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Look up every recorded transaction on a public RPC
+      - name: Vault run, every recorded transaction looked up on a public RPC
         run: |
           for attempt in 1 2 3; do
             python3 scripts/verify-testnet.py && exit 0
+            echo "attempt $attempt failed, retrying in 30 s"
+            sleep 30
+          done
+          exit 1
+      - name: Market run, every transaction, task and grant read back from testnet
+        run: |
+          for attempt in 1 2 3; do
+            python3 scripts/verify-market.py && exit 0
             echo "attempt $attempt failed, retrying in 30 s"
             sleep 30
           done

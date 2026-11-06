@@ -1,354 +1,305 @@
-# Swarm rules: a sealed-bid group buy where every bid is backed by a delegated budget
+# Swarm rules: a subcontracting market where the prize is a grant
 
-**Status: design.** Written before any market code, as the swarms track prompt asks ("Start with RULES.md
-and a sequence diagram of one round in text. Wait for my OK before writing contracts."). Nothing in this
-file is built yet. The only thing that has run is a throwaway probe that checks the assumptions below
-against the committed, unchanged vault wasm on a real local node: 34 of 34 checks passed
-([evidence/market-probe.log](evidence/market-probe.log), source in
-[evidence/market-probe/](evidence/market-probe/)). How it will be built and tested is in
-[SWARM-BUILD.md](SWARM-BUILD.md).
+Agents hire agents, who hire agents. Each hire is one sealed-bid round. What the winner gets is not a
+payment held in escrow: it is a grant in an Espalier vault, a child of the hirer's grant, narrower in
+every dimension, with the auction's price as its cap. The winner can hire from that grant in turn. So
+the budget tree is not drawn up by anyone in advance. It grows one node per auction, and every level of
+the supply chain is bounded by every level above it, because that is what the vault already enforces.
+Cut one contractor and everything it hired is cut in the same transaction.
 
-The vault is not changed, not by one line. The market is a second contract. It uses four views the vault
-already has and receives money through the vault's existing `request_spend`.
+The vault is not changed, not by one line: `res/espalier_vault.wasm` is the same file as before. The
+market is a second contract, `market/`. It calls three of the vault's views and nothing else.
 
-## 1. What it is
+What is built and how it was checked is in [SWARM-BUILD.md](SWARM-BUILD.md). The assumptions were first
+tested by a throwaway probe against the unchanged vault wasm, 56 of 56 checks:
+[evidence/market-probe.log](evidence/market-probe.log).
 
-Buyer agents each stand for one user and want a few units of the same good (the demo good is a GPU-hour
-voucher). Alone each pays the list price. Together they are an order big enough for sellers to compete
-for, and big enough to reach a bulk price. The buyers pool their orders in a round, seller agents answer
-with sealed offers, and one price clears the round. Each buyer pays only for its own units.
-
-What is new here is where the buyers' money comes from. No buyer agent holds funds. Each one holds a
-grant in an Espalier vault: a node in a budget tree that can only be narrower than its parent. A bid
-exists only if the vault first agreed to pay for it, which means the grant and every ancestor had room
-at that moment. Cutting a branch of the tree cuts its bids.
-
-## 2. Who takes part
+## 1. Who takes part
 
 | Role | On chain | Can do | Cannot do |
 |---|---|---|---|
-| Principal | Owner account of a vault | Fund the vault, create root grants, name the sellers its agents may buy from and the highest unit price, revoke anything | |
-| Team lead | A grant with `delegate` and `revoke` | Hand part of its budget to buyer agents, revoke them | Give a buyer more than it has, in any of the 14 dimensions |
-| Buyer agent | A non-root grant whose key may call `request_spend` only, and whose recipient list holds the market | Deposit into the market, sign orders | Pay anyone else, hold funds, withdraw, send a transaction to the market |
-| Relayer | Any account. In the demo each buyer has its own sub-account, `buyer-7.<base>`, holding gas only | Carry a buyer's signed message to the market | Change it: the market checks the grant key's signature |
-| Seller agent | Its own sub-account, `seller-3.<base>` | Stock goods, post a bond, make one sealed offer per round, collect its proceeds | Offer in a round that does not list it |
-| Opener | Any account, `coordinator.<base>` in the demo | Open a round and pay its storage fee | Anything after that. The market has no admin |
-| Anyone | | Call `clear`, `void_order`, `sync`, `claim_goods`, and `refund` for a grant that is no longer live | |
+| Principal | Owner account of a vault | Fund the vault, create the general contractor's root grant, name the worker accounts its money may hire (the roster), revoke anything | |
+| Poster | Any live grant whose only recipient is the market: the general contractor's root, or a grant won in an earlier task | Post a task, create the winner's grant with the vault's `delegate`, accept or reject the work, revoke the winner | Promise more than its grant can still spend. Pay anyone directly |
+| Worker | Its own sub-account, `worker-7.<base>`, on the roster. If it wins, it also holds the grant it won | Bid, deliver, draw its price from its own grant after acceptance, post tasks of its own | Draw before acceptance and be paid. Draw more than the price. Pay anyone but the market |
+| Carrier | Any account. Each agent's own sub-account carries its signed messages and attaches its bond | Carry a poster's signed post, acceptance or rejection to the market | Change them: the market checks the grant key's signature |
+| Anyone | | `close_bidding`, `confirm_award`, `default_award`, `fail_delivery`, `void_task`, `claim`, `refund`, `payout` | Steer any of them: each one asks the vault, or follows a deadline |
 
-One buyer agent is three things that the market ties together: a grant id in a vault, the key the vault
-issued for that grant, and a gas-only sub-account that relays for it. The key is the identity. The same
-key that signs `request_spend` on the vault signs the agent's orders, and the market reads the public
-half from the vault each time, so a key the vault has rotated or a grant it has revoked stops working in
-the market at once.
+A grant key is the identity of a poster. The same key that calls `delegate` on the vault signs the
+poster's messages to the market, and the market reads the public half from the vault every time. The
+market has no admin and no method that changes its rules.
 
-## 3. Money
+## 2. Money
 
-- **Deposit.** A buyer agent calls `request_spend(recipient = market, amount)` on the vault with its own
-  key. The vault applies every limit it has: the grant's cap, per-transaction limit and rolling window,
-  the same three on every ancestor, the recipient list, expiry, the denylist screen. If it passes, native
-  NEAR moves from the vault to the market account.
-- **Credit.** The market learns about the deposit by asking the vault: `contact(grant, market)` returns
-  the total the vault has ever settled from that grant to the market. The market credits the difference
-  since it last looked. It never credits on anyone's word, and never twice.
-- **Lock.** Placing an order moves part of the credit into a lock for that round. The lock is the most
-  the order can ever cost.
-- **Paid, returned.** At clearing, a filled order pays `price x quantity` out of its lock, and the rest of
-  the lock goes back to credit. Credit can be used in a later round, or sent back. It can only ever be
-  sent to the vault account it came from.
+There is no escrow of prices. The only money the market ever holds is:
 
-A deposit is charged to the grant and to every ancestor when it leaves the vault. Money that later comes
-back raises the vault's balance but does not lower those counters: the vault has no method for that, and
-this design does not add one. So the tree's counters show what the agent was allowed to commit, which is
-at least what it paid. Section 11 says more.
+- **Bonds.** A worker attaches a bid bond to each sealed bid. Whoever carries a post attaches a poster
+  bond. Bonds go back unless a deadline is missed (section 5).
+- **Draws on their way through.** Every grant in the chain has exactly one recipient, the market. A
+  winner is paid by calling the vault's `request_spend(market, amount)` with its own grant key. The
+  vault charges that draw to the winner's grant and to every ancestor, and refuses it if any of them
+  lacks room. The market then reads the grant's `direct_spent` from the vault, counts what is new, and
+  forwards it to the winner's account, up to the price, once the poster has accepted the work.
 
-## 4. One round
+So a task's price is charged to the tree when the winner draws it, in full and once: the vault's
+counters equal what left the vault. A contractor's own margin is what is left of its cap after its
+subcontractors drew theirs.
 
-A round has three windows, set when it is opened: `order_end`, `offer_end`, `reveal_end`.
+A draw the market cannot pay out, because the work was rejected, never accepted, or the amount is over
+the price, is held and then sent back to the vault account. That path over-counts: the vault has no
+method that lowers a grant's counters when money returns, and none is added. It only happens when a
+winner misbehaves, and it burns no more than that winner's own cap.
+
+## 3. One task
 
 ```text
-Principal   Team lead   Buyer agent    Relayer       Vault            Market           Seller      Anyone
-   |            |        (grant key)  (buyer-N)   (unchanged)           |                 |           |
-   | create_root, set_mandate(sellers, max price) ---------------------->|                 |           |
-   |----------->| delegate(buyer key, narrower terms) -->|               |                 |           |
-   |            |            |            |              |               |<-- stock goods -|           |
-   |            |            |            |              |  open_round(ceiling, sellers, bond, windows)|
-   |            |            |            |              |               |<----------------------------|
-   |            |            |            |              |               |                 |           |
-   |            |            | request_spend(market, amount)             |      ORDER WINDOW           |
-   |            |            |-------------------------->| limits on the grant and every ancestor      |
-   |            |            |            |              |-- NEAR ------>|                 |           |
-   |            |            | sign(round, lock, hash of qty/limit/salt) |                 |           |
-   |            |            |----------->| place_order ---------------->|                 |           |
-   |            |            |            |              |<- get_grant --| live? key? root?            |
-   |            |            |            |              |<- contact ----| how much was really paid?   |
-   |            |            |            |              |               | order recorded, lock taken  |
-   |            |            |            |              |               |                 |           |
-   |            |            |            |              |               |      OFFER WINDOW           |
-   |            |            |            |              |               |<- place_offer(hash) + bond -|
-   |            |            |            |              |               |   (sees orders and locks,   |
-   |            |            |            |              |               |    not quantities or limits)|
-   |            |            |            |              |               |                 |           |
-   |            |            |            |              |               |      REVEAL WINDOW          |
-   |            |            |----------->| reveal_order(qty, limit, salt)->|              |           |
-   |            |            |            |              |<- get_grant --| still live?     |           |
-   |            |            |            |              |               |<- reveal_offer(ask, capacity,
-   |            |            |            |              |               |    min units, salt): goods locked
-   |            |            |            |              |               |                 |           |
-   |            |            |            |              |               |<------------------ clear ---|
-   |            |            |            |              |               | one price; filled orders pay,
-   |            |            |            |              |               | the rest of each lock returns
-   |            |            |            |              |<-- goods -----|-- proceeds ---->|           |
-   |            |            | sign(refund)->| refund -->|<-- NEAR ------|                 |           |
+Principal   Poster           Carrier        Vault           Market            Workers          Anyone
+   |       (grant key)     (agent account) (unchanged)         |           (own accounts)         |
+   | set_roster(workers) --------------------------------------->|  asks vault_info: is this the owner?
+   |           |                |              |                 |                 |              |
+   |           | sign(spec) --->| post_task + poster bond ------>|                 |              |
+   |           |                |              |<-- get_grant ---| live? key? only recipient the market?
+   |           |                |              |                 | room for max_budget on top of what
+   |           |                |              |                 | this grant already promised?
+   |           |                |              |                 |                 |              |
+   |           |                |              |                 |<- commit_bid(hash) + bid bond  |  COMMIT
+   |           |                |              |                 |                 |              |
+   |           |                |              |                 |<- reveal_bid(price, key, salt) |  REVEAL
+   |           |                |              |<- grant_of_key -| is that key still free?        |
+   |           |                |              |                 |                 |              |
+   |           |                |              |                 |<----------------- close_bidding|
+   |           |                |              |                 | lowest bid wins, pays second-lowest
+   |           |                |              |                 |                 |              |
+   |           | delegate(winner's key, cap = price) ->|         |                 |              |  AWARD
+   |           |                |              | AddKey          |<----------------- confirm_award|
+   |           |                |              |<-- get_grant ---| parent? key? cap = price? limits?
+   |           |                |              |                 | task Awarded, poster bond returned
+   |           |                |              |                 |                 |              |
+   |           |                |              |                 |<- deliver(result hash) --------|  WORK
+   |           | sign(accept) ->| accept ----------------------->|                 |              |  REVIEW
+   |           |                |              |<-- get_grant ---| poster still live? its key?    |
+   |           |                |              |                 |                 |              |
+   |           |                |   winner: request_spend(market, price) with its own grant key   |  DRAW
+   |           |                |              |-- NEAR -------->|                 |              |
+   |           |                |              |<-- get_grant ---|<------------------------ claim |
+   |           |                |              |                 | counts direct_spent, pays the winner
+   |           |                |              |                 |-- payout ------>|              |
 ```
 
-At any point the principal or a team lead can `revoke` a grant on the vault. Section 6 says what that
-does to an order at each stage.
+Between AWARD and its own delivery, the winner can post tasks from the grant it just won. Each of those
+runs the same diagram one level down, with the winner as poster.
 
-## 5. Rules
+## 4. Rules
 
-**R1. Listing.** The market is created with a fixed list of vault accounts and one goods token. It
-credits deposits only from those vaults. Nobody can change the list later.
+**R1. Listing.** The market is created with a fixed list of vault accounts. It reads only those.
 
-**R2. Mandate.** A vault's owner tells the market which seller accounts its agents may buy from and the
-highest unit price they may be charged. The market confirms the caller is the owner by asking the vault
-(`vault_info`). Without a mandate, no grant of that vault can place an order.
+**R2. Roster.** A vault's owner names the worker accounts that may bid on tasks funded from that vault.
+The market confirms the caller is the owner by asking the vault (`vault_info`). Without a roster no
+task can be posted from that vault.
 
-**R3. Opening.** Anyone opens a round with: a ceiling price per unit, the list of sellers that may offer
-(at most 8), the seller bond, the three windows, and the no-reveal penalty in basis points of the lock
-(at most 2000). The opener pays a fixed storage fee. A round holds at most 32 orders.
+**R3. Posting.** A post is a signed spec: vault, poster grant, hash of the brief, maximum budget, bid
+bond, minimum number of bids, five deadlines (`commit_end`, `reveal_end`, `award_end`, `deliver_end`,
+`review_end`), what the winner's grant must carry for subcontracting (levels, node budget, gas budget,
+key allowance), and a nonce. The message is `"espalier-market-post-v1"` followed by the borsh encoding
+of `(market, spec)`, signed by the poster's grant key. The carrier attaches the poster bond. The market
+asks the vault for the poster's grant and accepts the post only if:
 
-**R4. Ordering.** During the order window a buyer places one order per round: a lock amount and a
-commitment, `sha256("espalier-market-order-v1", market, round, vault, grant, quantity, limit, salt)`.
-The message `("espalier-market-bid-v1", market, round, vault, grant, lock, commitment)` must be signed
-by the grant's key. The market then asks the vault and accepts the order only if all of these hold:
+- the grant is live, pays in native NEAR, has the market as its only recipient, is not bound to
+  clearance tickets, and its key may call `delegate`;
+- the signature verifies against the key the vault reports, and this signed post was not used before;
+- the grant has the depth, node budget, gas budget and denial limit to create the winner's grant, and
+  does not expire before the winner could draw;
+- its per-transaction, window and approval limits are at least the maximum budget;
+- what the vault says the grant can still spend covers the maximum budget on top of everything this
+  grant has already promised to open tasks;
+- the grant has fewer than 8 open tasks and fewer than 3 defaults (R7).
 
-- the vault is listed, the grant exists, is not a root, pays in native NEAR, and is live (not revoked
-  or expired, and neither is any ancestor);
-- the grant does not expire before the round's `reveal_end`. A child never outlives its parent, so no
-  ancestor expires mid-round either, and an expiry cannot be used to walk away from an order for free;
-- the signature verifies against the key the vault reports for that grant;
-- every seller in the round is in the vault's mandate, and the round's ceiling is at most the
-  mandate's highest unit price;
-- after counting what the vault says it has paid, the grant's free credit covers the lock.
+**R4. Bidding.** Until `commit_end`, a worker on the roster commits
+`sha256("espalier-market-bid-v1", market, task, worker, price, key, salt)` with the bid bond attached.
+`key` is the public key the worker wants on its grant if it wins. One bid per worker, at most 16 per
+task. Between `commit_end` and `reveal_end` it reveals price, key and salt. The price must be above
+zero and at most the maximum budget. The key must not be bound to any other bid, and the market asks the
+vault (`grant_of_key`) that it does not already belong to a grant, since such a key could never be
+awarded.
 
-An order cannot be changed or withdrawn.
+**R5. Winner and price.** After `reveal_end` anyone calls `close_bidding`, once. With fewer valid bids
+than the task's minimum there is no award. Otherwise the lowest bid wins, the earlier commitment on a
+tie, and the price is the second-lowest bid, or the maximum budget when there is only one bid. The
+winner's pay does not depend on its own bid, so bidding its real cost is its best move.
 
-**R5. Offering.** During the offer window each listed seller may place one sealed offer, a commitment
-`sha256("espalier-market-offer-v1", market, round, seller, ask, capacity, min_units, salt)`, with exactly
-the round's bond attached. Sellers can see how many orders there are and how much is locked. They cannot
-see quantities or limits.
+**R6. The award.** The poster creates a grant for the winner's key with the vault's `delegate`. Anyone
+then calls `confirm_award(task, grant)`, and the market reads that grant from the vault. It is the award
+only if all of these hold:
 
-**R6. Revealing.** During the reveal window:
+- its parent is the poster's grant, and its key is the key in the winning bid;
+- its cap, per-transaction limit, window cap and approval threshold all equal the price;
+- its only recipient is the market, it pays in native NEAR, it is live, and it needs no clearance ticket;
+- its key may call `request_spend`, and `delegate` and `revoke` if the task promised subcontracting;
+- it carries the depth, node budget, gas budget and key allowance the task promised;
+- it does not expire before `review_end` plus the draw grace.
 
-- A buyer's `(quantity, limit, salt)` must hash to its commitment, with `quantity >= 1`,
-  `limit <= ceiling` and `quantity x limit <= lock`. The market asks the vault again, and the grant must
-  still be live. Anyone may submit a reveal: it carries no authority, only the opening of a commitment.
-- A seller's `(ask, capacity, min_units, salt)` must hash to its commitment, with `0 < ask <= ceiling`
-  and `min_units <= capacity`, and the seller must hold `capacity` units of the goods token in the
-  market. Those units are locked until clearing.
+A grant that fails any check is not the award, however it was created. The poster can revoke it and try
+again until `award_end`.
 
-A reveal that fails a check changes nothing, and a correct one can still follow before the window ends.
+**R7. No award in time.** After `award_end` anyone calls `default_award`, and the market asks the vault
+why there is no award:
 
-**R7. Clearing.** After `reveal_end` anyone calls `clear`. It runs once.
+- The poster's grant is no longer live: nobody is at fault, the task is void, bonds go back.
+- The winner's key now belongs to a grant that someone other than the poster created: the task is
+  void, bonds go back.
+- Otherwise the poster defaulted: it did nothing, or it created a grant with the wrong terms. Its bond
+  goes to the winner, and the default is recorded. A grant with 3 defaults cannot post again.
 
-1. Sort the valid orders by limit, highest first, earlier order first on a tie. Sort the valid offers by
-   ask, lowest first, earlier offer first on a tie.
-2. Walk the orders with a running total `Q`, starting at 0. An order joins if the offers that ask at most
-   its limit can together supply `Q + its quantity`. If not, it is skipped and the walk continues.
-3. If `Q` is 0, there is no trade.
-4. Hand the `Q` units to the offers, cheapest first, each up to its capacity. The last offer to get
-   units is the marginal offer.
-5. If the marginal offer got fewer units than its `min_units`, remove that offer and go back to step 2.
-   Only the marginal offer can fall short, because every other filled offer sold its whole capacity.
-   Each pass removes one offer, so there are at most 8 passes.
-6. The price is the marginal offer's ask. Every order that joined pays `price x quantity`. Every offer
-   that got units is paid `price x units`.
+**R8. Delivery and review.** The winner calls `deliver` with a hash of the result before `deliver_end`.
+The poster then signs `accept` or, before `review_end`, `reject`. Silence until `review_end` counts as
+acceptance. A rejected or never-delivered task pays nothing.
 
-The price is never above the limit of any order that joined, never below the ask of any offer that sold,
-never above the ceiling, and what buyers pay equals what sellers receive.
+**R9. Payment.** `claim` reads the winner's grant from the vault, counts what it has drawn into the
+market since the last look, and, if the task is accepted, credits the winner up to the price. `payout`
+sends an account what it is owed. Anything a task holds that it can never pay goes back to the vault
+account with `refund`, once the task is over.
 
-Example, prices in mNEAR per unit. Offers: S1 asks 11 for up to 20 units, S2 asks 14 for up to 15, S4
-asks 8 for up to 100 but only if it sells at least 60.
+**R10. Revocation.** `void_task` asks the vault whether the task's grant is live: the winner's grant
+once there is one, the poster's before. If it is not, the task is void and every bond still locked goes
+back. A task with live grants cannot be voided. Being revoked is not a missed deadline, so it costs no
+bond.
 
-| Orders | Walk | Result |
+## 5. Bonds and deadlines
+
+| Missed | Who pays | To whom |
 |---|---|---|
-| A 10 units at most 20, B 15 at most 15 | Both join, `Q = 25`. Cheapest first gives S4 25 units, under its 60, so S4 is removed. Again: S1 20, S2 5 | Price 14. A pays 140, B pays 210 |
-| The same, plus C 20 at most 12 and E 30 at most 10 | All four join, `Q = 75`. S4 takes all 75, over its 60 | Price 8. A pays 80, B 120, C 160, E 240 |
-| The first two, plus D 200 at most 18 | A joins. D needs 210 and the offers hold 135: skipped. B joins | Price 14, D gets its lock back |
+| A bid is committed and not validly revealed | That bidder's bond | The vault account the task was funded from |
+| The poster does not create the winner's grant by `award_end` | The poster bond | The winner |
+| The winner still holds its grant and delivers nothing by `deliver_end` | The winner's bond | The vault account |
+| Anything ended by a revoke or expiry | Nobody | Bonds go back |
 
-The second row is the group buy: four buyers reach a price that two could not.
-
-**R8. Settlement.** Clearing moves balances inside the market in one receipt, so it cannot half happen.
-
-- A filled order: `price x quantity` leaves its lock and goes to the sellers, the rest of the lock
-  returns to the grant's credit, and the units are recorded as owed to that grant's vault.
-- An order that revealed and did not join: its whole lock returns to credit.
-- A filled offer: its proceeds and its bond become withdrawable, and unsold locked goods are released.
-- An offer that revealed and sold nothing: bond and goods are released.
-
-**R9. Goods.** `claim_goods(vault, grant)` sends the units to the vault account with `ft_transfer_call`.
-The vault's existing `ft_on_transfer` keeps them if its owner accepted the token (`add_token`) and
-returns them otherwise, in which case they stay claimable in the market. Goods go to the vault and to
-no other account.
-
-**R10. Refund.** `refund(vault, grant)` sends the grant's free credit to its vault account. While the
-grant is live it needs the grant key's signature, so that nobody else can empty an agent's credit just
-before it bids. Once the grant is not live, anyone can call it.
-
-**R11. Penalties.** A penalty exists to pay the side that was let down, and is taken only when that side
-has someone in it.
-
-- An order that is not validly revealed by `reveal_end` loses `penalty_bps` of its lock. That amount is
-  shared among the offers that revealed, by units sold, or by capacity if nothing sold. With no valid
-  offer in the round, nothing is taken.
-- An offer that is not validly revealed loses its bond. It is shared among the vaults of the orders that
-  revealed, by lock. It is paid to the vault accounts and never becomes agent credit, because credit
-  must only ever come from a budget the tree approved. With no valid order, nothing is taken.
+A forfeited bond is paid to the vault account and never becomes anything an agent can spend.
 
 ## 6. When things go wrong
 
 | What happens | Rule | Where the money ends up |
 |---|---|---|
-| Deposit is over the grant's cap, a parent's remainder, the window, or the per-transaction limit | The vault refuses it (`CAP`, `ANCESTOR_CAP`, `WINDOW`, `PER_TX`). The market is never involved | Nothing moved |
-| Two siblings race for the last of a shared parent's budget | The vault handles receipts one at a time. The first deposit settles, the second is refused | The loser can bid less, with a deposit that fits |
-| Grant revoked or expired before it orders | `place_order` is refused: the vault reports it not live | Any credit goes back to the vault, by anyone |
-| Grant would expire before the round's `reveal_end` | `place_order` is refused, so no order can lapse mid-round | Credit stays usable in a shorter round, or goes back |
-| Grant, or any ancestor, revoked after ordering and before revealing | Its reveal is refused. Anyone calls `void_order`, the market asks the vault, and the order is removed with no penalty | Lock returns to credit, credit to the vault, by anyone |
-| Revoked after revealing, before clearing | `void_order` works until `clear` runs. If nobody calls it, the order clears: it was placed, funded and opened while the grant was live | As a normal order, and goods and leftovers go to the vault |
-| Revoked after clearing | The trade stands | Goods to the vault, leftover credit to the vault, by anyone |
-| Buyer never reveals | R11 penalty on the lock. Revoking the grant and voiding the order avoids the penalty, at the price of the grant | Penalty to the sellers that revealed, the rest to credit |
-| Buyer reveals numbers that do not match | Refused. It counts as not revealed unless a correct reveal follows in time | As above |
-| Buyer reveals `quantity x limit` above its lock, or a limit above the ceiling | Refused, same as a mismatch | As above |
-| Seller never reveals, or reveals without the goods in stock | Bond lost (R11) | Bond to the vaults of the buyers that revealed |
-| Seller does not deliver | Cannot happen: a valid offer has its goods locked in the market before clearing, and clearing moves them | |
-| No offer at or under any order's limit, or every offer removed by its own minimum | No trade | Locks and bonds released, penalties as in R11 |
-| Key rotated in the vault mid-round | The order stands, since it was signed by the key that was valid then. New orders and refunds need the new key | |
-| Vault paused mid-round | New deposits are refused by the vault. Orders already funded stand. To pull an agent out, revoke it | |
-| Someone replays a signed order | Same round: refused, one order per grant. Another round or another market: the signature does not verify | |
-| Someone copies another buyer's commitment | The copy cannot be opened: the hash covers the vault and the grant | The copier pays the no-reveal penalty |
-| Vault owner has not accepted the goods token | `claim_goods` returns the units to the market | Goods stay claimable |
+| A poster promises more than its grant has left | `post_task` refused: `OVERCOMMITTED` | Poster bond returned at once |
+| Two subcontractors of one contractor draw more than the contractor has | The vault refuses the later draw: `ANCESTOR_CAP`, naming the contractor's grant | The later one is paid what was left |
+| A contractor draws before it is accepted | The vault allows it inside the cap. The market holds it and pays nobody | Held, then back to the vault if the work is not accepted |
+| Poster revoked during bidding | `void_task`: void | Every bid bond and the poster bond go back |
+| Winner revoked during the work | `void_task` or `fail_delivery`: void | Winner's bond goes back. Nothing is paid. What it drew goes to the vault |
+| A contractor with open subtasks is revoked | One vault transaction makes every grant below it not live. Each of its tasks is voided with one call | All bonds back. Subcontractors already paid keep their pay |
+| Revoked after acceptance, before the draw | The winner's key is gone, so it cannot draw | Nothing is paid. Its bond was already returned |
+| Revoked after it was paid | The trade stands | The vault's counters equal what left the vault |
+| A worker never reveals | Bond lost | To the vault account |
+| A reveal does not match, or copies another worker's commitment | Refused: the hash names the worker | A copy can never be opened, and loses its bond |
+| A bid names a key that is already in use | Refused: `KEY_TAKEN` | That bid cannot win |
+| Someone binds the winner's key to another grant before the award | `default_award` finds it: void, nobody punished | Bonds back |
+| The poster creates a grant with a lower cap, tighter limits or a short life | `confirm_award` refuses it. After `award_end` it is a default | Poster bond to the winner |
+| The winner delivers nothing | `fail_delivery` | Winner's bond to the vault account |
+| The poster rejects good work | Allowed: the contract cannot judge work. The rejection is counted on the poster's record | Winner's bond returned, nothing paid |
+| A hijacked contractor tries to pay an outside account | The vault refuses: its grant can pay only the market. A sub-grant cannot add a recipient. An account off the roster cannot bid | Nothing moves |
+| A signed post, acceptance or rejection is replayed or altered | Refused: `DUPLICATE_TASK` or `BAD_SIGNATURE` | |
+| A root pays the market outside any task | `return_unbound` sends it back | To the vault account |
 
 ## 7. Who enforces what
 
-| Step | Vault contract, unchanged | Market contract | NEAR protocol |
+| Property | Vault contract, unchanged | Market contract | NEAR protocol |
 |---|---|---|---|
-| A buyer cannot commit more than its branch of the tree allows | Cap, window and per-transaction limit on the grant and on every ancestor, at deposit time | Lock at most credit, credit at most what the vault settled | |
-| A buyer key can pay only the market | Recipient list, narrowed at `delegate` and fixed after | | The key's receiver is the vault, and it cannot attach NEAR or add keys |
-| Only the grant's agent can place its order | Reports the grant's current key | Verifies an ed25519 signature over market, round, vault, grant, lock and commitment | |
-| Revoked or expired agents drop out | `revoke` writes one flag, and the lineage walk reports `live = false` for the whole subtree | Reads `live` at order, at reveal, at `void_order` and at `refund` | The vault deletes the revoked keys |
-| Money cannot be sent to an accomplice | | Pays only sellers in the vault owner's mandate, at no more than the mandate's price. Refunds and goods go only to the vault | |
-| Bids are sealed | | Commit and reveal, with hashes bound to market, round and bidder | |
-| No bid without money, no offer without goods | | Lock before order, goods locked at reveal | |
-| Settlement is all or nothing | | One receipt, balances inside the contract | Receipts for one account run one at a time |
-| Rules cannot be changed | | No admin method | Contract account locked: no full-access key |
+| No level of the chain spends more than any level above it | Every draw is charged to every ancestor | Refuses a post that would promise more than the grant has left | |
+| A grant can pay only the market | Recipient list, which a child can only narrow | Posts and awards only for grants whose one recipient is the market | A grant key can only call the vault |
+| The winner's grant is exactly the award | `delegate` refuses anything wider than the parent | Reads parent, key, cap, limits and lifetime back from the vault | |
+| Only the poster can post, accept or reject | Reports the grant's current key | Verifies an ed25519 signature against it | |
+| Payment only for accepted work, and never above the price | Cap equal to the price | Forwards a draw only after acceptance, up to the price | |
+| A revoked branch stops | One flag, read on every walk up the tree. Keys deleted | Reads `live` before every step that depends on authority | Deleted keys cannot sign |
+| Bids are sealed and binding | | Commit and reveal, hash bound to market, task and worker. Bond | |
+| The winner's pay does not depend on its own bid | | Second-lowest price | |
+| Rules cannot be changed | | No admin, no upgrade method | |
 
 ## 8. Every interaction with the vault
 
-All line numbers are `contract/src/lib.rs` at commit `1e59742`. "Probe" means the row ran in the probe
-on a real local node. The other rows use vault behaviour that existing scenarios already cover.
+Line numbers are `contract/src/lib.rs` at commit `1e59742`.
 
-| Purpose | Existing method | Who calls | Line | Enough as is? | Checked by |
-|---|---|---|---|---|---|
-| Fund an order | `request_spend(recipient, amount, memo, clearance)` | The buyer's key, on the vault | 321 | Yes. Plain transfer to the market account: balance rose by exactly the deposit | Probe |
-| Check before depositing, for free | `preview_spend(grant_id, recipient, amount, clearance)` | The buyer's client, as a view | 796 | Yes | Probe |
-| Learn what a grant really paid | `contact(grant_id, recipient)` | The market, cross-contract | 764 | Yes, for non-root grants. A root's record also holds its descendants' payments, so roots are refused as bidders | Probe |
-| Learn if a grant is live, its key, parent, asset | `get_grant(grant_id)` | The market, cross-contract | 697 | Yes. 701 bytes for a grant with one recipient | Probe |
-| Confirm who owns a vault | `vault_info()` | The market, cross-contract | 776 | Yes | Probe |
-| Return money | A plain transfer to the vault account | The market | | Yes. `available_native` rose by the refund. Grant counters did not move | Probe |
-| Deliver goods | `ft_on_transfer`, reached through `ft_transfer_call` on the token | The goods token | 674 | Yes, after the owner's `add_token` (243). The owner takes goods out with `withdraw` (290) | Vault scenarios E02, E10 |
-| Build the tree | `create_root` (217), `delegate` (412) | Owner, team lead | | Yes | Probe |
-| Pull an agent out | `revoke(grant_id)` | Owner or an ancestor | 434 | Yes. The market saw `live = false` in its next call, for the grant and for a child of a revoked parent | Probe |
+| Purpose | Existing method | Who calls | Line |
+|---|---|---|---|
+| Read a grant: live, key, parent, cap, limits, recipients, depth, budgets, lifetime, what it has paid | `get_grant(grant_id)` | The market, on post, award, review, default, void, claim | 697 |
+| Is a key already bound to a grant | `grant_of_key(pk)` | The market, on reveal and default | 745 |
+| Who owns a vault | `vault_info()` | The market, on `set_roster` | 776 |
+| Create the winner's grant and its key | `delegate(child_pk, terms)` | The poster's grant key | 412 |
+| Draw the price | `request_spend(recipient = market, amount)` | The winner's grant key | 321 |
+| Cut a contractor and everything below it | `revoke(grant_id)` | The owner or any ancestor | 434 |
+| The root grant | `create_root(pk, terms)` | The owner | 217 |
+| Cross-check what a grant paid the market | `contact(grant_id, recipient)` | Tests and the verifier, as a view | 764 |
 
-Three things the vault cannot do, and what the design does instead:
+What the vault cannot do, and what the design does about it:
 
-- **Reserve budget without moving money.** The vault's `reserved` counter lives only between a spend
-  and its own callback. So the reservation is real money: the deposit sits in the market as credit, and
-  the lock is taken there.
-- **Let a contract spend for an agent.** `agent()` (line 854) requires the signer and the predecessor to
-  both be the vault account, so no contract can ever call `request_spend`. That is on purpose and stays.
-  The agent pushes the deposit. The market only reads.
-- **Tell the recipient that a payment arrived.** A native spend is a plain transfer, with no call on the
-  recipient. So the market pulls: it asks `contact` and credits the difference.
+- **A recipient list is fixed when a grant is created, and a child's list must be inside its parent's.**
+  So a poster cannot pay a winner it did not know in advance. Every grant in the chain therefore names
+  one recipient, the market, and the market forwards a draw to the task's winner.
+- **Methods only narrow.** A root without `request_spend` cannot hand it to a child (the probe shows
+  `ATT_METHODS`). So the general contractor's root keeps `request_spend`, and a root that pays the market
+  by mistake is repaid by `return_unbound`.
+- **A root's `contact` record includes its whole tree.** The market does not use it. It reads
+  `direct_spent`, which is what a grant paid itself, and which equals what reached the market because the
+  market is that grant's only recipient.
+- **Caps are not carved out of the parent.** Two awards can each be up to the poster's remainder. The
+  vault bounds the total when the money is drawn. The market keeps a running sum of what each poster has
+  promised and refuses a post that would go over.
+- **No contract can call the vault for an agent.** That stays. The poster delegates and the winner
+  draws, each with its own key. The market only reads.
 
 ## 9. Why this needs the delegation tree, and not one wallet per agent
 
-The group-buying projects we read at this hackathon fund a buyer agent in one of two ways: the owner puts
-money into that agent's own balance, or the owner sets one flat limit per agent. Either way it is a
-wallet per agent. It answers "can this agent overspend its own allowance" and nothing else. With a tree,
-five things change. The limit that matters is shared: a team's twenty agents can each be promised the
-whole team budget, and the vault still stops their deposits at the team's cap, because every deposit is
-charged to every ancestor, so no agent needs a private balance set aside for it and no sum of balances
-has to be kept under a limit by hand. Idle money is not spread around: until an agent actually deposits for an
-order, the funds sit in the vault, not in twenty hot balances. Cutting off a group is one transaction: a
-team lead or the principal revokes one grant and every order below it becomes void in the market, where
-separate wallets would need one withdrawal per agent, each racing the round. Authority is delegated by
-the agents themselves and can only shrink: a buyer agent can hand a narrower, shorter-lived grant to a
-bidding sub-agent for one round without asking the principal, and the market sees that sub-agent's
-orders bounded by every level above it. And the money has one way home: refunds, forfeited seller bonds
-and goods go to the vault account, never to an agent, because the agent has no account to receive them.
+A market where each agent has its own funded balance can run one level of hiring: the hirer escrows the
+price and the worker is paid from it. The second level is where it stops working. The worker would have
+to be paid first to have something to escrow for its own subcontractor, so money moves down the chain
+before any work exists, and from then on nobody above can see it, cap it or take it back. With a
+delegation tree, nothing moves until work is accepted. A contractor that wins 120 holds a grant of 120,
+not 120 in a wallet. It can promise 50 of it to a subcontractor, who promises 20 further down, and each
+promise is a child grant that the vault will not let exceed its parent. When the bottom worker draws 20,
+that 20 is charged to all three levels above it in the same receipt, so the contractor's margin is
+simply what its own cap has left. If the contractor is hijacked, its grant can pay nobody but the
+market, and the market pays only the winner of a task that its poster accepted. And when the general
+contractor revokes that contractor, one transaction ends the authority of every agent it hired, at any
+depth, where separate wallets would mean chasing each balance.
 
-## 10. Gas
+## 10. Known limits
 
-Measured by the probe on a local node (neard 2.14.0) at tree depth 1, with the vault's denylist screen on:
+- **A poster can refuse good work.** It can reject, or revoke the winner before the draw. The contract
+  cannot judge work. It records rejections and defaults per poster, and a worker can read that record
+  before it bids.
+- **A contractor can starve its own subcontractor.** If it draws its cap down before an accepted
+  subcontractor has drawn, the vault refuses the subcontractor's draw at the contractor's grant
+  (scenario M32). The tree's bound holds. The subcontractor is short. Its protection is to draw as soon
+  as it is accepted.
+- **Subcontractors carry their contractor's risk.** If a contractor is revoked, work in progress below
+  it is cut off unpaid, with bonds returned.
+- **Promises are bounded by the market, not reserved in the vault.** The market refuses a post that
+  over-promises, but a poster could still create grants outside the market. The vault then bounds the
+  total at draw time, and someone is paid less.
+- **Returned money does not restore budget.** Only on the paths in section 2 where a draw is held and
+  sent back.
+- **Colluding roster members can still collude.** A cartel can lift a price to the maximum budget. A
+  hijacked poster and an accomplice on the roster can run a sham task up to the poster's own cap. The
+  budget, the roster and revocation are the limits.
+- **A lone bidder is paid the maximum budget.** `min_bids` is the poster's guard.
+- **A worker's bid bond and a carrier's poster bond are real NEAR from their own accounts.** Agents
+  therefore do hold a little money of their own. It is not the principal's.
+- **Delivery is a hash.** Whether the work is good is the poster's judgment.
+- **Each step in the market after a revoke needs a call.** The vault cuts a branch in one transaction.
+  The market's tasks under it are voided one call each, by anyone.
+- **Native NEAR only. No NEAR Intents:** it has no testnet, and this project spends no real money.
 
-| Step | Burnt gas, whole transaction |
-|---|---|
-| Deposit: `request_spend` to the market, with the registry check | 11.49 Tgas |
-| Market asks the vault two views in parallel, verifies an ed25519 signature in the callback and writes two records | 8.45 Tgas |
+## 11. Where this departs from the track prompt
 
-Estimates, to be replaced by measurements:
+The prompt's example is a group-buying swarm with a sealed-bid round, sub-accounts, a coordinator
+contract, a scripted simulation and a live page. This project keeps all of those elements and changes
+what is traded: tasks, not goods, and recursively.
 
-| Step | Estimate | Why |
-|---|---|---|
-| `place_order` | 9 to 13 Tgas | The measured pattern plus the round checks. `get_grant` walks the lineage twice, so it grows with depth. The vault's own spend grows about 0.5 Tgas per level |
-| `reveal_order`, `void_order`, `refund` | 7 to 10 Tgas | One view and one callback |
-| `place_offer`, `reveal_offer` | 3 to 5 Tgas | No cross-contract call |
-| `clear`, 32 orders and 8 offers | 20 to 50 Tgas | Sorting 32 and 8, at most 8 passes of 32 x 8 comparisons, about 45 record writes. Must stay far under the 300 Tgas limit, and will be measured at the largest round |
+- **Sub-accounts.** Every worker is a sub-account. A poster's authority is a vault-issued key and a
+  grant, which trace further than an account name: to its hirer, and to every budget above it.
+- **NEAR Intents.** Not used, see section 10.
 
-## 11. Known limits
+## 12. The design we dropped
 
-- **Returned money does not restore budget.** A deposit is charged to the grant and its ancestors. A
-  refund puts the NEAR back in the vault but the counters stay, as the probe shows (`spent` 60 mNEAR
-  before and after a 25 mNEAR refund). The tree therefore over-counts by whatever came back, and never
-  under-counts. An agent keeps this small by depositing only what an order needs and reusing credit in
-  the next round.
-- **The lock is public.** It is an upper bound on `quantity x limit`. An agent can lock more than it
-  needs to blur it, at the cost of the point above.
-- **The price is the marginal ask.** A seller that expects to be marginal can ask more than its cost, and
-  a full cartel can push the price to the ceiling. The ceiling and the mandate's highest price are the
-  buyers' protection then.
-- **The last to reveal knows more.** The penalty makes silence cost something. It does not make it
-  unprofitable in every case.
-- **Revocation reaches the market when the vault is asked.** Between a reveal and `clear`, a revoked
-  grant's order stands unless someone calls `void_order`.
-- **The market trusts its listed vaults.** A listed vault that lied about `contact` could create credit
-  out of nothing and spend other vaults' deposits. The list is fixed at creation, and each listed vault
-  should be locked and run the published wasm, which anyone can check from its code hash and key list.
-- **The goods are a demo token.** Proving that a real GPU hour was delivered is out of scope.
-- **Buyers need a relayer.** A grant key cannot send a transaction to the market, so someone has to
-  carry the signed message. Anyone can.
-- **Bidder grants are not clearance-bound.** On a clearance-bound grant a deposit with no attestor
-  ticket is queued for a human. In the demo the bidder branch turns clearance off, so the age and code
-  signals of the recipient check do not apply to the market account. The recipient list and the denylist
-  screen still do.
-- **Native NEAR only**, one order per grant per round, no cancelling, at most 32 orders and 8 offers.
-- **No NEAR Intents.** It has no testnet, and this project spends no real money.
-
-## 12. Options that would need a vault change, not taken
-
-| Option | What it would give | What it would cost |
-|---|---|---|
-| A credit-back method, so a refund lowers `spent` up the lineage | The tree would be charged exactly each buyer's share | New state in the vault to bound what each recipient may hand back, so the deployed `vault2` could not read it without a migration. All 98 sandbox scenarios, both real-runtime property runs, the 100,000-operation in-process run, the 28 mutants and the 113 testnet transactions would have to be redone, and the property oracle rewritten, because `spent` would no longer only grow |
-| A spend that calls the recipient | Deposit and order in one transaction | A new external call path in the spend flow, which is the part of the vault the tests cover most heavily |
-| A reserve-and-release method open to other contracts | No money in the market until clearing | A new way for a contract to hold a grant's budget, which is new attack surface in the vault |
-
-The design above needs none of them.
-
-## 13. Where this departs from the track prompt
-
-- **Sub-accounts.** The prompt gives every agent a sub-account so each action traces to one agent. Sellers
-  are sub-accounts. A buyer's authority is a vault-issued key and a grant id, which trace further: to the
-  agent, its parent, and every budget above it. Each buyer also has a gas-only sub-account that relays
-  its messages, so the transaction signer is per agent as well.
-- **NEAR Intents.** Not used, for the reason in section 11.
-- **Coordinator.** It is the market contract. The account that opens a round has no power over it.
+The first design in this file was a sealed-bid group buy, with buyer agents funded through the vault.
+It was dropped for three reasons. Several teams at this hackathon had already built group buying as
+the prompt describes it. The delegation tree only backed the buyers' deposits, so it was a side part.
+And every refund of an unused deposit over-counted the tree. In the subcontracting market the tree is
+the thing the market produces, and the normal path charges it exactly. The probe results that carried
+over are in [SWARM-BUILD.md](SWARM-BUILD.md).

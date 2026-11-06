@@ -168,7 +168,9 @@ class Rpc:
     def query(self, request_type, block=None, **kw):
         params = {"request_type": request_type, **kw}
         if block is None:
-            params["finality"] = "final"
+            # "final" by default. A script that reads right after it writes sets `finality` to
+            # "optimistic", which is where a transaction that has just executed is first visible.
+            params["finality"] = getattr(self, "finality", "final")
         else:
             params["block_id"] = block
         res = self.raw("query", params)

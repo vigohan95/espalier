@@ -54,6 +54,19 @@ THREATS = [
     ("T41", "Forged, stale, reused or widened ticket", "Signature binds vault, grant, recipient, amount and expiry; attestor can be replaced", "Contract", "H17 H18 H19 H22"),
     ("T42", "History faked with refused or failed payments", "Only settlement writes a contact", "Contract", "H24"),
     ("T43", "Spending goes unseen or the vault cannot be stopped", "Every decision is an event with numbers; pause stops spending and delegation, not revocation", "Contract", "E01 E02 G01 P01"),
+    ("T44", "A level of the supply chain spends more than a level above it", "Every draw is charged to every ancestor; the market refuses a post that promises more than the grant has left", "Vault and market", "M02 M08 M32 M35"),
+    ("T45", "A poster creates a grant that is not what the auction decided", "The market reads parent, key, cap, limits and lifetime back from the vault before it binds a grant to a task", "Market", "M01 M16"),
+    ("T46", "Someone other than the poster posts, accepts or rejects, or reuses a signed message", "ed25519 signature against the grant key the vault reports; a signed post is used once", "Market", "M05 M21"),
+    ("T47", "A revoked, unknown or unfit grant posts a task", "The market reads the poster's grant from the vault first", "Market", "M06 M07 M09"),
+    ("T48", "An account the owner did not approve is hired with the owner's money", "Roster set by the vault's owner, who is confirmed by asking the vault", "Market", "M10"),
+    ("T49", "A bidder sees other bids, bids out of turn, changes its bid or copies one", "Commit and reveal with windows; the hash names the market, the task and the worker", "Market", "M11 M12 M14"),
+    ("T50", "A bidder commits and never reveals", "Its bond goes to the vault account", "Market", "M13 M33"),
+    ("T51", "A winner raises its pay through its own bid, or bidders agree on a price", "Second-lowest price; the maximum budget caps a cartel and a lone bidder", "Market", "M03 M04 M15"),
+    ("T52", "A poster does not award, awards on worse terms, or the winner's key is squatted", "Poster bond to the winner and a ban after three; a squatted key voids the task with nobody punished", "Market", "M17 M18"),
+    ("T53", "A winner is paid without accepted work, or more than its price", "A draw is forwarded only after acceptance, up to the price; the rest goes back to the vault", "Vault and market", "M19 M20 M22 M23"),
+    ("T54", "A hijacked contractor pays an outside account", "Its grant can pay only the market, a sub-grant cannot add a recipient, an outsider cannot bid", "Vault and market", "M24"),
+    ("T55", "A revoked poster or winner keeps its tasks alive, or a revoke punishes the wrong party", "The market reads `live` from the vault; one revoke cuts the whole branch; a void costs no bond", "Vault and market", "M25 M26 M27 M28 M29 M30"),
+    ("T56", "Money gets stuck in the market or the market owes more than it holds", "Stray payments return to the vault account; every bond, balance and held draw is counted", "Market", "M31 M34"),
 ]
 
 
@@ -88,6 +101,8 @@ def main():
         "",
         "Trust assumptions: the owner account is honest and its key is safe, and the NEAR protocol works as specified. Any agent key can be stolen, and any agent can be prompt-injected. Unless a row says otherwise, the attacker holds a real agent key.",
         "",
+        "Threats T01 to T43 are about the vault. T44 to T56 are about the subcontracting market on top of it, scenarios M01 to M35: there the attacker can also be a worker, a poster, or whoever carries a message. Rules: [SWARM-RULES.md](SWARM-RULES.md).",
+        "",
         "## Threat model",
         "",
         "| # | Threat | What stops it | Enforced by | Scenarios |",
@@ -121,6 +136,8 @@ def main():
         "- A real model under indirect injection: [trials/report.md](evidence/trials/report.md).",
         "- The official attack demo as a log: [attack-demo.log](evidence/attack-demo.log).",
         "- A rogue worker in the hiring flow: [hire-demo-sandbox.log](evidence/hire-demo-sandbox.log).",
+        "- Random operations against vault and market together, with invariants: [market-property.json](evidence/market-property.json).",
+        "- A 25-agent, three-level subcontracting run with a hijacked contractor, on a local node and on testnet: [swarm-sim-sandbox.log](evidence/swarm-sim-sandbox.log), [swarm-sim-testnet.log](evidence/swarm-sim-testnet.log).",
         "",
     ]
     with open(os.path.join(HERE, "..", "docs", "ATTACKS.md"), "w", encoding="utf8", newline="\n") as f:

@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espalier: the budget tree that auctions grow</title>
+<style>
+:root {
+  --paper: #f6f3ea; --card: #fffdf7; --ink: #1d2a22; --soft: #5b6b60; --line: #c9c3b0; --leaf: #2f6b3f;
+  --leaf-soft: #dcebd9; --bark: #7a5a35; --cut: #a8412f; --cut-soft: #f3ddd6; --amber: #9a6b00; --amber-soft: #f4e7c4;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121a15; --card: #18231c; --ink: #e6ecdf; --soft: #9fb0a3; --line: #33443a; --leaf: #7fc48c;
+    --leaf-soft: #1f3a27; --bark: #c9a66b; --cut: #e58a76; --cut-soft: #3b211c; --amber: #e0b34a; --amber-soft: #3a3015;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121a15; --card: #18231c; --ink: #e6ecdf; --soft: #9fb0a3; --line: #33443a; --leaf: #7fc48c;
+  --leaf-soft: #1f3a27; --bark: #c9a66b; --cut: #e58a76; --cut-soft: #3b211c; --amber: #e0b34a; --amber-soft: #3a3015;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 var(--sans); }
+main { max-width: 1080px; margin: 0 auto; padding: 20px 16px 60px; }
+h1 { font: 600 30px/1.15 var(--serif); margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font: 600 19px/1.2 var(--serif); margin: 34px 0 10px; }
+p { margin: 6px 0; }
+.lede { color: var(--soft); max-width: 68ch; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0 0; font-size: 13px; color: var(--soft); }
+.pill { border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; background: var(--card); white-space: nowrap; }
+.pill.live { border-color: var(--leaf); color: var(--leaf); }
+.pill.snap { border-color: var(--amber); color: var(--amber); background: var(--amber-soft); }
+button { font: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 5px 12px; cursor: pointer; }
+button:hover { border-color: var(--leaf); }
+button[aria-pressed="true"] { background: var(--leaf-soft); border-color: var(--leaf); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 18px; }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.tile b { display: block; font: 600 22px/1.2 var(--mono); }
+.tile span { font-size: 12.5px; color: var(--soft); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 6px 0 12px; font-size: 13.5px; }
+.controls input[type=range] { width: min(260px, 60vw); accent-color: var(--leaf); }
+.tree, .tree ul { list-style: none; margin: 0; padding: 0; }
+.tree ul { margin-left: 12px; padding-left: 14px; border-left: 2px solid var(--line); }
+.tree li { position: relative; margin: 10px 0 0; }
+.tree ul > li::before { content: ""; position: absolute; left: -14px; top: 22px; width: 12px; border-top: 2px solid var(--line); }
+.node { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--leaf); border-radius: 8px; padding: 8px 10px; }
+.node.cut { border-left-color: var(--cut); background: var(--cut-soft); }
+.node.cut .who { text-decoration: line-through; text-decoration-color: var(--cut); }
+.node.pending { border-style: dashed; border-left-style: solid; border-left-color: var(--amber); }
+.row { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.who { font: 600 16px var(--serif); }
+.tag { font-size: 12px; border-radius: 4px; padding: 0 6px; border: 1px solid var(--line); color: var(--soft); white-space: nowrap; }
+.tag.ok { color: var(--leaf); border-color: var(--leaf); }
+.tag.bad { color: var(--cut); border-color: var(--cut); }
+.tag.wait { color: var(--amber); border-color: var(--amber); }
+.edge { font-size: 13px; color: var(--soft); margin-bottom: 4px; }
+.edge a { color: var(--bark); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; }
+.meter { height: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 5px; overflow: hidden; display: flex; margin: 6px 0 3px; }
+.meter i { display: block; height: 100%; }
+.meter .own { background: var(--leaf); }
+.meter .below { background: var(--bark); }
+.meter .promised { background: repeating-linear-gradient(45deg, var(--amber), var(--amber) 3px, transparent 3px, transparent 6px); }
+.small { font-size: 12.5px; color: var(--soft); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--soft); margin: 8px 0; }
+.legend i { display: inline-block; width: 12px; height: 8px; margin-right: 4px; vertical-align: middle; border-radius: 2px; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 4px 10px 4px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--soft); font-weight: 500; }
+td.r, th.r { text-align: right; }
+.checks { list-style: none; padding: 0; margin: 0; }
+.checks li { padding: 3px 0 3px 22px; position: relative; }
+.checks li::before { content: "ok"; position: absolute; left: 0; font: 600 11px var(--mono); color: var(--leaf); top: 6px; }
+.checks li.fail::before { content: "no"; color: var(--cut); }
+code { font-family: var(--mono); font-size: 12.5px; overflow-wrap: anywhere; }
+.err { color: var(--cut); }
+footer { margin-top: 36px; color: var(--soft); font-size: 13px; }
+@media (max-width: 560px) {
+  h1 { font-size: 24px; }
+  main { padding: 14px 16px 50px; }
+  .tree ul { margin-left: 4px; padding-left: 10px; }
+  .tree ul > li::before { left: -10px; width: 8px; }
+  .who { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>The budget tree that auctions grow</h1>
+  <p class="lede">Agents hire agents, who hire agents. Each hire is a sealed-bid round, and the prize is a grant in an Espalier vault:
+  a child of the hirer's grant, capped at the auction's price. Nobody draws this tree. It grows one node per auction, and the vault
+  will not let any node spend more than the nodes above it.</p>
+  <div class="bar" id="source"><span class="pill">loading</span></div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <h2>The tree</h2>
+  <div class="controls">
+    <label>Grown after <b class="num" id="stepLabel">0</b> awards <input type="range" id="step" min="0" max="0" value="0" aria-label="How many awards to show"></label>
+    <span>
+      <button id="modeNow" aria-pressed="true">Now</button>
+      <button id="modeBefore" aria-pressed="false">Before any revoke</button>
+    </span>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--leaf)"></i>drawn by this agent</span>
+    <span><i style="background:var(--bark)"></i>drawn by agents it hired</span>
+    <span><i style="background:var(--amber)"></i>promised to open tasks</span>
+    <span><i style="background:var(--cut)"></i>cut off by a revoke</span>
+  </div>
+  <ul class="tree" id="tree"></ul>
+  <p class="small" id="revokeNote"></p>
+
+  <h2 id="taskTitle">A task</h2>
+  <div class="panel" id="task"><span class="small">Pick a task in the tree.</span></div>
+
+  <h2>All tasks</h2>
+  <div class="panel scroll"><table id="tasks"></table></div>
+
+  <h2>Checked in your browser</h2>
+  <div class="panel"><ul class="checks" id="checks"></ul></div>
+
+  <h2>Contracts</h2>
+  <div class="panel scroll"><table id="contracts"></table></div>
+
+  <footer>
+    <p>This page holds no key and sends no transaction. It makes read-only view calls to a public NEAR RPC from your browser, and falls
+    back to a snapshot file when none answers. Amounts are in mNEAR, thousandths of a NEAR. The agents in the recorded run are scripted.</p>
+  </footer>
+</main>
+
+<script src="config.js"></script>
+<script src="snapshot.js"></script>
+<script>
+"use strict";
+const CFG = Object.assign({ rpcs: ["https://test.rpc.fastnear.com", "https://rpc.testnet.fastnear.com", "https://near-testnet.drpc.org"], names: {} }, window.ESPALIER_CONFIG || {});
+const SNAP = window.ESPALIER_SNAPSHOT || null;
+const Q = new URLSearchParams(location.search);
+for (const k of ["market", "vault", "network"]) if (Q.get(k)) CFG[k] = Q.get(k);
+if (Q.get("rpc")) CFG.rpcs = [Q.get("rpc")];
+if (!CFG.market && SNAP) { CFG.market = SNAP.market; CFG.vault = SNAP.vault; CFG.network = SNAP.network; }
+if (SNAP && SNAP.market === CFG.market) Object.assign(CFG.names, SNAP.names || {});
+const FORCE_SNAPSHOT = Q.get("source") === "snapshot";
+
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+const MILLI = 10n ** 21n;
+const big = (v) => BigInt(v || 0);
+function mn(v) {
+  const x = big(v), whole = x / MILLI, frac = (x % MILLI) * 100n / MILLI;
+  return frac === 0n ? whole.toString() : `${whole}.${frac.toString().padStart(2, "0")}`.replace(/0$/, "");
+}
+const short = (account) => account ? (CFG.names[account] || account.split(".")[0]) : "";
+
+// ---- The pricing rule, the same as market/src/pricing.rs, with the same vectors -----------------
+function pick(bids, maxBudget, minBids) {
+  if (!bids.length || bids.length < Math.max(1, minBids)) return null;
+  const order = bids.map((b, i) => i).sort((a, b) => (bids[a][0] < bids[b][0] ? -1 : bids[a][0] > bids[b][0] ? 1 : bids[a][1] - bids[b][1]));
+  let price = maxBudget;
+  if (order.length > 1) price = bids[order[1]][0] < maxBudget ? bids[order[1]][0] : maxBudget;
+  return [order[0], price];
+}
+const VECTORS = [
+  [[], "100", 1, null], [[["40", 0]], "100", 1, [0, "100"]], [[["40", 0]], "100", 2, null], [[["40", 0], ["55", 1]], "100", 2, [0, "55"]],
+  [[["55", 0], ["40", 1]], "100", 1, [1, "55"]], [[["70", 0], ["40", 1], ["55", 2]], "100", 2, [1, "55"]],
+  [[["40", 3], ["40", 1], ["90", 2]], "100", 1, [1, "40"]], [[["100", 0], ["100", 1], ["100", 2]], "100", 2, [0, "100"]],
+  [[["1", 0], ["60", 1], ["80", 2]], "100", 2, [0, "60"]], [[["30", 0]], "50", 0, [0, "50"]], [[["30", 0], ["31", 1], ["32", 2]], "50", 4, null],
+  [[["120000000000000000000000", 0], ["95000000000000000000000", 1], ["99000000000000000000000", 2]], "150000000000000000000000", 2, [1, "99000000000000000000000"]],
+];
+
+// ---- Reading the chain ---------------------------------------------------------------------------
+let rpcUsed = null, fromSnapshot = FORCE_SNAPSHOT;
+async function rpc(method, params) {
+  let last;
+  for (const url of rpcUsed ? [rpcUsed] : CFG.rpcs) {
+    try {
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 9000);
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: "page", method, params }), signal: ctl.signal });
+      clearTimeout(timer);
+      const j = await r.json();
+      if (j.error) { last = new Error(JSON.stringify(j.error).slice(0, 200)); if (rpcUsed) throw last; continue; }
+      rpcUsed = url;
+      return j.result;
+    } catch (e) { last = e; if (rpcUsed) throw e; }
+  }
+  throw last || new Error("no RPC");
+}
+const sortKeys = (o) => JSON.stringify(Object.keys(o).sort().reduce((a, k) => (a[k] = o[k], a), {}));
+async function view(account, method, args = {}) {
+  if (!fromSnapshot) {
+    const res = await rpc("query", { request_type: "call_function", finality: "final", account_id: account, method_name: method, args_base64: btoa(JSON.stringify(args)) });
+    if (res.error) throw new Error(res.error);
+    return JSON.parse(new TextDecoder().decode(Uint8Array.from(res.result)));
+  }
+  const key = `${account}|${method}|${sortKeys(args)}`;
+  if (!SNAP || !(key in SNAP.calls)) throw new Error("not in the snapshot: " + key);
+  return SNAP.calls[key];
+}
+async function inBatches(items, size, fn) {
+  const out = [];
+  for (let i = 0; i < items.length; i += size) out.push(...await Promise.all(items.slice(i, i + size).map(fn)));
+  return out;
+}
+function b58hex(s) {
+  const A = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  let n = 0n;
+  for (const c of s) n = n * 58n + BigInt(A.indexOf(c));
+  return n.toString(16).padStart(64, "0");
+}
+
+async function load() {
+  const S = { grants: new Map(), tasks: [], posters: new Map(), accounts: {} };
+  S.config = await view(CFG.market, "config");
+  S.solvency = await view(CFG.market, "solvency");
+  S.info = await view(CFG.vault, "vault_info");
+  const starts = [];
+  for (let i = 1; i <= S.config.tasks; i += 50) starts.push(i);
+  for (const page of await inBatches(starts, 2, (from) => view(CFG.market, "get_tasks", { from, limit: 50 }))) S.tasks.push(...page);
+  const ids = Array.from({ length: S.info.grants }, (_, i) => i + 1);
+  (await inBatches(ids, 6, (id) => view(CFG.vault, "get_grant", { grant_id: id }))).forEach((g) => g && S.grants.set(g.id, g));
+  const posters = [...new Set(S.tasks.map((t) => t.spec.grant_id))].sort((a, b) => a - b);
+  (await inBatches(posters, 6, (id) => view(CFG.market, "get_poster", { vault: CFG.vault, grant_id: id }))).forEach((p, i) => S.posters.set(posters[i], p));
+  if (fromSnapshot) S.accounts = SNAP.accounts;
+  else {
+    for (const a of [CFG.market, CFG.vault]) {
+      const acct = await rpc("query", { request_type: "view_account", finality: "final", account_id: a });
+      const keys = await rpc("query", { request_type: "view_access_key_list", finality: "final", account_id: a });
+      S.accounts[a] = { code_hash: acct.code_hash, amount: acct.amount, storage_usage: acct.storage_usage, keys: keys.keys.length, full_access_keys: keys.keys.filter((k) => k.access_key.permission === "FullAccess").length };
+    }
+  }
+  return S;
+}
+
+// ---- Drawing -------------------------------------------------------------------------------------
+let STATE = null, MODE = "now", STEP = 0, PICKED = null;
+
+function derive(S) {
+  const byGrant = new Map(), postedBy = new Map();
+  for (const t of S.tasks) {
+    if (t.grant) byGrant.set(t.grant, t);
+    if (!postedBy.has(t.spec.grant_id)) postedBy.set(t.spec.grant_id, []);
+    postedBy.get(t.spec.grant_id).push(t);
+  }
+  const awards = S.tasks.filter((t) => t.grant).map((t) => t.id);
+  // Only the branch the market grew: roots whose one recipient is the market, and awarded grants.
+  const roots = [...S.grants.values()].filter((g) => g.parent === null && postedBy.has(g.id));
+  return { byGrant, postedBy, awards, roots };
+}
+const revealed = (t) => t.bids.filter((b) => b.revealed);
+function recompute(t) {
+  const bids = t.bids.map((b, i) => [b, i]).filter(([b]) => b.revealed).map(([b, i]) => [big(b.price), i]);
+  const got = pick(bids, big(t.spec.max_budget), t.spec.min_bids);
+  return got ? { worker: t.bids[got[0]].worker, price: got[1] } : null;
+}
+function cutBy(S, g) {
+  // The nearest grant up the tree that was itself revoked.
+  for (let x = g; x; x = x.parent ? S.grants.get(x.parent) : null) if (x.revoked && (x.id === g.id || !S.grants.get(x.parent)?.revoked)) return x;
+  for (let x = g; x; x = x.parent ? S.grants.get(x.parent) : null) if (x.revoked) return x;
+  return null;
+}
+function statusTag(status) {
+  const cls = { Paid: "ok", Accepted: "ok", Awarded: "wait", Delivered: "wait", Open: "wait", Awarding: "wait" }[status] || "bad";
+  return el("span", "tag " + cls, status === "NoAward" ? "no award" : status.toLowerCase());
+}
+function edgeLine(t) {
+  const d = el("div", "edge");
+  const a = el("a", null, `task ${t.id}`);
+  a.onclick = () => { PICKED = t.id; drawTask(); $("taskTitle").scrollIntoView({ behavior: "smooth", block: "start" }); };
+  const r = revealed(t), lows = r.map((b) => big(b.price)).sort((x, y) => (x < y ? -1 : 1));
+  d.append(a, ` · ${t.bids.length} sealed bid${t.bids.length === 1 ? "" : "s"}`);
+  if (t.winner) d.append(` · lowest ${mn(lows[0])}, paid `, Object.assign(el("b", "num"), { textContent: mn(t.price) }), r.length > 1 ? " (the second-lowest bid)" : " (alone: the full budget)");
+  return d;
+}
+function nodeFor(S, D, g, depth) {
+  const li = el("li");
+  const t = D.byGrant.get(g.id);
+  const visible = !t || D.awards.indexOf(t.id) < STEP;
+  if (!visible) return null;
+  const dead = MODE === "now" && !g.live;
+  const card = el("div", "node" + (dead ? " cut" : ""));
+  if (t) card.append(edgeLine(t));
+  const row = el("div", "row");
+  row.append(el("span", "who", t ? short(t.winner) : "general contractor"), el("span", "small num", `grant ${g.id}`));
+  if (dead) { const by = cutBy(S, g); row.append(el("span", "tag bad", by && by.id !== g.id ? `cut off with grant ${by.id}` : (g.revoked ? "revoked" : "expired"))); }
+  else row.append(el("span", "tag ok", "live"));
+  if (t) row.append(statusTag(t.status));
+  card.append(row);
+  const cap = big(g.cap), own = big(g.direct_spent), below = big(g.spent) - own;
+  const promised = big(S.posters.get(g.id)?.committed);
+  const pct = (x) => cap > 0n ? Number(x * 1000n / cap) / 10 : 0;
+  const meter = el("div", "meter");
+  for (const [cls, v] of [["own", own], ["below", below], ["promised", MODE === "now" && !g.live ? 0n : promised]]) { const i = el("i", cls); i.style.width = pct(v) + "%"; meter.append(i); }
+  card.append(meter);
+  card.append(el("div", "small num", `cap ${mn(cap)} · drawn ${mn(own)} · by hires ${mn(below)}${promised > 0n ? ` · promised ${mn(promised)}` : ""} · left ${mn(g.spendable)}`));
+  li.append(card);
+  const kids = el("ul");
+  for (const c of g.children.map((id) => S.grants.get(id)).filter(Boolean)) { const n = D.byGrant.has(c.id) ? nodeFor(S, D, c, depth + 1) : null; if (n) kids.append(n); }
+  // Tasks this grant posted that have no grant: still bidding, waiting for an award, or ended without one.
+  for (const p of (D.postedBy.get(g.id) || []).filter((p) => !p.grant)) {
+    if (STEP < D.awards.length && p.id > (D.awards[STEP] || 0)) continue;
+    const pli = el("li"), pc = el("div", "node pending");
+    pc.append(edgeLine(p));
+    const pr = el("div", "row");
+    pr.append(el("span", "small", p.winner ? `${short(p.winner)} won and got no grant` : "no winner"), statusTag(p.status));
+    if (p.note) pr.append(el("span", "small", p.note.replace(/_/g, " ").toLowerCase()));
+    pc.append(pr); pli.append(pc); kids.append(pli);
+  }
+  if (kids.children.length) li.append(kids);
+  return li;
+}
+function drawTree() {
+  const S = STATE, D = derive(S);
+  $("step").max = D.awards.length;
+  $("stepLabel").textContent = `${STEP} of ${D.awards.length}`;
+  const tree = $("tree");
+  tree.replaceChildren();
+  for (const r of D.roots) { const n = nodeFor(S, D, r, 0); if (n) tree.append(n); }
+  if (!D.roots.length) tree.append(el("li", "small", "No task has been posted yet."));
+  const cut = [...S.grants.values()].filter((g) => !g.live && (D.byGrant.has(g.id)));
+  const revoked = cut.filter((g) => g.revoked && S.grants.get(g.parent)?.live !== false);
+  $("revokeNote").textContent = cut.length
+    ? (MODE === "now" ? `${cut.length} grants are cut off. ${revoked.length} revoke${revoked.length === 1 ? "" : "s"} did it: each one ended everything below it in the same transaction.` : `Shown as awarded. ${cut.length} of these grants have since been cut off.`)
+    : "";
+}
+function drawTiles() {
+  const S = STATE, D = derive(S);
+  const sum = (f) => S.tasks.reduce((a, t) => a + big(f(t)), 0n);
+  const root = D.roots[0];
+  const tiles = [
+    [root ? mn(root.cap) : "0", "root budget, mNEAR"],
+    [root ? mn(root.spent) : "0", "charged to the tree"],
+    [mn(sum((t) => t.paid)), "paid to workers"],
+    [mn(sum((t) => t.refunded) + sum((t) => t.held)), "drawn and not payable: back to the vault"],
+    [String(D.awards.length), `grants grown by ${S.tasks.length} auctions`],
+    [String(D.awards.filter((id) => !S.grants.get(S.tasks.find((t) => t.id === id).grant)?.live).length), "grants cut off by revokes"],
+  ];
+  $("tiles").replaceChildren(...tiles.map(([b, s]) => { const t = el("div", "tile"); t.append(el("b", null, b), el("span", null, s)); return t; }));
+}
+function drawTask() {
+  const S = STATE, box = $("task");
+  const t = S.tasks.find((x) => x.id === PICKED);
+  if (!t) return;
+  $("taskTitle").textContent = `Task ${t.id}`;
+  box.replaceChildren();
+  const head = el("div", "row");
+  head.append(el("span", "who", `posted by ${short(S.tasks.find((x) => x.grant === t.spec.grant_id)?.winner) || "the general contractor"}`), el("span", "small num", `grant ${t.spec.grant_id}`), statusTag(t.status));
+  box.append(head);
+  box.append(el("p", "small num", `budget up to ${mn(t.spec.max_budget)} · at least ${Math.max(1, t.spec.min_bids)} bid${t.spec.min_bids > 1 ? "s" : ""} · bid bond ${mn(t.spec.bid_bond)} · winner may hire ${t.spec.sub_depth} level${t.spec.sub_depth === 1 ? "" : "s"} further`));
+  const wrap = el("div", "scroll"), tb = el("table");
+  tb.innerHTML = "<tr><th>worker</th><th class='r'>bid</th><th>bond</th><th></th></tr>";
+  const order = t.bids.map((b, i) => [b, i]).sort(([a], [b]) => (a.revealed === b.revealed ? (a.revealed && big(a.price) < big(b.price) ? -1 : 1) : a.revealed ? -1 : 1));
+  for (const [b] of order) {
+    const tr = el("tr");
+    const isWinner = t.winner === b.worker;
+    tr.append(el("td", null, short(b.worker)), el("td", "r num", b.revealed ? mn(b.price) : "sealed"),
+      el("td", "small", big(b.bond) > 0n ? "locked" : b.revealed ? "returned" : (t.status === "Open" ? "locked" : (t.status === "Void" ? "returned" : "lost: never revealed"))),
+      el("td", "small", isWinner ? `wins, paid ${mn(t.price)}` : ""));
+    tb.append(tr);
+  }
+  wrap.append(tb); box.append(wrap);
+  const re = t.status === "Open" || t.status === "Void" && !t.winner ? null : recompute(t);
+  if (t.status !== "Open" && !(t.status === "Void" && !t.winner)) {
+    const same = re ? (re.worker === t.winner && re.price === big(t.price)) : !t.winner;
+    box.append(el("p", same ? "small" : "small err", same ? `Recomputed here from the revealed bids: ${re ? `${short(re.worker)} at ${mn(re.price)}` : "no award"}. Same as the contract.` : "Recomputed here from the revealed bids: NOT what the contract recorded."));
+  }
+  if (t.grant) {
+    const g = S.grants.get(t.grant);
+    box.append(el("p", "small num", `prize: grant ${t.grant}, cap ${mn(g.cap)}${big(g.cap) === big(t.price) ? " = the price" : ""} · paid ${mn(t.paid)} · held ${mn(t.held)} · returned to the vault ${mn(t.refunded)}`));
+  }
+  if (t.note) box.append(el("p", "small", `Note on chain: ${t.note.replace(/_/g, " ").toLowerCase()}`));
+  const when = (ms) => new Date(ms).toISOString().slice(11, 19) + " UTC";
+  box.append(el("p", "small num", `commit until ${when(t.spec.commit_end_ms)} · reveal until ${when(t.spec.reveal_end_ms)} · award by ${when(t.spec.award_end_ms)} · deliver by ${when(t.spec.deliver_end_ms)} · review until ${when(t.spec.review_end_ms)}`));
+}
+function drawTasks() {
+  const S = STATE, tb = $("tasks");
+  tb.innerHTML = "<tr><th>task</th><th>posted by</th><th>winner</th><th class='r'>bids</th><th class='r'>price</th><th class='r'>paid</th><th>status</th></tr>";
+  for (const t of S.tasks) {
+    const tr = el("tr");
+    const a = el("a", null, String(t.id));
+    a.style.cssText = "cursor:pointer;text-decoration:underline dotted;color:var(--bark)";
+    a.onclick = () => { PICKED = t.id; drawTask(); $("taskTitle").scrollIntoView({ behavior: "smooth" }); };
+    const td = el("td"); td.append(a);
+    const st = el("td"); st.append(statusTag(t.status));
+    tr.append(td, el("td", null, short(S.tasks.find((x) => x.grant === t.spec.grant_id)?.winner) || "general contractor"), el("td", null, short(t.winner) || "-"),
+      el("td", "r num", String(t.bids.length)), el("td", "r num", t.winner ? mn(t.price) : "-"), el("td", "r num", mn(t.paid)), st);
+    tb.append(tr);
+  }
+}
+function drawChecks() {
+  const S = STATE, D = derive(S), list = $("checks"), out = [];
+  const add = (ok, text) => out.push([ok, text]);
+  let pass = 0;
+  for (const [bids, max, min, want] of VECTORS) {
+    const got = pick(bids.map(([p, s]) => [big(p), s]), big(max), min);
+    if ((got === null && want === null) || (got && want && got[0] === want[0] && got[1] === big(want[1]))) pass++;
+  }
+  add(pass === VECTORS.length, `The pricing rule in this page gives the expected answer on ${pass} of ${VECTORS.length} shared test vectors.`);
+  const closed = S.tasks.filter((t) => t.status !== "Open" && !(t.status === "Void" && !t.winner));
+  const agree = closed.filter((t) => { const r = recompute(t); return r ? (r.worker === t.winner && r.price === big(t.price)) : !t.winner; }).length;
+  add(agree === closed.length, `Winner and price recomputed from the revealed bids match the contract on ${agree} of ${closed.length} closed tasks.`);
+  const gs = [...S.grants.values()];
+  add(gs.every((g) => big(g.spent) + big(g.reserved) <= big(g.cap)), `No grant has spent more than its cap: ${gs.length} grants read from the vault.`);
+  add(gs.every((g) => big(g.spent) >= g.children.reduce((a, c) => a + big(S.grants.get(c)?.spent), 0n)), "Every grant's own counter covers everything spent below it.");
+  const awarded = S.tasks.filter((t) => t.grant);
+  add(awarded.every((t) => big(S.grants.get(t.grant).cap) === big(t.price) && S.grants.get(t.grant).parent === t.spec.grant_id), `Each of the ${awarded.length} awarded grants has its task's price as its cap and the poster's grant as its parent.`);
+  add(awarded.every((t) => JSON.stringify(S.grants.get(t.grant).recipients) === JSON.stringify([CFG.market])), "Every awarded grant can pay only the market.");
+  add(awarded.every((t) => big(t.paid) <= big(t.price) && big(t.paid) + big(t.held) + big(t.refunded) <= big(S.grants.get(t.grant).direct_spent)), "No task paid more than its price, or more than its winner's grant drew.");
+  add(S.tasks.every((t) => big(t.paid) === 0n || ["Accepted", "Paid"].includes(t.status)), "Nothing was paid for work that was not accepted.");
+  const owed = big(S.solvency.owed), bal = big(S.accounts[CFG.market]?.amount ?? S.solvency.balance), storage = big(S.accounts[CFG.market]?.storage_usage) * 10n ** 19n;
+  add(bal >= owed + storage, `The market holds ${mn(bal)} and owes ${mn(owed)} in bonds and balances, plus ${mn(storage)} for its storage.`);
+  list.replaceChildren(...out.map(([ok, text]) => el("li", ok ? "" : "fail", text)));
+}
+function drawContracts() {
+  const S = STATE, tb = $("contracts");
+  tb.innerHTML = "<tr><th>contract</th><th>account</th><th>code sha256</th><th>keys</th></tr>";
+  for (const [name, account, want] of [["vault", CFG.vault, CFG.vault_sha256], ["market", CFG.market, CFG.market_sha256]]) {
+    const a = S.accounts[account] || {}, hex = a.code_hash ? b58hex(a.code_hash) : "";
+    const tr = el("tr"), link = el("a", null, account);
+    if ((CFG.network || "").includes("testnet")) { link.href = `https://testnet.nearblocks.io/address/${account}`; link.rel = "noopener"; link.target = "_blank"; }
+    link.style.color = "var(--bark)";
+    const td = el("td"); td.append(link);
+    const code = el("td"); code.append(el("code", null, hex));
+    if (want) code.append(el("div", hex === want ? "small" : "small err", hex === want ? "same as the wasm file in the repository" : "differs from the repository's wasm"));
+    tr.append(el("td", null, name), td, code, el("td", "small", a.keys === undefined ? "" : (a.full_access_keys === 0 ? `locked: no full-access key (${a.keys} agent keys)` : `${a.full_access_keys} full-access, ${a.keys - a.full_access_keys} agent keys`)));
+    tb.append(tr);
+  }
+}
+function drawSource() {
+  const S = STATE, bar = $("source");
+  bar.replaceChildren();
+  if (fromSnapshot) bar.append(el("span", "pill snap", `snapshot taken ${SNAP.taken_at}`), el("span", null, FORCE_SNAPSHOT ? "shown on request" : "no RPC answered, so this is a saved copy, not the live chain"));
+  else bar.append(el("span", "pill live", "live"), el("span", null, `${CFG.network || "NEAR"} via ${new URL(rpcUsed).host}, chain time ${new Date(S.config.now_ms).toISOString().slice(0, 19).replace("T", " ")} UTC`));
+  const b = el("button", null, "Read again");
+  b.onclick = () => start(true);
+  bar.append(b);
+}
+function drawAll() { drawSource(); drawTiles(); drawTree(); drawTasks(); drawChecks(); drawContracts(); if (PICKED) drawTask(); }
+
+async function start(keepStep) {
+  try {
+    if (!CFG.market || !CFG.vault) throw new Error("no contract configured: add ?market=ACCOUNT&vault=ACCOUNT to the address");
+    try { STATE = await load(); }
+    catch (e) {
+      if (fromSnapshot || !SNAP || SNAP.market !== CFG.market) throw e;
+      fromSnapshot = true; STATE = await load();
+    }
+    const awards = derive(STATE).awards;
+    if (!keepStep || STEP > awards.length) STEP = awards.length;
+    $("step").value = STEP;
+    if (!PICKED && STATE.tasks.length) PICKED = STATE.tasks[0].id;
+    drawAll();
+  } catch (e) {
+    $("source").replaceChildren(el("span", "pill err", "could not read"), el("span", "err", String(e.message || e)));
+  }
+}
+$("step").oninput = (e) => { STEP = Number(e.target.value); drawTree(); };
+for (const [id, mode] of [["modeNow", "now"], ["modeBefore", "before"]]) $(id).onclick = () => {
+  MODE = mode;
+  $("modeNow").setAttribute("aria-pressed", String(mode === "now"));
+  $("modeBefore").setAttribute("aria-pressed", String(mode === "before"));
+  drawTree();
+};
+start(false);
+</script>
+</body>
+</html>
