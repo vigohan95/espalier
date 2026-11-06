@@ -102,6 +102,7 @@ pub fn all() -> Vec<Scenario> {
     ]
     .into_iter()
     .chain(crate::recipient::all())
+    .chain(crate::market::all())
     .collect()
 }
 

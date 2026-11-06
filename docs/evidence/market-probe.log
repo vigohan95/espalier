@@ -12,7 +12,7 @@ PASS  P2 preview_spend says a deposit that fits would go through  [WITHIN_POLICY
 PASS  P2 preview_spend says a deposit over the limits would be refused  [PER_TX]
 PASS  P2 request_spend to a contract account settles (registry screen on)  [settled SETTLED, gas 11.49 Tgas]
 PASS  P2 market balance rose by exactly the deposit  [60.0 mNEAR]
-PASS  P2 vault.contact(grant, market) records it  [{'count': 1, 'total': '60000000000000000000000', 'first_ms': 1793976138381, 'last_ms': 1793976138381}]
+PASS  P2 vault.contact(grant, market) records it  [{'count': 1, 'total': '60000000000000000000000', 'first_ms': 1793977683461, 'last_ms': 1793977683461}]
 PASS  P2 probe credits exactly the settled amount  [60000000000000000000000]
 PASS  P1 spendable seen by the probe is the lineage minimum  [40.0 mNEAR (A has 40 left, root has 90)]
 PASS  P2 the same payment is never credited twice
@@ -33,4 +33,26 @@ PASS  P6 credit of a revoked grant is still there to be returned  [35.0 mNEAR]
 PASS  P6 revoked key cannot top up  [the vault deleted the key in the revoke, so the protocol has nothing to check]
 PASS  P6 revoking an ancestor makes the child not live  [live False, own revoked flag True]
 PASS  P5 on a clearance-bound grant a deposit with no ticket is queued, not paid  [NEEDS_CLEARANCE]
-34/34 checks passed
+PASS  S1 a root without request_spend cannot hand it to a child: methods only narrow  [ATT_METHODS]
+PASS  S1 a root whose money can only go to the market  [GRANTED]
+PASS  S2 the root awards a level-1 grant with the cap of a price  [GRANTED, gas 6.46 Tgas]
+PASS  S3 the winner awards its own sub-grant, and that one awards a third level  [grants 6 > 7 > 8 > 9]
+PASS  S4 get_grant shows everything a market must confirm about an award: parent, key, cap, limits, recipients  [parent 7, cap 50.0 mNEAR, nodes left 1]
+PASS  S4 get_lineage walks from the third level to the root
+PASS  S4 grant_of_key maps a bound key to its grant, and an unused key to nothing
+PASS  S5 a key that already belongs to a grant cannot be bound to a second one  [KEY_IN_USE]
+PASS  S5 an award larger than the awarding grant has left is refused by the vault  [ATT_CAP]
+PASS  S5 a sub-grant cannot add a recipient beside the market  [ATT_RECIPIENTS]
+PASS  S6 a third-level draw settles and is charged to every level up to the root  [spent by level [20, 20, 20, 20] mNEAR, gas 12.64 Tgas]
+PASS  S6 contact credits the draw to the grant that made it, not to its parent  [L3 20.0 mNEAR, L2 None]
+PASS  S6 a grant cannot draw past its own price  [CAP]
+PASS  S6 a hijacked sub-contractor cannot pay an outside account  [RECIPIENT_NOT_ALLOWED]
+PASS  S6 direct_spent is what a grant paid itself, also for a root, where contact adds the tree  [root direct 5.0, spent 25.0, contact 25.0 mNEAR]
+PASS  S6 for a grant whose only recipient is the market, direct_spent equals its contact total
+PASS  S7 a second award up to the contractor's remainder is allowed: caps are not carved out  [GRANTED]
+PASS  S7 the first sibling draws its whole price  [SETTLED]
+PASS  S7 the other sibling's draw is refused at the shared parent  [ANCESTOR_CAP blocking grant 7]
+PASS  S8 one revoke by the root makes the contractor and all three grants below it not live  [live [True, False, False, False, False], gas 6.86 Tgas]
+PASS  S8 and deletes their keys in the same transaction
+PASS  S8 the root's counters keep exactly what was drawn before the revoke  [125.0 mNEAR of 300]
+56/56 checks passed

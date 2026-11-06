@@ -1,10 +1,11 @@
 //! Runs the scenarios and the real-runtime property test, and writes the evidence reports.
-//!   harness sandbox [--only A01,B02] [--report docs/evidence/sandbox-report]
+//!   harness sandbox [--only A01,B02] [--group market] [--report docs/evidence/sandbox-report]
 //!   harness sandbox-property --ops 2000 --seed 7 [--report docs/evidence/sandbox-property]
 //!   harness gas [--report docs/evidence/gas]
 //!   harness testnet --account NAME --key-file PATH [--report docs/evidence/testnet-run]
 mod env;
 mod gas;
+mod market;
 mod property;
 mod recipient;
 mod report;
@@ -107,9 +108,11 @@ async fn cmd_sandbox() -> Result<bool> {
     let worker = sandbox_worker().await?;
     let root = worker.root_account()?;
     let only: Option<Vec<String>> = arg("--only").map(|s| s.split(',').map(str::to_string).collect());
+    let group = arg("--group");
     let list: Vec<Scenario> = scenarios::all()
         .into_iter()
         .filter(|s| only.as_ref().is_none_or(|o| o.iter().any(|x| x == s.id)))
+        .filter(|s| group.as_ref().is_none_or(|g| g == s.group))
         .collect();
     let started = Instant::now();
     let concurrency: usize = arg("--jobs").and_then(|j| j.parse().ok()).unwrap_or(4);

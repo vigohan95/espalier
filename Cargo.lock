@@ -880,6 +880,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "espalier-market"
+version = "0.1.0"
+dependencies = [
+ "near-sdk",
+ "serde_json",
+]
+
+[[package]]
 name = "espalier-registry"
 version = "0.1.0"
 dependencies = [

@@ -40,6 +40,112 @@ def message(probe, vault, grant, payload):
     return b"espalier-market-probe-v1" + near.bstr(probe) + near.bstr(vault) + near.u64(grant) + near.bstr(payload)
 
 
+def subcontracting(w, rpc, vault, market, sb):
+    """The assumptions of the subcontracting market: a chain of grants that can pay only the market,
+    built level by level with the vault's own `delegate`, read back through its views."""
+
+    def terms(now, cap, depth, methods, nodes, expires):
+        return {
+            "asset": "Native", "cap": str(cap), "per_tx": str(cap), "window_cap": str(cap), "window_secs": 3600,
+            "approval_threshold": str(cap), "recipients": [market], "methods": methods, "expires_at_ms": expires,
+            "max_depth": depth, "max_denials": 20, "key_allowance": str(200 * MILLI),
+            "gas_budget": str(nodes * 250 * MILLI), "node_budget": nodes, "clearance_required": False,
+        }
+
+    def delegate(parent, key, t):
+        r = parent.call(vault, "delegate", {"child_pk": key.public_str, "terms": t}, tgas=100)
+        return r.value or {}, r
+
+    def draw(signer, amount):
+        r = signer.call(vault, "request_spend", {"recipient": market, "amount": str(amount), "memo": "draw"}, tgas=120)
+        return r.value or {}, r
+
+    now = w.now_ms()
+    end = now + 3_600_000
+    work = ["request_spend", "delegate", "revoke"]
+    gc_key = near.Key.generate()
+    r = w.owner.call(vault, "create_root", {"pk": gc_key.public_str, "terms": terms(now, 300 * MILLI, 3, ["delegate", "revoke"], 12, end)}, tgas=100)
+    narrow_id = (r.value or {}).get("new_grant")
+    narrow = near.Signer(rpc, vault, gc_key)
+    d, _ = delegate(narrow, near.Key.generate(), terms(now, 120 * MILLI, 2, work, 6, end))
+    check("S1 a root without request_spend cannot hand it to a child: methods only narrow", narrow_id is not None and d.get("code") == "ATT_METHODS", d.get("code"))
+    gc_key = near.Key.generate()
+    r = w.owner.call(vault, "create_root", {"pk": gc_key.public_str, "terms": terms(now, 300 * MILLI, 3, work, 12, end)}, tgas=100)
+    gc_id = (r.value or {}).get("new_grant")
+    check("S1 a root whose money can only go to the market", gc_id is not None, (r.value or {}).get("code"))
+    gc = near.Signer(rpc, vault, gc_key)
+
+    k1, k2, k3, k2b = (near.Key.generate() for _ in range(4))
+    d, r = delegate(gc, k1, terms(now, 120 * MILLI, 2, work, 6, end))
+    l1 = d.get("new_grant")
+    check("S2 the root awards a level-1 grant with the cap of a price", l1 is not None, f"{d.get('code')}, gas {r.gas_burnt / 1e12:.2f} Tgas")
+    s1 = near.Signer(rpc, vault, k1)
+    d, _ = delegate(s1, k2, terms(now, 50 * MILLI, 1, work, 2, end))
+    l2 = d.get("new_grant")
+    s2 = near.Signer(rpc, vault, k2)
+    d, _ = delegate(s2, k3, terms(now, 20 * MILLI, 0, ["request_spend"], 0, end))
+    l3 = d.get("new_grant")
+    s3 = near.Signer(rpc, vault, k3)
+    check("S3 the winner awards its own sub-grant, and that one awards a third level", l2 is not None and l3 is not None, f"grants {gc_id} > {l1} > {l2} > {l3}")
+    settle(rpc)
+
+    g = rpc.view(vault, "get_grant", {"grant_id": l2})
+    seen = (g["parent"], g["pk"], g["cap"], g["per_tx"], g["window_cap"], g["approval_threshold"], g["recipients"], g["clearance_required"], g["max_depth"], g["nodes_left"], g["live"])
+    want = (l1, k2.public_str, str(50 * MILLI), str(50 * MILLI), str(50 * MILLI), str(50 * MILLI), [market], False, 1, 1, True)
+    check("S4 get_grant shows everything a market must confirm about an award: parent, key, cap, limits, recipients", seen == want, f"parent {g['parent']}, cap {int(g['cap']) / MILLI} mNEAR, nodes left {g['nodes_left']}")
+    check("S4 get_lineage walks from the third level to the root", rpc.view(vault, "get_lineage", {"grant_id": l3}) == [l3, l2, l1, gc_id])
+    check("S4 grant_of_key maps a bound key to its grant, and an unused key to nothing", rpc.view(vault, "grant_of_key", {"pk": k3.public_str}) == l3 and rpc.view(vault, "grant_of_key", {"pk": near.Key.generate().public_str}) is None)
+
+    d, _ = delegate(s1, k2, terms(now, 10 * MILLI, 0, ["request_spend"], 0, end))
+    check("S5 a key that already belongs to a grant cannot be bound to a second one", d.get("code") == "KEY_IN_USE", d.get("code"))
+    d, _ = delegate(s2, near.Key.generate(), terms(now, 60 * MILLI, 0, ["request_spend"], 0, end))
+    check("S5 an award larger than the awarding grant has left is refused by the vault", d.get("code") == "ATT_CAP", d.get("code"))
+    wide = terms(now, 10 * MILLI, 0, ["request_spend"], 0, end)
+    wide["recipients"] = [market, "relayer." + sb.root.account]
+    d, _ = delegate(s2, near.Key.generate(), wide)
+    check("S5 a sub-grant cannot add a recipient beside the market", d.get("code") == "ATT_RECIPIENTS", d.get("code"))
+
+    d, r = draw(s3, 20 * MILLI)
+    settle(rpc)
+    spent = [int(rpc.view(vault, "get_grant", {"grant_id": i})["spent"]) // MILLI for i in (l3, l2, l1, gc_id)]
+    check("S6 a third-level draw settles and is charged to every level up to the root", d.get("outcome") == "settled" and spent == [20, 20, 20, 20], f"spent by level {spent} mNEAR, gas {r.gas_burnt / 1e12:.2f} Tgas")
+    c3 = rpc.view(vault, "contact", {"grant_id": l3, "recipient": market})
+    c2 = rpc.view(vault, "contact", {"grant_id": l2, "recipient": market})
+    check("S6 contact credits the draw to the grant that made it, not to its parent", c3["total"] == str(20 * MILLI) and c2 is None, f"L3 {int(c3['total']) / MILLI} mNEAR, L2 {c2}")
+    d, _ = draw(s3, 1 * MILLI)
+    check("S6 a grant cannot draw past its own price", d.get("code") == "CAP", d.get("code"))
+    r = s3.call(vault, "request_spend", {"recipient": "relayer." + sb.root.account, "amount": str(MILLI)}, tgas=120)
+    check("S6 a hijacked sub-contractor cannot pay an outside account", (r.value or {}).get("code") == "RECIPIENT_NOT_ALLOWED", (r.value or {}).get("code"))
+    d, _ = draw(gc, 5 * MILLI)
+    settle(rpc)
+    root = rpc.view(vault, "get_grant", {"grant_id": gc_id})
+    croot = rpc.view(vault, "contact", {"grant_id": gc_id, "recipient": market})
+    check("S6 direct_spent is what a grant paid itself, also for a root, where contact adds the tree", d.get("outcome") == "settled" and root["direct_spent"] == str(5 * MILLI) and root["spent"] == str(25 * MILLI) and croot["total"] == str(25 * MILLI), f"root direct {int(root['direct_spent']) / MILLI}, spent {int(root['spent']) / MILLI}, contact {int(croot['total']) / MILLI} mNEAR")
+    g3 = rpc.view(vault, "get_grant", {"grant_id": l3})
+    check("S6 for a grant whose only recipient is the market, direct_spent equals its contact total", g3["direct_spent"] == c3["total"] == str(20 * MILLI))
+
+    # Two sub-contractors under one contractor, together promised more than it has left.
+    d, _ = delegate(s1, k2b, terms(now, 100 * MILLI, 0, ["request_spend"], 0, end))
+    l2b = d.get("new_grant")
+    check("S7 a second award up to the contractor's remainder is allowed: caps are not carved out", l2b is not None, d.get("code"))
+    s2b = near.Signer(rpc, vault, k2b)
+    d, _ = draw(s2b, 100 * MILLI)
+    check("S7 the first sibling draws its whole price", d.get("outcome") == "settled", d.get("code"))
+    d, _ = draw(s2, 30 * MILLI)
+    check("S7 the other sibling's draw is refused at the shared parent", d.get("code") == "ANCESTOR_CAP" and d.get("blocking_grant") == l1, f"{d.get('code')} blocking grant {d.get('blocking_grant')}")
+    settle(rpc)
+
+    # Revoking the contractor cuts every level below it in one transaction.
+    r = gc.call(vault, "revoke", {"grant_id": l1}, tgas=100)
+    settle(rpc)
+    live = [rpc.view(vault, "get_grant", {"grant_id": i})["live"] for i in (gc_id, l1, l2, l3, l2b)]
+    check("S8 one revoke by the root makes the contractor and all three grants below it not live", (r.value or {}).get("code") == "REVOKED" and live == [True, False, False, False, False], f"live {live}, gas {r.gas_burnt / 1e12:.2f} Tgas")
+    keys = {k["public_key"] for k in rpc.keys(vault)}
+    check("S8 and deletes their keys in the same transaction", not ({k1.public_str, k2.public_str, k3.public_str, k2b.public_str} & keys) and gc_key.public_str in keys)
+    root = rpc.view(vault, "get_grant", {"grant_id": gc_id})
+    check("S8 the root's counters keep exactly what was drawn before the revoke", root["spent"] == str(125 * MILLI), f"{int(root['spent']) / MILLI} mNEAR of 300")
+
+
 def main():
     with sandbox.Sandbox(port=3071) as sb:
         w = world.World(sb.rpc, sb.root).build()  # vault with registry screen and attestor, as on testnet
@@ -181,6 +287,8 @@ def main():
         r = root2._spend(market, 10 * MILLI, "no ticket")
         d = r.value or {}
         check("P5 on a clearance-bound grant a deposit with no ticket is queued, not paid", d.get("outcome") == "queued" and d.get("code") == "NEEDS_CLEARANCE", d.get("code"))
+
+        subcontracting(w, rpc, vault, market, sb)
 
         summary = {
             "vault_wasm_sha256": vault_sha,

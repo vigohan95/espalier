@@ -2,8 +2,8 @@
   "vault_wasm_sha256": "3218271c471fdd4e4161bfdc4a3d2d50f24631fc854df8b9eff1f27b314803a4",
   "probe_wasm_sha256": "21b5851c729930127c1ec9a30bc8905735df8049fff6fa33deb044df50989efb",
   "check_gas_tgas": 8.45,
-  "passed": 34,
-  "total": 34,
+  "passed": 56,
+  "total": 56,
   "results": [
     {
       "check": "setup: root and two bidder grants exist",
@@ -73,7 +73,7 @@
     {
       "check": "P2 vault.contact(grant, market) records it",
       "pass": true,
-      "detail": "{'count': 1, 'total': '60000000000000000000000', 'first_ms': 1793976138381, 'last_ms': 1793976138381}"
+      "detail": "{'count': 1, 'total': '60000000000000000000000', 'first_ms': 1793977683461, 'last_ms': 1793977683461}"
     },
     {
       "check": "P2 probe credits exactly the settled amount",
@@ -174,6 +174,116 @@
       "check": "P5 on a clearance-bound grant a deposit with no ticket is queued, not paid",
       "pass": true,
       "detail": "NEEDS_CLEARANCE"
+    },
+    {
+      "check": "S1 a root without request_spend cannot hand it to a child: methods only narrow",
+      "pass": true,
+      "detail": "ATT_METHODS"
+    },
+    {
+      "check": "S1 a root whose money can only go to the market",
+      "pass": true,
+      "detail": "GRANTED"
+    },
+    {
+      "check": "S2 the root awards a level-1 grant with the cap of a price",
+      "pass": true,
+      "detail": "GRANTED, gas 6.46 Tgas"
+    },
+    {
+      "check": "S3 the winner awards its own sub-grant, and that one awards a third level",
+      "pass": true,
+      "detail": "grants 6 > 7 > 8 > 9"
+    },
+    {
+      "check": "S4 get_grant shows everything a market must confirm about an award: parent, key, cap, limits, recipients",
+      "pass": true,
+      "detail": "parent 7, cap 50.0 mNEAR, nodes left 1"
+    },
+    {
+      "check": "S4 get_lineage walks from the third level to the root",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "S4 grant_of_key maps a bound key to its grant, and an unused key to nothing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "S5 a key that already belongs to a grant cannot be bound to a second one",
+      "pass": true,
+      "detail": "KEY_IN_USE"
+    },
+    {
+      "check": "S5 an award larger than the awarding grant has left is refused by the vault",
+      "pass": true,
+      "detail": "ATT_CAP"
+    },
+    {
+      "check": "S5 a sub-grant cannot add a recipient beside the market",
+      "pass": true,
+      "detail": "ATT_RECIPIENTS"
+    },
+    {
+      "check": "S6 a third-level draw settles and is charged to every level up to the root",
+      "pass": true,
+      "detail": "spent by level [20, 20, 20, 20] mNEAR, gas 12.64 Tgas"
+    },
+    {
+      "check": "S6 contact credits the draw to the grant that made it, not to its parent",
+      "pass": true,
+      "detail": "L3 20.0 mNEAR, L2 None"
+    },
+    {
+      "check": "S6 a grant cannot draw past its own price",
+      "pass": true,
+      "detail": "CAP"
+    },
+    {
+      "check": "S6 a hijacked sub-contractor cannot pay an outside account",
+      "pass": true,
+      "detail": "RECIPIENT_NOT_ALLOWED"
+    },
+    {
+      "check": "S6 direct_spent is what a grant paid itself, also for a root, where contact adds the tree",
+      "pass": true,
+      "detail": "root direct 5.0, spent 25.0, contact 25.0 mNEAR"
+    },
+    {
+      "check": "S6 for a grant whose only recipient is the market, direct_spent equals its contact total",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "S7 a second award up to the contractor's remainder is allowed: caps are not carved out",
+      "pass": true,
+      "detail": "GRANTED"
+    },
+    {
+      "check": "S7 the first sibling draws its whole price",
+      "pass": true,
+      "detail": "SETTLED"
+    },
+    {
+      "check": "S7 the other sibling's draw is refused at the shared parent",
+      "pass": true,
+      "detail": "ANCESTOR_CAP blocking grant 7"
+    },
+    {
+      "check": "S8 one revoke by the root makes the contractor and all three grants below it not live",
+      "pass": true,
+      "detail": "live [True, False, False, False, False], gas 6.86 Tgas"
+    },
+    {
+      "check": "S8 and deletes their keys in the same transaction",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "S8 the root's counters keep exactly what was drawn before the revoke",
+      "pass": true,
+      "detail": "125.0 mNEAR of 300"
     }
   ]
 }

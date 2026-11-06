@@ -1,0 +1,17 @@
+{
+  "note": "Shared by market/src/pricing.rs, client/espalier/market_model.py and site/index.html. bids are [price, commit sequence]. winner is an index into bids.",
+  "cases": [
+    {"name": "no bids", "bids": [], "max_budget": "100", "min_bids": 1, "winner": null, "price": null},
+    {"name": "one bid is paid the maximum budget", "bids": [["40", 0]], "max_budget": "100", "min_bids": 1, "winner": 0, "price": "100"},
+    {"name": "one bid under a minimum of two", "bids": [["40", 0]], "max_budget": "100", "min_bids": 2, "winner": null, "price": null},
+    {"name": "two bids: lowest wins at the other's price", "bids": [["40", 0], ["55", 1]], "max_budget": "100", "min_bids": 2, "winner": 0, "price": "55"},
+    {"name": "order of arrival does not matter for price", "bids": [["55", 0], ["40", 1]], "max_budget": "100", "min_bids": 1, "winner": 1, "price": "55"},
+    {"name": "three bids: second lowest sets the price", "bids": [["70", 0], ["40", 1], ["55", 2]], "max_budget": "100", "min_bids": 2, "winner": 1, "price": "55"},
+    {"name": "tie on the lowest: earlier commit wins and is paid the tied price", "bids": [["40", 3], ["40", 1], ["90", 2]], "max_budget": "100", "min_bids": 1, "winner": 1, "price": "40"},
+    {"name": "every bid at the maximum: a cartel is capped by the budget", "bids": [["100", 0], ["100", 1], ["100", 2]], "max_budget": "100", "min_bids": 2, "winner": 0, "price": "100"},
+    {"name": "a very low bid does not lower the pay", "bids": [["1", 0], ["60", 1], ["80", 2]], "max_budget": "100", "min_bids": 2, "winner": 0, "price": "60"},
+    {"name": "min_bids of zero behaves as one", "bids": [["30", 0]], "max_budget": "50", "min_bids": 0, "winner": 0, "price": "50"},
+    {"name": "three bids under a minimum of four", "bids": [["30", 0], ["31", 1], ["32", 2]], "max_budget": "50", "min_bids": 4, "winner": null, "price": null},
+    {"name": "yocto amounts", "bids": [["120000000000000000000000", 0], ["95000000000000000000000", 1], ["99000000000000000000000", 2]], "max_budget": "150000000000000000000000", "min_bids": 2, "winner": 1, "price": "99000000000000000000000"}
+  ]
+}
