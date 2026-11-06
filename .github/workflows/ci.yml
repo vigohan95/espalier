@@ -1,0 +1,78 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline:
+    name: offline checks (no install)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Preflight
+        run: python3 scripts/preflight.py
+      - name: Story (hashes, client tests, recorded trials, signature)
+        run: python3 scripts/story.py
+      - name: Client unit tests
+        run: python3 -m unittest discover -s client/tests
+      - name: Replay one real-model trial
+        run: python3 trials/replay.py I01
+      - name: Rebuild trial statistics from stored files
+        run: python3 trials/report.py
+
+  contract:
+    name: contract unit and in-process property tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Unit tests and property test (2 seeds x 1000 ops)
+        env:
+          PROPERTY_SEEDS: "2"
+          PROPERTY_OPS: "1000"
+        run: cargo test -p espalier-vault --release
+
+  sandbox:
+    name: every scenario on a real local node
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run all scenarios against near-sandbox (prebuilt wasm in res/)
+        run: cargo run --release -p harness -- sandbox --jobs 4 --report "$RUNNER_TEMP/espalier-report"
+      - name: Upload the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sandbox-report
+          path: ${{ runner.temp }}/espalier-report.*
+          if-no-files-found: warn
+
+  testnet-evidence:
+    name: testnet transactions still match the report
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Look up every recorded transaction on a public RPC
+        run: |
+          for attempt in 1 2 3; do
+            python3 scripts/verify-testnet.py && exit 0
+            echo "attempt $attempt failed, retrying in 30 s"
+            sleep 30
+          done
+          exit 1
