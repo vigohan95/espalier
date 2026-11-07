@@ -310,7 +310,7 @@ does, not a ranking, and they may have changed since.
 What Espalier does that we did not find in those: hiring that repeats down a chain with each level bounded
 by the ones above, a market whose prize is itself a delegated budget, and one revoke that ends a contractor
 and everyone it hired. What several of them have and Espalier does not: mainnet deployments, NEAR Intents
-settlement, agents driven by a hosted model with TEE attestation, a hosted web app, and contracts already
+settlement, agents driven by a hosted model with TEE attestation, an interactive web app, and contracts already
 locked.
 
 ## Where to check each of the five judging criteria

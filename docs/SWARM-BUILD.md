@@ -139,4 +139,4 @@ back to `site/snapshot.js`, labelled as a snapshot, when none answers. Checked o
 `Origin` header and a preflight request: `test.rpc.fastnear.com`, `rpc.testnet.fastnear.com`,
 `archival-rpc.testnet.fastnear.com` and `near-testnet.drpc.org` all answer `Access-Control-Allow-Origin: *`.
 It was rendered with headless Chrome at 1180 and 390 pixels wide, live against testnet and from the
-snapshot. It is not hosted yet.
+snapshot. It is hosted at https://vigohan95.github.io/espalier/.
