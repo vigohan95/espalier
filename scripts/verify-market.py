@@ -14,7 +14,6 @@ import json
 import os
 import re
 import sys
-import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "client"))
@@ -53,20 +52,15 @@ def code_on_chain(result):
 
 def main():
     run = json.load(open(RUN, encoding="utf8"))
-    rpc = near.Rpc(os.environ.get("NEAR_RPC", "https://test.rpc.fastnear.com"))
-    archival = near.Rpc(os.environ.get("NEAR_ARCHIVAL_RPC", "https://archival-rpc.testnet.fastnear.com"))
+    rpc = near.Rpc(os.environ.get("NEAR_RPC", "https://test.rpc.fastnear.com"), retries=8)
+    archival = near.Rpc(os.environ.get("NEAR_ARCHIVAL_RPC", "https://archival-rpc.testnet.fastnear.com"), retries=8)
     market, vault = run["market"], run["vault"]
     short = {v: k for k, v in run["accounts"].items()}
     print(f"market {market}\nvault  {vault}\n")
 
     found = missing = differ = 0
-    for t in run["txs"]:
-        res = None
-        for node in (rpc, archival):
-            r = node.raw("tx", {"tx_hash": t["hash"], "sender_account_id": t["signer"], "wait_until": "NONE"})
-            if "result" in r and "status" in r["result"] and "receipts_outcome" in r["result"]:
-                res = r["result"]
-                break
+    results = near.find_txs((archival, rpc), [(t["hash"], t["signer"]) for t in run["txs"]])
+    for t, res in zip(run["txs"], results):
         if res is None:
             missing += 1
             print("  MISSING", t["hash"], t["what"])
@@ -77,7 +71,6 @@ def main():
         if t["code"] not in (None, got) and not (t["code"] == "ok" and "SuccessValue" in res["status"]):
             differ += 1
             print("  DIFFERENT", t["hash"], t["what"], "recorded", t["code"], "chain", got)
-        time.sleep(0.03)
     check(missing == 0 and differ == 0, f"{found} of {len(run['txs'])} recorded transactions found on chain, {missing} missing, {differ} with a different reason code")
 
     tasks = {}

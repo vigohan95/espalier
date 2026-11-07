@@ -3,6 +3,7 @@ It holds one key at a time and has no idea what a full-access key is for: it sig
 and the protocol decides what that key may do."""
 import base64
 import hashlib
+import http.client
 import json
 import os
 import struct
@@ -153,7 +154,9 @@ class Rpc:
                     raise
                 if e.code == 429:
                     time.sleep(6 * (attempt + 1))
-            except (urllib.error.URLError, TimeoutError, ConnectionError):
+            except (OSError, http.client.HTTPException, ValueError):
+                # Covers refused and reset connections, timeouts, TLS cut off mid-read (an SSL EOF is
+                # an OSError) and a reply that is not JSON. A public RPC does all of these now and then.
                 if attempt == self.retries - 1:
                     raise
             time.sleep(1.5 * (attempt + 1))
@@ -204,6 +207,67 @@ class Rpc:
 
     def block(self, block=None):
         return self.call("block", {"finality": "final"} if block is None else {"block_id": block})
+
+
+TX_API = os.environ.get("NEAR_TX_API", "https://tx.test.fastnear.com/v0/transactions")
+TX_API_BATCH = 20
+
+
+def _from_tx_api(entry):
+    """A transaction from the batch API, in the shape the `tx` RPC method returns. The final status is
+    found the way the RPC finds it: follow SuccessReceiptId until a value or a failure."""
+    outcomes = {r["execution_outcome"]["id"]: r["execution_outcome"]["outcome"] for r in entry["receipts"]}
+    status = entry["execution_outcome"]["outcome"]["status"]
+    while isinstance(status, dict) and "SuccessReceiptId" in status:
+        status = outcomes[status["SuccessReceiptId"]]["status"]
+    return {
+        "status": status,
+        "transaction": entry["transaction"],
+        "receipts_outcome": [{"outcome": {"logs": o["logs"]}} for o in outcomes.values()],
+    }
+
+
+def _tx_api(hashes, tries=6):
+    body = json.dumps({"tx_hashes": hashes}).encode()
+    req = urllib.request.Request(TX_API, body, {"Content-Type": "application/json", "User-Agent": "espalier-client"})
+    for attempt in range(tries):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.load(r)["transactions"]
+        except (OSError, http.client.HTTPException, ValueError, KeyError):
+            time.sleep(3 * (attempt + 1))
+    return []
+
+
+def find_tx(nodes, tx_hash, signer):
+    """A transaction's result, or None. `nodes` is tried in order. Regular RPC nodes forget a transaction
+    after about two days and answer UNKNOWN_TRANSACTION, so an archival node has to come first."""
+    for node in nodes:
+        res = node.raw("tx", {"tx_hash": tx_hash, "sender_account_id": signer, "wait_until": "NONE"})
+        result = res.get("result") or {}
+        if "status" in result and "receipts_outcome" in result:
+            return result
+    return None
+
+
+def find_txs(nodes, wanted):
+    """Results for many (hash, signer) pairs, in order, None for what cannot be found. Public archival
+    RPC allows only a few calls a minute, so transactions are first read in batches from the indexer,
+    and only what it does not return is looked up one at a time, slowly."""
+    found = {}
+    hashes = [w[0] for w in wanted]
+    for i in range(0, len(hashes), TX_API_BATCH):
+        for entry in _tx_api(hashes[i:i + TX_API_BATCH]):
+            found[entry["transaction"]["hash"]] = entry
+    out = []
+    for tx_hash, signer in wanted:
+        entry = found.get(tx_hash)
+        if entry is not None and entry["transaction"]["signer_id"] == signer:
+            out.append(_from_tx_api(entry))
+        else:
+            time.sleep(2)
+            out.append(find_tx(nodes, tx_hash, signer))
+    return out
 
 
 class Outcome:

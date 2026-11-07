@@ -30,7 +30,8 @@ def tool(name, why):
 def main():
     row("ok" if sys.version_info >= (3, 9) else "FAIL", f"python {sys.version.split()[0]}, need 3.9 or newer")
     for p in ("LICENSE", "README.md", "llms.txt", "docs/ATTACKS.md", "docs/BASELINE-GAPS.md", "docs/RECIPIENT-CHECK.md", "docs/AGENTS.md",
-              "res/espalier_vault.wasm", "res/espalier_registry.wasm", "docs/evidence/sandbox-report.json", "docs/evidence/testnet-run.json",
+              "res/espalier_vault.wasm", "res/espalier_registry.wasm", "res/espalier_market.wasm", "docs/SWARM-RULES.md", "site/index.html",
+              "docs/evidence/sandbox-report.json", "docs/evidence/testnet-run.json", "docs/evidence/swarm-sim-testnet.json",
               "docs/evidence/trials/report.md", "docs/evidence/mainnet-signals.md", "docs/submission/PAYLOAD.md"):
         row("ok" if os.path.exists(os.path.join(ROOT, p)) else "FAIL", p)
 

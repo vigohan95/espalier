@@ -97,49 +97,49 @@ class Market:
 
     def post(self, carrier, spec, grant_key, bond):
         sig = grant_key.sign(post_message(self.id, spec)).hex()
-        return carrier.call(self.id, "post_task", {"spec": spec, "signature": sig}, tgas=120, deposit=bond)
+        return carrier.call(self.id, "post_task", {"spec": spec, "signature": sig}, tgas=70, deposit=bond)
 
     def commit(self, worker, task_id, price, pk, salt, bond):
         c = bid_commitment(self.id, task_id, worker.account, price, pk, salt)
-        return worker.call(self.id, "commit_bid", {"task_id": task_id, "commitment": c}, tgas=30, deposit=bond)
+        return worker.call(self.id, "commit_bid", {"task_id": task_id, "commitment": c}, tgas=20, deposit=bond)
 
     def reveal(self, worker, task_id, price, pk, salt):
-        return worker.call(self.id, "reveal_bid", {"task_id": task_id, "price": str(price), "pk": pk, "salt": salt.hex()}, tgas=80)
+        return worker.call(self.id, "reveal_bid", {"task_id": task_id, "price": str(price), "pk": pk, "salt": salt.hex()}, tgas=60)
 
     def close(self, anyone, task_id):
-        return anyone.call(self.id, "close_bidding", {"task_id": task_id}, tgas=60)
+        return anyone.call(self.id, "close_bidding", {"task_id": task_id}, tgas=30)
 
     def confirm(self, anyone, task_id, grant_id):
-        return anyone.call(self.id, "confirm_award", {"task_id": task_id, "grant_id": grant_id}, tgas=80)
+        return anyone.call(self.id, "confirm_award", {"task_id": task_id, "grant_id": grant_id}, tgas=60)
 
     def default(self, anyone, task_id):
-        return anyone.call(self.id, "default_award", {"task_id": task_id}, tgas=200)
+        return anyone.call(self.id, "default_award", {"task_id": task_id}, tgas=120)
 
     def deliver(self, worker, task_id, result_hash):
-        return worker.call(self.id, "deliver", {"task_id": task_id, "result_hash": result_hash}, tgas=30)
+        return worker.call(self.id, "deliver", {"task_id": task_id, "result_hash": result_hash}, tgas=15)
 
     def accept(self, carrier, task_id, grant_key):
         sig = grant_key.sign(accept_message(self.id, task_id)).hex()
-        return carrier.call(self.id, "accept", {"task_id": task_id, "signature": sig}, tgas=80)
+        return carrier.call(self.id, "accept", {"task_id": task_id, "signature": sig}, tgas=60)
 
     def reject(self, carrier, task_id, reason_hash, grant_key):
         sig = grant_key.sign(reject_message(self.id, task_id, reason_hash)).hex()
-        return carrier.call(self.id, "reject", {"task_id": task_id, "reason_hash": reason_hash, "signature": sig}, tgas=80)
+        return carrier.call(self.id, "reject", {"task_id": task_id, "reason_hash": reason_hash, "signature": sig}, tgas=60)
 
     def fail_delivery(self, anyone, task_id):
-        return anyone.call(self.id, "fail_delivery", {"task_id": task_id}, tgas=80)
+        return anyone.call(self.id, "fail_delivery", {"task_id": task_id}, tgas=60)
 
     def void(self, anyone, task_id):
-        return anyone.call(self.id, "void_task", {"task_id": task_id}, tgas=80)
+        return anyone.call(self.id, "void_task", {"task_id": task_id}, tgas=60)
 
     def claim(self, anyone, task_id):
-        return anyone.call(self.id, "claim", {"task_id": task_id}, tgas=80)
+        return anyone.call(self.id, "claim", {"task_id": task_id}, tgas=60)
 
     def refund(self, anyone, task_id):
-        return anyone.call(self.id, "refund", {"task_id": task_id}, tgas=40)
+        return anyone.call(self.id, "refund", {"task_id": task_id}, tgas=20)
 
     def payout(self, anyone, account):
-        return anyone.call(self.id, "payout", {"account_id": account}, tgas=30)
+        return anyone.call(self.id, "payout", {"account_id": account}, tgas=25)
 
 
 def award_terms(spec, price, poster_view, market):

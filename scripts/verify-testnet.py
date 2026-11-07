@@ -1,42 +1,53 @@
 #!/usr/bin/env python3
 """Checks the testnet evidence without any key: every recorded transaction is looked up on a public
-RPC and its logged reason code is compared with the report. Python standard library only."""
-import json, sys, time, urllib.request, os
+RPC and its logged reason code is compared with the report. Python standard library only.
+
+Regular RPC nodes forget a transaction after about two days, and public archival RPC allows only a few
+calls a minute, so transactions are read in batches from FastNear's indexer, with archival RPC for
+anything it does not return. Every call is retried: a public endpoint drops a connection now and then."""
+import json
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", "client"))
+
+from espalier import near  # noqa: E402
 
 RPC = os.environ.get("NEAR_RPC", "https://test.rpc.fastnear.com")
-HERE = os.path.dirname(os.path.abspath(__file__))
+ARCHIVAL = os.environ.get("NEAR_ARCHIVAL_RPC", "https://archival-rpc.testnet.fastnear.com")
 REPORT = os.path.join(HERE, "..", "docs", "evidence", "testnet-run.json")
+NODES = [near.Rpc(ARCHIVAL, retries=8), near.Rpc(RPC, retries=8)]
+
 
 def rpc(method, params):
-    body = json.dumps({"jsonrpc": "2.0", "id": "x", "method": method, "params": params}).encode()
-    req = urllib.request.Request(RPC, body, {"Content-Type": "application/json", "User-Agent": "espalier-verify"})
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return json.load(r)
+    return NODES[1].raw(method, params)
+
 
 def main():
     report = json.load(open(REPORT))
     deploy = json.load(open(os.path.join(os.path.dirname(REPORT), "testnet-deploy.json")))
     vault = deploy["vault"]
     checked = mismatched = missing = 0
-    for s in report["scenarios"]:
-        for t in s["txs"]:
-            signer = deploy["owner"] if t["signer"] == "owner" else t["signer"]
-            if "." not in signer:
-                signer = vault
-            res = rpc("tx", {"tx_hash": t["hash"], "sender_account_id": signer, "wait_until": "NONE"})
-            if "result" not in res or "receipts_outcome" not in res["result"]:
-                missing += 1
-                print("MISSING", s["id"], t["hash"], str(res)[:120])
-                continue
-            logs = [l for o in res["result"]["receipts_outcome"] for l in o["outcome"]["logs"]]
-            joined = "\n".join(logs)
-            ok = (not t["code"]) or t["outcome"] == "ok" or t["code"] in joined or t["outcome"] in ("settled", "rolled_back", "queued", "allowed")
-            checked += 1
-            if not ok:
-                mismatched += 1
-                print("MISMATCH", s["id"], t["hash"], t["code"])
-            time.sleep(0.05)
-    print(f"{checked} transactions found on {RPC}, {missing} missing, {mismatched} mismatched, vault {vault}")
+    rows = [(s, t) for s in report["scenarios"] for t in s["txs"]]
+
+    def signer_of(t):
+        signer = deploy["owner"] if t["signer"] == "owner" else t["signer"]
+        return signer if "." in signer else vault
+
+    for (s, t), result in zip(rows, near.find_txs(NODES, [(t["hash"], signer_of(t)) for _, t in rows])):
+        if result is None:
+            missing += 1
+            print("MISSING", s["id"], t["hash"])
+            continue
+        logs = [l for o in result["receipts_outcome"] for l in o["outcome"]["logs"]]
+        joined = "\n".join(logs)
+        ok = (not t["code"]) or t["outcome"] == "ok" or t["code"] in joined or t["outcome"] in ("settled", "rolled_back", "queued", "allowed")
+        checked += 1
+        if not ok:
+            mismatched += 1
+            print("MISMATCH", s["id"], t["hash"], t["code"])
+    print(f"{checked} transactions found, {missing} missing, {mismatched} mismatched, vault {vault}")
     view = rpc("query", {"request_type": "view_access_key_list", "account_id": vault, "finality": "final"})
     keys = view["result"]["keys"]
     full = [k for k in keys if k["access_key"]["permission"] == "FullAccess"]
