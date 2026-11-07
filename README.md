@@ -1,5 +1,9 @@
 # Espalier
 
+[![ci](https://github.com/vigohan95/espalier/actions/workflows/ci.yml/badge.svg)](https://github.com/vigohan95/espalier/actions/workflows/ci.yml)
+
+**Live page:** https://vigohan95.github.io/espalier/
+
 Agents hire agents, who hire agents. In Espalier each hire is a sealed-bid round, and what the winner
 gets is not money in escrow: it is a grant in a vault on NEAR, a child of the hirer's grant, capped at
 the auction's price and narrower in every other dimension. The winner can hire from that grant in turn.
@@ -72,7 +76,7 @@ against the real contracts.
 
 ### 3. Open the live page
 
-Open `site/index.html` in a browser. No server and no key: the page makes read-only view calls to a public
+Open https://vigohan95.github.io/espalier/ or `site/index.html` in a browser. No server and no key: the page makes read-only view calls to a public
 testnet RPC and draws the tree as the auctions grew it, with each edge labelled by its bids and price.
 The slider replays the growth one award at a time, and "Before any revoke" shows the branches that were
 cut. If no RPC answers it says so and shows a saved snapshot.
@@ -314,7 +318,7 @@ locked.
 | Criterion | Start here |
 |---|---|
 | Technical implementation | `python3 scripts/story.py`, then [docs/ATTACKS.md](docs/ATTACKS.md): 134 numbered scenarios against 56 threats (133 on a local node, plus T01, which needs the real `wrap.testnet` and ran only on testnet). `contract/src/lib.rs` and `market/src/lib.rs` are the two contracts |
-| Design | `site/index.html`, the live read-only page. [docs/SWARM-RULES.md](docs/SWARM-RULES.md) section 3 has one task as a text sequence diagram, and section 7 says which contract enforces what |
+| Design | https://vigohan95.github.io/espalier/, the live read-only page. [docs/SWARM-RULES.md](docs/SWARM-RULES.md) section 3 has one task as a text sequence diagram, and section 7 says which contract enforces what |
 | Impact | The problem statement above. [docs/BASELINE-GAPS.md](docs/BASELINE-GAPS.md) maps limits that the official reference products document to tests here. The injection trial reports what got through as well as what was stopped |
 | Originality | The comparison table above, and [docs/SWARM-RULES.md](docs/SWARM-RULES.md) section 9: why this needs a delegation tree and not a wallet per agent |
 | Sustainability | Two contracts with no admin and no operator: anyone can deploy them and nothing has to keep running. MIT license. Every claim has a command that rechecks it, and CI runs them. "What remains" below is the honest list |
@@ -413,7 +417,7 @@ used, such as `26000000000000000000000 > 25000000000000000000000 per-tx` (G01). 
 
 Not built: a reproducible wasm build, NEAR Intents, an external audit, integration with market.near.ai, which
 needs an account or mainnet USDC, a mutation test for the market, agents in the market driven by a real model.
-The live page is not hosted yet. The testnet contracts are not locked yet.
+The testnet contracts are not locked yet.
 
 ## Hackathon window, AI assistance and libraries
 
