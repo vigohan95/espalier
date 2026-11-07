@@ -259,10 +259,11 @@ function recompute(t) {
   return got ? { worker: t.bids[got[0]].worker, price: got[1] } : null;
 }
 function cutBy(S, g) {
-  // The nearest grant up the tree that was itself revoked.
-  for (let x = g; x; x = x.parent ? S.grants.get(x.parent) : null) if (x.revoked && (x.id === g.id || !S.grants.get(x.parent)?.revoked)) return x;
-  for (let x = g; x; x = x.parent ? S.grants.get(x.parent) : null) if (x.revoked) return x;
-  return null;
+  // The highest grant on the way up that is not live: the one whose revoke cut this branch. The vault
+  // marks everything below a revoked grant as revoked too, so the flag alone does not say which it was.
+  let top = g;
+  for (let x = g; x && !x.live; x = x.parent ? S.grants.get(x.parent) : null) top = x;
+  return top;
 }
 function statusTag(status) {
   const cls = { Paid: "ok", Accepted: "ok", Awarded: "wait", Delivered: "wait", Open: "wait", Awarding: "wait" }[status] || "bad";
@@ -287,15 +288,18 @@ function nodeFor(S, D, g, depth) {
   if (t) card.append(edgeLine(t));
   const row = el("div", "row");
   row.append(el("span", "who", t ? short(t.winner) : "general contractor"), el("span", "small num", `grant ${g.id}`));
-  if (dead) { const by = cutBy(S, g); row.append(el("span", "tag bad", by && by.id !== g.id ? `cut off with grant ${by.id}` : (g.revoked ? "revoked" : "expired"))); }
+  if (dead) {
+    const by = cutBy(S, g), byTask = D.byGrant.get(by.id);
+    row.append(el("span", "tag bad", by.id !== g.id ? `cut off with ${byTask ? short(byTask.winner) : "grant " + by.id}` : (g.revoked ? "revoked" : "expired")));
+  }
   else row.append(el("span", "tag ok", "live"));
   if (t) row.append(statusTag(t.status));
   card.append(row);
   const cap = big(g.cap), own = big(g.direct_spent), below = big(g.spent) - own;
-  const promised = big(S.posters.get(g.id)?.committed);
+  const promised = MODE === "now" && !g.live ? 0n : big(S.posters.get(g.id)?.committed);
   const pct = (x) => cap > 0n ? Number(x * 1000n / cap) / 10 : 0;
   const meter = el("div", "meter");
-  for (const [cls, v] of [["own", own], ["below", below], ["promised", MODE === "now" && !g.live ? 0n : promised]]) { const i = el("i", cls); i.style.width = pct(v) + "%"; meter.append(i); }
+  for (const [cls, v] of [["own", own], ["below", below], ["promised", promised]]) { const i = el("i", cls); i.style.width = pct(v) + "%"; meter.append(i); }
   card.append(meter);
   card.append(el("div", "small num", `cap ${mn(cap)} · drawn ${mn(own)} · by hires ${mn(below)}${promised > 0n ? ` · promised ${mn(promised)}` : ""} · left ${mn(g.spendable)}`));
   li.append(card);
@@ -307,7 +311,8 @@ function nodeFor(S, D, g, depth) {
     const pli = el("li"), pc = el("div", "node pending");
     pc.append(edgeLine(p));
     const pr = el("div", "row");
-    pr.append(el("span", "small", p.winner ? `${short(p.winner)} won and got no grant` : "no winner"), statusTag(p.status));
+    const told = p.status === "Open" ? "bids are sealed" : !p.winner ? "no winner" : p.status === "Awarding" ? `${short(p.winner)} won, its grant is not created yet` : `${short(p.winner)} won and got no grant`;
+    pr.append(el("span", "small", told), statusTag(p.status));
     if (p.note) pr.append(el("span", "small", p.note.replace(/_/g, " ").toLowerCase()));
     pc.append(pr); pli.append(pc); kids.append(pli);
   }
@@ -323,7 +328,7 @@ function drawTree() {
   for (const r of D.roots) { const n = nodeFor(S, D, r, 0); if (n) tree.append(n); }
   if (!D.roots.length) tree.append(el("li", "small", "No task has been posted yet."));
   const cut = [...S.grants.values()].filter((g) => !g.live && (D.byGrant.has(g.id)));
-  const revoked = cut.filter((g) => g.revoked && S.grants.get(g.parent)?.live !== false);
+  const revoked = cut.filter((g) => cutBy(S, g).id === g.id);
   $("revokeNote").textContent = cut.length
     ? (MODE === "now" ? `${cut.length} grants are cut off. ${revoked.length} revoke${revoked.length === 1 ? "" : "s"} did it: each one ended everything below it in the same transaction.` : `Shown as awarded. ${cut.length} of these grants have since been cut off.`)
     : "";
@@ -371,7 +376,7 @@ function drawTask() {
   }
   if (t.grant) {
     const g = S.grants.get(t.grant);
-    box.append(el("p", "small num", `prize: grant ${t.grant}, cap ${mn(g.cap)}${big(g.cap) === big(t.price) ? " = the price" : ""} · paid ${mn(t.paid)} · held ${mn(t.held)} · returned to the vault ${mn(t.refunded)}`));
+    box.append(el("p", "small num", `prize: grant ${t.grant}, cap ${mn(g.cap)}${big(g.cap) === big(t.price) ? " = the price" : ""} · used ${mn(t.drawn)}: ${mn(t.paid)} paid to ${short(t.winner)}, ${mn(big(g.spent) - big(g.direct_spent))} drawn by its own hires · held ${mn(t.held)} · returned to the vault ${mn(t.refunded)}`));
   }
   if (t.note) box.append(el("p", "small", `Note on chain: ${t.note.replace(/_/g, " ").toLowerCase()}`));
   const when = (ms) => new Date(ms).toISOString().slice(11, 19) + " UTC";
