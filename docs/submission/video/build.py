@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
-"""Builds the Espalier demo video from real terminal output. No browser, no screen recording.
+"""Builds the Espalier demo video from the recorded testnet run. No screen recording.
 
-    python docs/submission/video/build.py                 # capture, voice, render, mux, small copy
-    python docs/submission/video/build.py --plan          # capture and voice only, print the timing
-    python docs/submission/video/build.py --repo-url URL  # end card shows URL instead of storyboard repo_url
+    python docs/submission/video/build.py                 # silent master, plus a small copy
+    python docs/submission/video/build.py --voice         # also a copy with a synthetic voice
+    python docs/submission/video/build.py --plan          # print the timing and stop
+    python docs/submission/video/build.py --frames 12,40  # write stills at these seconds to tmp/
 
-Pipeline:
-  1. captures: run the repository's commands and read its stored evidence files. The text goes to
-     captured/*.txt, unedited. Nothing on a terminal screen comes from anywhere else, and a highlight is
-     a substring of that text: if the text is not there, the build stops.
-  2. edge-tts speaks each scene and returns word timings. A beat in storyboard.json names the phrase it
-     starts on, so highlights and scrolling follow the voice rather than a hand-set clock.
-  3. PIL draws each frame (scrolling, highlight boxes) and pipes it to ffmpeg, H.264 at 1080p24.
-  4. ffmpeg places each narration at its scene time and muxes AAC. A copy for upload tools goes next to it.
+The video has to work with the sound off, so every sentence is on screen, and timing comes from reading
+speed, not from a voice. `--voice` lays edge-tts narration over the same frames as a second file.
 
-The build refuses any captured text that holds a key: docs/evidence/attack-demo.log line 4 has a public key
-fragment, so the storyboard's line ranges skip it, and this guard keeps it that way.
+What keeps it honest:
+  - Every number in a caption is a field filled in from docs/evidence/, never typed in storyboard.json.
+  - A caption can name `proof`: text that has to be a passed check in docs/evidence/swarm-sim-testnet.json.
+    If it is not there, the build stops.
+  - The tree, its prices, bids, hashes and meters are drawn from the same run. The meters are replayed from
+    the run's draws, and the build stops if they do not end on what the vault reported.
+  - The terminal scene is docs/evidence/verify-market.log, and the page scene is site/index.html as it renders.
 
-Requires ffmpeg and ffprobe on PATH, `pip install edge-tts pillow`, and a Consolas-like monospace font (FONT).
+Requires ffmpeg and ffprobe on PATH, Pillow, Chrome for the page scene (CHROME), edge-tts for --voice, and the
+fonts below (FONT_DIR).
 """
 import argparse
 import asyncio
@@ -33,386 +34,573 @@ from PIL import Image, ImageDraw, ImageFont
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
-OUT = HERE / "out"
-TMP = HERE / "tmp"
-CAP = HERE / "captured"
-FONT = os.environ.get("FONT", "C:/Windows/Fonts/consola.ttf")
-FONT_BOLD = os.environ.get("FONT_BOLD", "C:/Windows/Fonts/consolab.ttf")
+EV = ROOT / "docs" / "evidence"
+OUT, TMP = HERE / "out", HERE / "tmp"
+FONT_DIR = pathlib.Path(os.environ.get("FONT_DIR", "C:/Windows/Fonts"))
+CHROME = os.environ.get("CHROME", "C:/Program Files/Google/Chrome/Application/chrome.exe")
 
-W, H, FPS = 1920, 1080, 24
-SIZE, ROW = 34, 44                      # terminal font size and row pitch, in pixels
-MARGIN, BAR = 26, 58                    # window margin and title bar height
-PAD_X, PAD_Y = 30, 14                   # text inset inside the window
-BODY_X, BODY_Y = MARGIN + PAD_X, MARGIN + BAR + PAD_Y
-BODY_W, BODY_H = W - 2 * BODY_X, H - BODY_Y - MARGIN - PAD_Y
-
-BG, WINDOW, BARC = "#0b0e14", "#11151c", "#1b212c"
-TEXT, DIM, PROMPT = "#e6e6e6", "#9aa4b2", "#7ee787"
-COLORS = {"red": (255, 92, 87), "green": (63, 200, 100), "amber": (242, 190, 70), "blue": (88, 166, 255)}
-
-SCROLL_S, FADE_HL_S, TYPE_S = 0.6, 0.18, 0.55
+W, H, FPS, SS = 1920, 1080, 24, 2
+BG, CARD, INK, SOFT, LINE = "#121a15", "#1a261e", "#e6ecdf", "#9fb0a3", "#34463b"
+LEAF, BARK, CUT, CUTBG, AMBER, BLUE = "#7fc48c", "#c9a66b", "#e58a76", "#3b211c", "#e0b34a", "#7db4e6"
+CAPTION_TOP = 906
+WORDS_PER_S, MIN_CAPTION_S = 2.9, 2.7
 FORBIDDEN = re.compile(r"ed25519:|near-credentials|secret_key|private_key", re.I)
+MILLI = 10**21
+
+_fonts = {}
 
 
-def run_capture(name, spec):
-    """Returns (shown command, text). Runs the command, or reads a file, and stores the text as it came."""
-    if "run" in spec:
-        env = dict(os.environ, PYTHONIOENCODING="utf-8")
-        cmd = [sys.executable if c == "{python}" else c for c in spec["run"]]
-        p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=120, env=env)
-        if p.returncode != 0:
-            sys.exit(f"capture {name}: {cmd} exited {p.returncode}\n{p.stderr}")
-        text = p.stdout
-    else:
-        src = (ROOT / spec["file"]).read_text(encoding="utf-8").split("\n")
-        text = "\n".join(line for a, b in spec["lines"] for line in src[a - 1:b]) + "\n"
-    if FORBIDDEN.search(text):
-        sys.exit(f"capture {name} holds key material, refusing to put it on screen: {FORBIDDEN.search(text).group(0)}")
-    CAP.mkdir(exist_ok=True)
-    (CAP / f"{name}.txt").write_text(text, encoding="utf-8", newline="\n")
-    return spec["show"], text
+def font(name, size):
+    key = (name, size)
+    if key not in _fonts:
+        _fonts[key] = ImageFont.truetype(str(FONT_DIR / name), size)
+    return _fonts[key]
 
 
-class Term:
-    """Terminal text laid out in rows, with one tall image of it. Lines wrap at spaces, as `fold -s` would."""
+SERIF, SANS, SANSB, MONO, MONOB = "georgiab.ttf", "segoeui.ttf", "segoeuib.ttf", "consola.ttf", "consolab.ttf"
 
-    def __init__(self, show, text, font, adv):
-        self.font, self.adv = font, adv
-        self.cols = int(BODY_W // adv)
-        self.full = "$ " + show + "\n" + text.rstrip("\n")
-        self.rows = []  # (text, offset of its first character in self.full)
-        offset = 0
-        for line in self.full.split("\n"):
-            rest, at = line, offset
-            while len(rest) > self.cols:
-                cut = rest.rfind(" ", 1, self.cols + 1)
-                cut = cut if cut > 0 else self.cols
-                self.rows.append((rest[:cut], at))
-                skip = cut + 1 if rest[cut:cut + 1] == " " else cut
-                rest, at = rest[skip:], at + skip
-            self.rows.append((rest, at))
-            offset += len(line) + 1
-        self.show = show
-        self.canvas = Image.new("RGB", (BODY_W, len(self.rows) * ROW + BODY_H), WINDOW)
-        d = ImageDraw.Draw(self.canvas)
-        for i, (row, _) in enumerate(self.rows):
-            if i == 0:
-                d.text((0, i * ROW + 3), "$", font=font, fill=PROMPT)
-                d.text((2 * adv, i * ROW + 3), row[2:], font=font, fill=TEXT)
-            else:
-                d.text((0, i * ROW + 3), row, font=font, fill=TEXT)
 
-    def spans(self, sub):
-        pos = self.full.find(sub)
-        if pos < 0:
-            sys.exit(f"not in the captured text, so it cannot be highlighted: {sub!r}")
-        end, out = pos + len(sub), []
-        for i, (row, at) in enumerate(self.rows):
-            a, b = max(pos, at), min(end, at + len(row))
-            if a < b:
-                out.append((i, a - at, b - at))
+def rgb(c):
+    c = c.lstrip("#")
+    return tuple(int(c[i:i + 2], 16) for i in (0, 2, 4))
+
+
+def mix(a, b, p):
+    a, b = rgb(a) if isinstance(a, str) else a, rgb(b) if isinstance(b, str) else b
+    return tuple(int(x + (y - x) * p) for x, y in zip(a, b))
+
+
+def ease(x):
+    x = min(1.0, max(0.0, x))
+    return x * x * (3 - 2 * x)
+
+
+# ---- What the video is allowed to say ---------------------------------------------------------------
+
+
+def load_run():
+    run = json.loads((EV / "swarm-sim-testnet.json").read_text(encoding="utf-8"))
+    report = json.loads((EV / "sandbox-report.json").read_text(encoding="utf-8"))
+    prop = json.loads((EV / "market-property.json").read_text(encoding="utf-8"))
+    snap = (ROOT / "site" / "snapshot.js").read_text(encoding="utf-8")
+    snap = json.loads(snap[snap.index("window.ESPALIER_SNAPSHOT = ") + 27:].rstrip().rstrip(";"))
+    if not (run["passed"] and run["matches_model"] and report["passed"] == report["total"] and not prop["broken"]):
+        sys.exit("the evidence files do not all pass, so there is nothing to show")
+    if snap["market"] != run["market"]:
+        sys.exit("site/snapshot.js is not from the testnet run")
+    tasks = [t for k, v in snap["calls"].items() if "|get_tasks|" in k for t in v]
+    commitments = {t["id"]: {b["worker"].split(".")[0]: b["commitment"] for b in t["bids"]} for t in tasks}
+    g, t = run["grants"], run["tasks"]
+    hal_revoke = next(x for x in run["txs"] if x["what"] == f"vault.revoke {g['hal']['grant']}")
+    paid = sum(x["paid_mnear"] for x in t.values())
+    back = sum(x["refunded_mnear"] for x in t.values())
+    below_hal = [n for n, v in g.items() if n != "hal" and is_below(g, v, g["hal"]["grant"])]
+    facts = {
+        "root_cap": g["gc"]["cap_mnear"], "root_near": g["gc"]["cap_mnear"] // 1000, "root_spent": g["gc"]["spent_mnear"], "paid": paid, "back": back,
+        "auctions": len(t), "grants": len(g) - 1, "txs": run["transactions"], "checks": len(run["checks"]),
+        "scenarios": report["total"], "assertions": report["assertions"],
+        "market_scenarios": sum(1 for s in report["scenarios"] if s["group"] == "market"),
+        "prop_calls": prop["transactions"], "prop_checks": f"{prop['invariant_checks']:,}",
+        "below_hal": len(below_hal), "revoke_tx": hal_revoke["hash"], "market": run["market"], "vault": run["vault"],
+        "vault_sha": report["wasm_sha256"][:12],
+    }
+    if paid + back != facts["root_spent"]:
+        sys.exit(f"paid {paid} + back {back} is not what the root was charged, {facts['root_spent']}")
+    return run, facts, commitments
+
+
+def is_below(grants, node, top):
+    by_id = {v["grant"]: v for v in grants.values()}
+    cur = node
+    while cur["parent"] is not None:
+        if cur["parent"] == top:
+            return True
+        cur = by_id[cur["parent"]]
+    return False
+
+
+def check_proofs(sb, run):
+    passed = {c["claim"] for c in run["checks"] if c["pass"]}
+    for s in sb["scenes"]:
+        for c in s.get("captions", []):
+            for p in c.get("proof", []):
+                if not any(p in claim for claim in passed):
+                    sys.exit(f"caption {c['id']}: no passed check in the testnet run says {p!r}")
+
+
+def plan(sb, facts):
+    """Fills in numbers, and works out when each caption starts from how long it takes to read."""
+    t, marks = 0.0, {}
+    for s in sb["scenes"]:
+        s["start"] = t
+        for c in s["captions"]:
+            c["text"] = c["text"].format(**facts)
+            words = len(c["text"].split())
+            c["start"] = t
+            c["len"] = max(MIN_CAPTION_S, words / WORDS_PER_S + 0.4) + c.get("extra", 0.0)
+            marks[c["id"]] = t
+            t += c["len"]
+        s["end"] = t
+    return t, marks
+
+
+# ---- Drawing helpers ---------------------------------------------------------------------------------
+
+
+def wrap(text, f, width):
+    lines, cur = [], ""
+    for word in text.split():
+        trial = f"{cur} {word}".strip()
+        if f.getlength(trial) <= width:
+            cur = trial
+        else:
+            lines.append(cur)
+            cur = word
+    return lines + [cur]
+
+
+def caption(img, text):
+    d = ImageDraw.Draw(img)
+    f = font(SANS, 43)
+    lines = wrap(text, f, W - 220)
+    d.rectangle((0, CAPTION_TOP, W, H), fill=mix(BG, "#000000", 0.45))
+    d.line((0, CAPTION_TOP, W, CAPTION_TOP), fill=LINE, width=2)
+    y = CAPTION_TOP + (H - CAPTION_TOP) / 2 - (len(lines) - 1) * 29
+    for line in lines:
+        d.text((W / 2, y), line, font=f, fill=INK, anchor="mm")
+        y += 58
+
+
+def header(img, text):
+    ImageDraw.Draw(img).text((40, 26), text, font=font(SANS, 25), fill=SOFT)
+
+
+def pill(d, x, y, text, f, fg, bg, scale=1, anchor="mm", alpha=1.0, pad=(14, 7)):
+    """A small label centred on (x, y)."""
+    w = f.getlength(text) + 2 * pad[0] * scale
+    h = f.size + 2 * pad[1] * scale
+    x0 = x - w / 2 if anchor == "mm" else x
+    d.rounded_rectangle((x0, y - h / 2, x0 + w, y + h / 2), 9 * scale, fill=mix(BG, bg, alpha), outline=mix(BG, fg, alpha), width=2 * scale)
+    d.text((x0 + w / 2, y), text, font=f, fill=mix(BG, fg, alpha), anchor="mm")
+
+
+# ---- The tree ----------------------------------------------------------------------------------------
+
+POS = {
+    "gc": (960, 128), "ada": (350, 318), "eve": (960, 318), "hal": (1500, 318),
+    "kai": (200, 526), "ned": (500, 526), "quin": (810, 526), "sam": (1110, 526), "uma": (1400, 526), "wes": (1680, 526),
+    "cy": (200, 736), "fay": (810, 736), "ida": (1400, 736),
+}
+BOX_W, BOX_H = 232, 108
+LABEL = {"gc": "general contractor"}
+
+
+class Tree:
+    """The state of the tree at any moment, as a pure function of time."""
+
+    def __init__(self, run, marks):
+        self.g = run["grants"]
+        self.t = run["tasks"]
+        self.by_grant = {v["grant"]: n for n, v in self.g.items()}
+        self.task_of = {v["winner"]: k for k, v in self.t.items() if v["winner"] in self.g}
+        m = marks
+        self.born = {"gc": m["c1"]}
+        self.born["ada"] = m["p1"] + 0.5
+        self.born["eve"], self.born["hal"] = m["p2"] + 0.2, m["p2"] + 0.9
+        for i, n in enumerate(("kai", "ned", "quin", "sam", "uma", "wes")):
+            self.born[n] = m["l1"] + 0.4 + 0.42 * i
+        for i, n in enumerate(("cy", "fay", "ida")):
+            self.born[n] = m["l3"] + 0.3 + 0.55 * i
+        cut_at = m["r1"] + 1.3
+        self.cut = {n: cut_at for n in ("hal", "uma", "wes", "ida")}
+        ended = m["m2b"] + 0.7
+        self.cut.update({n: ended for n in ("eve", "quin", "sam", "fay", "ned", "cy")})
+        self.hijacked_at, self.flash_at = m["h1"], cut_at
+        # The run's draws, replayed. Each is charged to the grant and to every level above it.
+        self.draws = [(m["m1"] + 1.2, "fay", 30), (m["m2"] + 0.2, "kai", 70), (m["m2"] + 2.6, "ada", 160), (m["m2b"] + 0.2, "quin", 70), (m["m3"] + 0.3, "hal", 100)]
+        for name, v in self.g.items():
+            if self.spent(name, 1e9) != v["spent_mnear"]:
+                sys.exit(f"replayed draws give {name} {self.spent(name, 1e9)}, the vault says {v['spent_mnear']}")
+        self.m = m
+
+    def lineage(self, name):
+        out = [name]
+        while self.g[out[-1]]["parent"] is not None:
+            out.append(self.by_grant[self.g[out[-1]]["parent"]])
         return out
 
-    def row_of(self, sub):
-        return self.spans(sub)[0][0]
+    def spent(self, name, t):
+        total = 0.0
+        for at, who, amount in self.draws:
+            if name in self.lineage(who):
+                total += amount * ease((t - at) / 0.8)
+        return total
 
-
-def norm(s):
-    return re.sub(r"[^a-z0-9]", "", s.lower())
-
-
-async def tts(text, voice, rate, mp3):
-    import edge_tts
-    words = []
-    com = edge_tts.Communicate(text, voice, rate=rate, boundary="WordBoundary")
-    with open(mp3, "wb") as f:
-        async for chunk in com.stream():
-            if chunk["type"] == "audio":
-                f.write(chunk["data"])
-            elif chunk["type"] == "WordBoundary":
-                words.append({"t": chunk["offset"] / 1e7, "d": chunk["duration"] / 1e7, "w": chunk["text"]})
-    return words
-
-
-def duration(path):
-    out = subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)], timeout=30)
-    return float(out.decode().strip())
-
-
-def voice_scene(scene, sb):
-    text = scene.get("tts", scene["narration"])
-    key = hashlib.sha256(f"{sb['voice']}|{sb['rate']}|{text}".encode()).hexdigest()[:16]
-    mp3, meta = TMP / f"{key}.mp3", TMP / f"{key}.json"
-    if not (mp3.exists() and meta.exists()):
-        meta.write_text(json.dumps(asyncio.run(tts(text, sb["voice"], sb["rate"], mp3))), encoding="utf-8")
-    return mp3, json.loads(meta.read_text(encoding="utf-8")), duration(mp3)
-
-
-def phrase_time(words, phrase):
-    """Start time of a phrase in the spoken words, matched on letters and digits only."""
-    joined, owner = "", []
-    for i, w in enumerate(words):
-        n = norm(w["w"])
-        joined += n
-        owner += [i] * len(n)
-    at = joined.find(norm(phrase))
-    if at < 0:
-        sys.exit(f"phrase not spoken: {phrase!r}\nspoken: {' '.join(w['w'] for w in words)}")
-    return words[owner[at]]["t"]
-
-
-def plan(sb):
-    """Works out scene start times and the absolute time of every beat."""
-    t = 0.0
-    for s in sb["scenes"]:
-        s["mp3"], s["words"], s["voice_len"] = voice_scene(s, sb)
-        lead, tail = s.get("lead", 0.3), s.get("tail", 0.45)
-        s["start"] = t
-        s["voice_at"] = t + lead
-        s["voice_end"] = s["voice_at"] + s["words"][-1]["t"] + s["words"][-1]["d"]
-        s["end"] = s["voice_end"] + tail  # the mp3 ends in silence, which may run under the next scene
-        for b in s.get("beats", []):
-            b["t"] = s["start"] if not b.get("on") else s["voice_at"] + phrase_time(s["words"], b["on"]) - 0.12
-        t = s["end"]
-    return t
-
-
-class Scene:
-    """What a terminal scene shows at a time. A scene may carry on from the state the last one ended in."""
-
-    def __init__(self, s, terms, carried):
-        self.s, self.terms = s, terms
-        self.base = carried if s.get("continues") else {"cap": s.get("capture"), "scroll": 0.0, "upto": None}
-        self.accumulate = s.get("accumulate", False)
+    def price(self, name):
+        return self.t[self.task_of[name]]["price_mnear"]
 
     def state(self, t):
-        cap, scroll, upto = self.base["cap"], self.base["scroll"], self.base["upto"]
-        boxes = []
-        for b in self.s.get("beats", []):
-            if t < b["t"]:
+        nodes = {}
+        for n, born in self.born.items():
+            p = ease((t - born) / 0.55)
+            if p <= 0:
+                continue
+            cut = ease((t - self.cut[n]) / 0.3) if n in self.cut else 0.0
+            nodes[n] = (round(p, 2), round(cut, 2), round(self.spent(n, t), 1))
+        return nodes
+
+
+def draw_tree(tree, t, tags):
+    S = SS
+    img = Image.new("RGB", (W * S, H * S), BG)
+    d = ImageDraw.Draw(img)
+    state = tree.state(t)
+    fn, fs, fp = font(SERIF, 30 * S), font(MONO, 22 * S), font(MONOB, 25 * S)
+
+    def box(n):
+        x, y = POS[n]
+        return (x - BOX_W / 2) * S, (y - BOX_H / 2) * S, (x + BOX_W / 2) * S, (y + BOX_H / 2) * S
+
+    for n, (p, cut, _) in state.items():  # edges first
+        if n == "gc":
+            continue
+        parent = tree.by_grant[tree.g[n]["parent"]]
+        x0, y0 = POS[parent][0] * S, (POS[parent][1] + BOX_H / 2) * S
+        x1, y1 = POS[n][0] * S, (POS[n][1] - BOX_H / 2) * S
+        ym = (y0 + y1) / 2
+        color = mix(LINE, CUT, cut) if cut else mix(LINE, LEAF, 0.55)
+        pts = [(x0, y0), (x0, ym), (x1, ym), (x1, y1)]
+        total = abs(ym - y0) + abs(x1 - x0) + abs(y1 - ym)
+        left = total * p
+        for a, b in zip(pts, pts[1:]):
+            seg = abs(b[0] - a[0]) + abs(b[1] - a[1])
+            if seg == 0:
+                continue
+            k = min(1.0, left / seg)
+            d.line((a, (a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k)), fill=color, width=4 * S)
+            left -= seg
+            if left <= 0:
                 break
-            if b.get("capture"):
-                cap, scroll, upto, boxes = b["capture"], 0.0, None, []
-            term = self.terms[cap]
-            if "upto" in b:
-                upto = term.spans(b["upto"])[-1][0] if b["upto"] else None
-            if "top" in b:
-                target = float(max(0, term.row_of(b["top"]) - b.get("top_row", 0)) * ROW)
-                p = min(1.0, (t - b["t"]) / SCROLL_S)
-                scroll += (target - scroll) * (p * p * (3 - 2 * p))
-            if "hl" in b or b.get("clear"):
-                boxes = [(x[0], x[1], x[2], True) for x in boxes] if self.accumulate and not b.get("clear") else []
-                for h in b.get("hl", []):
-                    boxes.append((h["text"], h["color"], b["t"], False))
-        return cap, scroll, upto, boxes
+    for n, (p, cut, spent) in state.items():
+        a = ease((p - 0.45) / 0.55)
+        if a <= 0:
+            continue
+        x0, y0, x1, y1 = box(n)
+        hij = ease((t - tree.hijacked_at) / 0.4) if n == "hal" and not cut else 0.0
+        edge = mix(mix(LEAF, AMBER, hij), CUT, cut)
+        fill = mix(CARD, CUTBG, cut)
+        d.rounded_rectangle((x0, y0, x1, y1), 12 * S, fill=mix(BG, fill, a), outline=mix(BG, edge, a), width=3 * S)
+        cx = (x0 + x1) / 2
+        d.text((cx, y0 + 33 * S), LABEL.get(n, n) if n != "gc" else "contractor", font=fn, fill=mix(BG, INK, a), anchor="mm")
+        cap = tree.g[n]["cap_mnear"]
+        d.text((cx, y0 + 68 * S), f"grant {tree.g[n]['grant']}", font=fs, fill=mix(BG, SOFT, a), anchor="mm")
+        bx0, bx1, by = x0 + 18 * S, x1 - 18 * S, y1 - 17 * S
+        d.rounded_rectangle((bx0, by, bx1, by + 8 * S), 4 * S, fill=mix(BG, LINE, a))
+        if spent > 0:
+            d.rounded_rectangle((bx0, by, bx0 + (bx1 - bx0) * min(1.0, spent / cap), by + 8 * S), 4 * S, fill=mix(BG, BARK, a))
+        if n != "gc":
+            pill(d, cx, y0 - 2 * S, str(tree.price(n)), fp, mix(mix(LEAF, CUT, cut), BG, 0.0), CARD, S, alpha=a, pad=(11, 2))
+    for tag in tags:
+        p = ease((t - tag["at"]) / 0.25)
+        if p > 0 and t < tag.get("until", 1e9):
+            tag["draw"](d, p)
+    if tree.flash_at <= t < tree.flash_at + 0.5:  # one flash over the whole branch, in the same instant
+        q = 1 - (t - tree.flash_at) / 0.5
+        for n in ("hal", "uma", "wes", "ida"):
+            x0, y0, x1, y1 = box(n)
+            g = 12 * S
+            d.rounded_rectangle((x0 - g, y0 - g, x1 + g, y1 + g), 16 * S, outline=mix(BG, CUT, q), width=5 * S)
+    out = img.resize((W, H), Image.LANCZOS)
+    # The root's meter, the number everything else is charged to.
+    dd = ImageDraw.Draw(out)
+    spent, cap = tree.spent("gc", t), tree.g["gc"]["cap_mnear"]
+    dd.text((W - 40, 26), f"charged to the root: {spent:.0f} of {cap} mNEAR", font=font(MONO, 26), fill=INK, anchor="ra")
+    return out, (tuple(sorted(state.items())), tuple(ease((t - x["at"]) / 0.25) > 0 and t < x.get("until", 1e9) and round(ease((t - x["at"]) / 0.25), 2) for x in tags), round(spent, 1), tree.flash_at <= t < tree.flash_at + 0.5 and round(t, 2))
 
-    def final(self):
-        cap, scroll, upto, _ = self.state(1e9)
-        return {"cap": cap, "scroll": scroll, "upto": upto}
+
+def tags_for(tree, m, tx):
+    S = SS
+    f = font(MONOB, 22 * S)
+
+    def red_pill(x, y, text):
+        return lambda d, p: pill(d, x * S, y * S, text, f, CUT, CUTBG, S, alpha=p)
+
+    def outsider(d, p):
+        x, y = 1786, 150
+        hx, hy = POS["hal"][0] + 60, POS["hal"][1] - BOX_H / 2
+        d.rounded_rectangle(((x - 100) * S, (y - 42) * S, (x + 100) * S, (y + 42) * S), 12 * S, fill=mix(BG, CUTBG, p), outline=mix(BG, CUT, p), width=3 * S)
+        d.text((x * S, y * S), "outsider", font=font(SERIF, 30 * S), fill=mix(BG, INK, p), anchor="mm")
+        steps = 11
+        for i in range(0, steps, 2):
+            a = (hx + (x - 60 - hx) * i / steps, hy + (y + 42 - hy) * i / steps)
+            b = (hx + (x - 60 - hx) * (i + 1) / steps, hy + (y + 42 - hy) * (i + 1) / steps)
+            d.line(((a[0] * S, a[1] * S), (b[0] * S, b[1] * S)), fill=mix(BG, CUT, p), width=4 * S)
+        mx, my = (hx + x - 60) / 2, (hy + y + 42) / 2
+        r = 15
+        for sx in (1, -1):
+            d.line((((mx - r * sx) * S, (my - r) * S), ((mx + r * sx) * S, (my + r) * S)), fill=mix(BG, CUT, p), width=6 * S)
+
+    return [
+        {"at": m["l2"] + 1.0, "until": m["l3"], "draw": red_pill(1230, POS["eve"][1], "OVERCOMMITTED")},
+        {"at": m["h1"] + 0.8, "until": m["r1"] + 1.3, "draw": outsider},
+        {"at": m["h1"] + 1.6, "until": m["h2"], "draw": red_pill(1765, POS["hal"][1], "RECIPIENT_NOT_ALLOWED")},
+        {"at": m["h2"] + 0.7, "until": m["r1"], "draw": red_pill(1765, POS["hal"][1], "ATT_RECIPIENTS")},
+        {"at": m["r2"], "until": m["r3"], "draw": red_pill(1400, 838, f"4 grants, 1 transaction: {tx[:12]}...")},
+        {"at": m["r3"], "until": m["m1"], "draw": red_pill(1400, 838, "their 4 tasks: void, bonds returned")},
+        {"at": m["m2"] + 1.2, "until": m["m2b"], "draw": red_pill(POS["ada"][0] + 170, POS["ada"][1], "CAP")},
+    ]
 
 
-def chrome(title, small):
+# ---- Other scenes ------------------------------------------------------------------------------------
+
+
+def draw_title(lines, sub):
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)
-    d.rounded_rectangle((MARGIN, MARGIN, W - MARGIN, H - MARGIN), 14, fill=WINDOW)
-    d.rounded_rectangle((MARGIN, MARGIN, W - MARGIN, MARGIN + BAR), 14, fill=BARC)
-    d.rectangle((MARGIN, MARGIN + BAR - 16, W - MARGIN, MARGIN + BAR), fill=BARC)
-    for i, c in enumerate(("#ff5f56", "#ffbd2e", "#27c93f")):
-        x = MARGIN + 26 + i * 28
-        y = MARGIN + BAR // 2
-        d.ellipse((x - 8, y - 8, x + 8, y + 8), fill=c)
-    d.text((MARGIN + 126, MARGIN + BAR // 2), title, font=small, fill=DIM, anchor="lm")
+    y = 470
+    for line in lines:
+        d.text((W / 2, y), line, font=font(SERIF, 78), fill=INK, anchor="mm")
+        y += 118
+    d.text((W / 2, y + 26), sub, font=font(SANS, 36), fill=SOFT, anchor="mm")
     return img
 
 
-def body_image(term, scroll, upto, boxes, t):
-    y = int(round(scroll))
-    body = term.canvas.crop((0, y, BODY_W, y + BODY_H))
-    if upto is not None:
-        hide = (upto + 1) * ROW - y
-        if hide < BODY_H:
-            ImageDraw.Draw(body).rectangle((0, max(0, hide), BODY_W, BODY_H), fill=WINDOW)
-    if boxes:
-        layer = Image.new("RGBA", (BODY_W, BODY_H), (0, 0, 0, 0))
-        d = ImageDraw.Draw(layer)
-        for text, color, t0, old in boxes:
-            a = 0.6 if old else min(1.0, max(0.0, (t - t0) / FADE_HL_S))
-            r, g, b = COLORS[color]
-            for row, c0, c1 in term.spans(text):
-                x0, x1 = c0 * term.adv - 7, c1 * term.adv + 7
-                y0 = row * ROW - y
-                d.rounded_rectangle((x0, y0, x1, y0 + ROW - 2), 7, fill=(r, g, b, int(52 * a)), outline=(r, g, b, int(255 * a)), width=3)
-        body = Image.alpha_composite(body.convert("RGBA"), layer).convert("RGB")
-    return body
-
-
-def typing_image(term, t):
-    body = Image.new("RGB", (BODY_W, BODY_H), WINDOW)
-    d = ImageDraw.Draw(body)
-    shown = term.show[: int(len(term.show) * min(1.0, t / TYPE_S))]
-    d.text((0, 3), "$", font=term.font, fill=PROMPT)
-    d.text((2 * term.adv, 3), shown, font=term.font, fill=TEXT)
-    d.rectangle(((2 + len(shown)) * term.adv + 2, 6, (3 + len(shown)) * term.adv, ROW - 6), fill=TEXT)
-    return body
-
-
-def title_card(lines, font):
+def draw_auction(run, commits, t, m):
+    """Task 1, from the run: hashes on chain, then the bids as they opened."""
+    task = run["tasks"]["api"]
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)
-    gap = 104
-    y = H // 2 - gap * (len(lines) - 1) // 2
-    for i, line in enumerate(lines):
-        d.text((W // 2, y + i * gap), line, font=font, fill=TEXT, anchor="mm")
+    d.text((W / 2, 120), f"Task {task['id']}: up to 300 mNEAR. Four workers bid.", font=font(SERIF, 46), fill=INK, anchor="mm")
+    rows = list(task["bids_mnear"].items())
+    order = commits[task["id"]]
+    open_at = m["a2"] + 0.3
+    y = 240
+    for i, (who, bid) in enumerate(rows):
+        reveal = ease((t - (open_at + 0.35 * i)) / 0.3) if bid is not None else 0.0
+        silent = bid is None and t >= open_at + 1.6
+        win = who == task["winner"] and t >= m["a3"] + 0.2
+        sets = bid == task["price_mnear"] and t >= m["a3"] + 1.2
+        edge = CUT if silent else LEAF if win else AMBER if sets else LINE
+        d.rounded_rectangle((280, y, 1640, y + 124), 12, fill=CUTBG if silent else CARD, outline=edge, width=3)
+        d.text((330, y + 62), who, font=font(SERIF, 42), fill=INK, anchor="lm")
+        h = "0x" + order[who][:30] + "..."
+        d.text((560, y + 62), h, font=font(MONO, 32), fill=mix(CARD, SOFT, 1 - reveal), anchor="lm")
+        if bid is not None and reveal > 0:
+            d.text((560, y + 62), f"{bid} mNEAR", font=font(MONOB, 44), fill=mix(CARD, INK, reveal), anchor="lm")
+        note = "never revealed: bond lost" if silent else f"wins, paid {task['price_mnear']}" if win else "sets the price" if sets else ""
+        d.text((1600, y + 62), note, font=font(SANSB, 34), fill=CUT if silent else LEAF if win else AMBER, anchor="rm")
+        y += 148
+    return img, (round(t - open_at, 1) if open_at <= t < open_at + 2.2 else t >= open_at, t >= m["a3"] + 0.2, t >= m["a3"] + 1.2)
+
+
+def shoot_page():
+    """The real page, from the snapshot of the testnet run, at twice the pixels."""
+    png = TMP / "page.png"
+    url = (ROOT / "site" / "index.html").as_uri() + "?source=snapshot"
+    subprocess.run(
+        [CHROME, "--headless=new", "--disable-gpu", "--no-first-run", f"--user-data-dir={TMP / 'chrome'}", "--hide-scrollbars", "--force-device-scale-factor=2",
+         "--force-dark-mode", "--enable-features=WebContentsForceDark:inversion_method/cielab_based", "--window-size=1180,2300", "--virtual-time-budget=6000", f"--screenshot={png}", url],
+        check=True, timeout=120, capture_output=True,
+    )
+    return Image.open(png).convert("RGB")
+
+
+def draw_page(page, u):
+    """A slow pan down the page. `u` runs from 0 to 1."""
+    width = 1300
+    scale = width / page.width
+    view = int(860 / scale)
+    y = int((page.height - view) * 0.42 * ease(u))
+    crop = page.crop((0, y, page.width, y + view)).resize((width, 860), Image.LANCZOS)
+    img = Image.new("RGB", (W, H), BG)
+    img.paste(crop, ((W - width) // 2, 40))
     return img
 
 
-def end_card(card, repo_url, fonts):
-    big, mid, small = fonts
+def verify_text():
+    text = (EV / "verify-market.log").read_text(encoding="utf-8")
+    if FORBIDDEN.search(text):
+        sys.exit("verify-market.log holds key material")
+    return [line.rstrip() for line in text.split("\n") if line.strip()]
+
+
+def draw_verify(lines, u):
+    img = Image.new("RGB", (W, H), "#0d1210")
+    d = ImageDraw.Draw(img)
+    f, fb = font(MONO, 25), font(MONOB, 25)
+    y = 34
+    d.text((48, y), "$ python3 scripts/verify-market.py", font=fb, fill=LEAF)
+    y += 46
+    shown = int(len(lines) * min(1.0, u / 0.45)) + 1
+    for line in lines[:shown]:
+        keep = line.startswith("  ok") and ("transactions found" in line or "recomputed" in line) or "all checks passed" in line
+        if len(line) > 118:
+            line = line[:115] + "..."
+        if keep:
+            d.rectangle((40, y - 4, W - 40, y + 32), fill=mix("#0d1210", LEAF, 0.16))
+        d.text((48, y), line, font=fb if keep else f, fill=INK if keep else SOFT)
+        y += 37
+    return img, shown
+
+
+def draw_end(card, facts, repo):
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)
-    x, y = 150, 165
-    d.text((x, y), card["name"], font=big, fill=TEXT)
-    y += 130
+    x, y = 170, 118
+    d.text((x, y), "Espalier", font=font(SERIF, 88), fill=INK)
+    y += 122
     for line in card["lines"]:
-        d.text((x, y), line, font=small, fill=DIM)
-        y += 50
-    y += 44
+        d.text((x, y), line, font=font(SANS, 38), fill=SOFT)
+        y += 54
+    y += 34
     for line in card["facts"]:
-        d.text((x, y), line, font=small, fill=TEXT)
-        y += 50
-    y += 56
-    link = repo_url or card["repo_fallback"]
-    d.text((x, y), link, font=mid, fill=tuple(COLORS["blue"]))
-    y += 100
-    d.text((x, y), card["status"], font=big, fill=tuple(COLORS["amber"]))
+        d.text((x, y), line.format(**facts), font=font(MONO, 34), fill=INK)
+        y += 52
+    y += 34
+    d.text((x, y), repo, font=font(MONOB, 44), fill=BLUE)
+    y += 78
+    d.text((x, y), card["status"], font=font(SANSB, 38), fill=AMBER)
     return img
 
 
-def render(sb, total, terms, cards, small, tmp_video):
-    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
-           "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p", "-c:v", "libx264", "-preset", "medium", "-crf", "17",
-           "-g", str(FPS * 2), "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", str(tmp_video)]
-    ff = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-    carried, windows = None, {}
-    scenes = []
-    for s in sb["scenes"]:
-        sc = Scene(s, terms, carried) if s["kind"] == "term" else None
-        if sc:
-            carried = sc.final()
-        scenes.append((s, sc))
-    frames = int(round(total * FPS))
-    i_scene, last_key, last_bytes = 0, None, None
-    for n in range(frames):
-        t = n / FPS
-        while i_scene + 1 < len(scenes) and t >= scenes[i_scene + 1][0]["start"]:
-            i_scene += 1
-        s, sc = scenes[i_scene]
-        local = t - s["start"]
-        if sc is None:
-            fade = min(1.0, local / 0.35, (s["end"] - t) / 0.35 if s.get("fade_out") else 1.0)
-            key = (s["id"], round(fade, 2))
-            if key != last_key:
-                img = cards[s["id"]] if fade >= 1 else Image.blend(Image.new("RGB", (W, H), BG), cards[s["id"]], max(0.0, fade))
-                last_bytes = img.tobytes()
+# ---- Assembly ----------------------------------------------------------------------------------------
+
+
+class Film:
+    def __init__(self, sb, run, facts, commits, marks, total, repo):
+        self.sb, self.run, self.facts, self.commits, self.m, self.total = sb, run, facts, commits, marks, total
+        self.tree = Tree(run, marks)
+        self.tags = tags_for(self.tree, marks, facts["revoke_tx"])
+        self.page = shoot_page()
+        self.log = verify_text()
+        self.title = draw_title(sb["title_card"], sb["title_sub"])
+        self.end = draw_end(sb["end_card"], facts, repo)
+        self.scenes = sb["scenes"]
+        self.tree_header = sb["tree_header"].format(**facts)
+        self.memo = (None, None)
+
+    def frame(self, t):
+        s = next((x for x in self.scenes if x["start"] <= t < x["end"]), self.scenes[-1])
+        c = next((x for x in s["captions"] if x["start"] <= t < x["start"] + x["len"]), s["captions"][-1])
+        kind = s["kind"]
+        if kind == "tree":
+            base, key = draw_tree(self.tree, t, self.tags)
+            key = ("tree", key)
+            head = self.tree_header
+        elif kind == "auction":
+            base, key = draw_auction(self.run, self.commits, t, self.m)
+            key = ("auction", key)
+            head = self.tree_header
+        elif kind == "page":
+            u = (t - s["start"]) / (s["end"] - s["start"])
+            base, key, head = draw_page(self.page, u), ("page", round(u, 3)), None
+        elif kind == "verify":
+            u = (t - s["start"]) / (s["end"] - s["start"])
+            base, shown = draw_verify(self.log, u)
+            key, head = ("verify", shown), None
+        elif kind == "title":
+            base, key, head = self.title.copy(), ("title",), None
         else:
-            cap, scroll, upto, boxes = sc.state(t)
-            term = terms[cap]
-            typing = s.get("type") and local < TYPE_S + 0.12
-            alphas = tuple((b[0], b[3], round(min(1.0, (t - b[2]) / FADE_HL_S), 2)) for b in boxes)
-            key = (s["id"], cap, typing and local, round(scroll), upto, alphas)
-            if key != last_key:
-                title = s.get("window", sb["window"])
-                if title not in windows:
-                    windows[title] = chrome(title, small)
-                img = windows[title].copy()
-                img.paste(typing_image(term, local) if typing else body_image(term, scroll, upto, boxes, t), (BODY_X, BODY_Y))
-                last_bytes = img.tobytes()
-        last_key = key
-        ff.stdin.write(last_bytes)
+            base, key, head = self.end.copy(), ("end",), None
+        key = (key, c["id"])
+        if key == self.memo[0]:
+            return self.memo[1]
+        if head:
+            header(base, head)
+        if c["text"]:
+            caption(base, c["text"])
+        raw = base.tobytes()
+        self.memo = (key, raw)
+        return raw
+
+
+def render(film, path):
+    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
+           "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p", "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+           "-g", str(FPS * 2), "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-movflags", "+faststart", str(path)]
+    ff = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+    for n in range(int(round(film.total * FPS))):
+        ff.stdin.write(film.frame(n / FPS))
     ff.stdin.close()
     if ff.wait(timeout=300) != 0:
         sys.exit("ffmpeg failed while rendering")
 
 
-def mix_audio(sb, total, wav):
-    cmd = ["ffmpeg", "-y", "-loglevel", "error"]
-    parts = []
-    for i, s in enumerate(sb["scenes"]):
-        cmd += ["-i", str(s["mp3"])]
-        ms = int(round(s["voice_at"] * 1000))
-        parts.append(f"[{i}:a]aresample=48000,adelay={ms}:all=1[a{i}]")
-    n = len(sb["scenes"])
+def duration(path):
+    return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)], timeout=30).decode().strip())
+
+
+async def speak(text, voice, rate, mp3):
+    import edge_tts
+    await edge_tts.Communicate(text, voice, rate=rate).save(str(mp3))
+
+
+def voice_track(sb, total, wav):
+    """Each caption spoken at its own start."""
+    sounds = sb["say"]
+    cmd, parts, n = ["ffmpeg", "-y", "-loglevel", "error"], [], 0
+    for s in sb["scenes"]:
+        for c in s["captions"]:
+            if not c["text"]:
+                continue
+            text = c["text"]
+            for a, b in sounds.items():
+                text = text.replace(a, b)
+            key = hashlib.sha256(f"{sb['voice']}|{sb['rate']}|{text}".encode()).hexdigest()[:16]
+            mp3 = TMP / f"{key}.mp3"
+            if not mp3.exists():
+                asyncio.run(speak(text, sb["voice"], sb["rate"], mp3))
+            # A clip longer than its caption is sped up a little, so that it never runs into the next one.
+            speed = max(1.0, duration(mp3) / (c["len"] - 0.2))
+            if speed > 1.15:
+                print(f"voice is {speed:.2f}x on caption {c['id']}")
+            cmd += ["-i", str(mp3)]
+            parts.append(f"[{n}:a]atempo={speed:.3f},aresample=48000,adelay={int((c['start'] + 0.1) * 1000)}:all=1[a{n}]")
+            n += 1
     labels = "".join(f"[a{i}]" for i in range(n))
     graph = ";".join(parts) + f";{labels}amix=inputs={n}:normalize=0:duration=longest,apad,atrim=0:{total:.3f},alimiter=limit=0.89[out]"
-    cmd += ["-filter_complex", graph, "-map", "[out]", "-ac", "2", "-ar", "48000", str(wav)]
-    subprocess.run(cmd, check=True, timeout=120)
+    subprocess.run(cmd + ["-filter_complex", graph, "-map", "[out]", "-ac", "2", "-ar", "48000", str(wav)], check=True, timeout=180)
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--plan", action="store_true", help="print the timing and stop")
-    ap.add_argument("--repo-url", help="repository link for the end card")
+    ap.add_argument("--plan", action="store_true")
+    ap.add_argument("--voice", action="store_true")
+    ap.add_argument("--frames", help="comma-separated seconds: write stills to tmp/ and stop")
+    ap.add_argument("--repo-url")
     args = ap.parse_args()
     sb = json.loads((HERE / "storyboard.json").read_text(encoding="utf-8"))
     OUT.mkdir(exist_ok=True)
     TMP.mkdir(exist_ok=True)
 
-    font = ImageFont.truetype(FONT, SIZE)
-    adv = font.getlength("M" * 100) / 100
-    terms = {name: Term(*run_capture(name, spec), font, adv) for name, spec in sb["captures"].items()}
-    total = plan(sb) + sb.get("hold", 0.6)
-    sb["scenes"][-1]["end"] = total
-
-    rows = []
-    for s in sb["scenes"]:
-        rows.append({"scene": s["id"], "script": s.get("script_time"), "start": round(s["start"], 2), "voice": [round(s["voice_at"], 2), round(s["voice_end"], 2)],
-                     "beats": [{"t": round(b["t"], 2), "on": b.get("on", "")} for b in s.get("beats", [])]})
-        print(f"{s['id']:10} script {s.get('script_time', ''):5} start {s['start']:6.2f} voice {s['voice_at']:6.2f}-{s['voice_end']:6.2f}")
-        for b in s.get("beats", []):
-            print(f"    {b['t']:6.2f}  {b.get('on', '')}")
-    print(f"total {total:.2f}s, cols {terms['replay'].cols}, rows in view {BODY_H // ROW}")
-    (OUT / "timing.json").write_text(json.dumps({"total": total, "scenes": rows}, indent=1), encoding="utf-8")
+    run, facts, commits = load_run()
+    check_proofs(sb, run)
+    total, marks = plan(sb, facts)
+    rows = [{"id": c["id"], "start": round(c["start"], 2), "seconds": round(c["len"], 2), "text": c["text"]} for s in sb["scenes"] for c in s["captions"]]
+    (OUT / "timing.json").write_text(json.dumps({"total": round(total, 2), "facts": facts, "captions": rows}, indent=1), encoding="utf-8")
+    for r in rows:
+        print(f"{r['start']:7.2f} {r['seconds']:5.2f}  {r['id']:6} {r['text']}")
+    print(f"total {total:.2f} s")
     if args.plan:
         return
 
-    # The end card's text has to be the repository's own words, and the story's own numbers.
-    readme = " ".join((ROOT / "README.md").read_text(encoding="utf-8").split())
-    for line in sb["end_card"]["readme_sentences"]:
-        if line not in readme:
-            sys.exit(f"end card text is not in README.md: {line!r}")
-    for line in sb["end_card"]["facts"]:
-        if line not in terms["story"].full:
-            sys.exit(f"end card fact is not in the story.py output: {line!r}")
-
-    # Every highlight and scroll anchor must exist before a single frame is drawn.
-    cap = None
-    for s in sb["scenes"]:
-        if s["kind"] != "term":
-            continue
-        cap = s.get("capture", cap)
-        for b in s.get("beats", []):
-            cap = b.get("capture", cap)
-            for sub in [h["text"] for h in b.get("hl", [])] + [b[k] for k in ("top", "upto") if b.get(k)]:
-                terms[cap].spans(sub)
-
-    small = ImageFont.truetype(FONT, 26)
-    card = sb["end_card"]
-    cards = {
-        "title": title_card(sb["title_card"], ImageFont.truetype(FONT, 72)),
-        "end": end_card(card, args.repo_url or sb.get("repo_url"), (ImageFont.truetype(FONT_BOLD, 76), ImageFont.truetype(FONT, 46), ImageFont.truetype(FONT, 36))),
-    }
-    video, wav = TMP / "video.mp4", TMP / "voice.wav"
-    render(sb, total, terms, cards, small, video)
-    mix_audio(sb, total, wav)
-
-    final = OUT / sb["output"]
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(video), "-i", str(wav), "-c:v", "copy", "-c:a", "aac", "-b:a", "160k",
-                    "-movflags", "+faststart", "-shortest", str(final)], check=True, timeout=120)
-    upload = OUT / sb["output_small"]
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(final), "-c:v", "libx264", "-preset", "slow", "-crf", "23", "-pix_fmt", "yuv420p",
-                    "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", str(upload)],
-                   check=True, timeout=300)
-    for p in (final, upload):
+    film = Film(sb, run, facts, commits, marks, total, args.repo_url or sb["repo_url"])
+    if args.frames:
+        for sec in args.frames.split(","):
+            raw = film.frame(float(sec))
+            Image.frombytes("RGB", (W, H), raw).save(TMP / f"still-{float(sec):06.1f}.png")
+        return
+    final, small = OUT / sb["output"], OUT / sb["output_small"]
+    render(film, final)
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(final), "-c:v", "libx264", "-preset", "slow", "-crf", "24", "-pix_fmt", "yuv420p",
+                    "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-movflags", "+faststart", str(small)], check=True, timeout=400)
+    outs = [final, small]
+    if args.voice:
+        wav, voiced = TMP / "voice.wav", OUT / sb["output_voiced"]
+        voice_track(sb, total, wav)
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(small), "-i", str(wav), "-c:v", "copy", "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", "-t", f"{total:.3f}", str(voiced)], check=True, timeout=120)
+        outs.append(voiced)
+    for p in outs:
         print(f"{p}  {p.stat().st_size / 1e6:.1f} MB  {duration(p):.2f}s")
 
 

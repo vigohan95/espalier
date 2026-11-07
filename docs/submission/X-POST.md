@@ -1,17 +1,32 @@
 # X demo post draft
 
-Draft only, not posted. The human publishes it with the video attached. Before posting, replace `REPO` with
-the public repository link: X counts any link as 23 characters, and the length below already allows for that.
+Draft only, not posted. The human writes the final words and publishes it with the video attached: the rules
+list posting on X among the things that need the human's own confirmation. The repository has to be public
+first, or the link leads nowhere.
 
 ```text
-I hid instructions in 50 invoices and a small local AI agent fell for 38. On NEAR, 15 were refused with no human, 18 waited for a human, and 5 overpaid real vendors. What would you try next?
+What stops the agent your agent hired from burning the budget?
 
-Built at NEAR HACKATHON @NEARProtocol #NEARHackathon
-REPO
+On NEAR, each hire is a sealed-bid auction and the prize is a smaller budget. 13 auctions grew 12 grants. One revoke cut off 4 agents.
+
+Built at NEAR HACKATHON
+@NEARProtocol #NEARHackathon
+https://github.com/vigohan95/espalier
 ```
 
-Every number comes from `docs/evidence/trials/report.md`. Do not shorten this to "all stopped": 5 went through,
-and the 18 depend on a person saying no.
+Length: 276 of 280, counting the link as 23, as X does.
 
-Pacing: the project's own rule is at most one new post per project per day, and a look at the account's last
-post first.
+Video to attach: `docs/submission/video/out/espalier-demo-small.mp4`.
+
+Where each number comes from:
+
+| Claim | Source |
+|---|---|
+| 13 auctions, 12 grants | `docs/evidence/swarm-sim-testnet.json`: 13 tasks, 12 grants under the root |
+| One revoke cut off 4 agents | The same file: `hal, uma, wes and ida are all cut off`, one `vault.revoke` |
+
+Do not say the agents are AI models making these choices: in this run they are scripted, and the video says so.
+Do not call it mainnet, or say the tree stopped a real attack.
+
+Pacing: at most one new post per project per day, and read the account's latest post first. The rule on spacing
+between posts applies. Keep the post up at least until the results are out.

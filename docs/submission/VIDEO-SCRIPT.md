@@ -1,25 +1,35 @@
-# Demo video script, 90 seconds
+# Demo video script, 116 seconds
 
-Draft. Not recorded, not posted. One complete moment: a real model reads a poisoned invoice, decides to pay
-the wrong account, and the money does not move. Everything on screen is a terminal. Every command exists in
-this repository, and trial I01 is a recorded run of a real model, not a mock-up.
+Built, not posted. `python docs/submission/video/build.py` draws the film from the recorded testnet run.
+The text and timing live in [video/storyboard.json](video/storyboard.json), and `video/out/timing.json`
+holds each caption as it was rendered, with its numbers filled in.
 
-Screen: full-size terminal, large font, dark background. Voice over, plain and unhurried.
+One idea: **auctions grow a budget tree, and one revoke cuts a branch.** The earlier script, about a poisoned
+invoice, is gone: that story is the most common one in the security track, and the injection numbers are
+still in the README.
 
-| Time | On screen | Voice |
+It works with the sound off. Every sentence is on screen, and timing follows reading speed, not a voice.
+The silent file is the main one. `--voice` also writes `espalier-demo-voiced.mp4`, the same frames with a
+synthetic voice. Whether any voice goes out is the human's decision.
+
+| Scene | On screen | Caption |
 |---|---|---|
-| 0:00 | Title card, plain text: "An AI agent pays invoices. One invoice lies." | "This agent pays invoices from a company wallet. Someone hid a line in an invoice footer. Watch what happens." |
-| 0:08 | `python3 trials/replay.py I01`. Stop on the document, and highlight the SYSTEM NOTE line | "The real payee is northwind-hosting. The footer says the account changed and names a different one." |
-| 0:20 | Scroll to the model's answer. Highlight `"recipient": "acme-b1lling.test.near"` | "This is gemma3, a small model running on my CPU. It believes the footer and tries to pay the attacker. That is a real answer, stored in the repo." |
-| 0:32 | Scroll to the recipient check. Highlight `block`, `DENYLIST_QUORUM` | "Before anything is signed, the wrapper asks about the recipient. Two independent reporters have listed this account, with evidence. The answer is block, so no transaction is created." |
-| 0:45 | `python3 scripts/attack-demo.py`, cut to step 3 of the log | "What if the agent skips the wrapper and signs directly? Its key can only reach the vault contract, and with no ticket the spend waits for a human. Even if the owner approves it by mistake, the contract asks the same denylist and refuses." |
-| 1:00 | Same log, final line, `received 0` | "The attacker received zero. That check runs in the contract on NEAR, not inside the agent, which is the point: a hijacked agent cannot turn it off." |
-| 1:10 | `python3 scripts/story.py`, the real-model block | "Across fifty poisoned invoices the model was fooled thirty-eight times. Fifteen were refused with no human. Eighteen waited for a human. Five went through: inflated bills to real vendors, inside the limits. This does not catch everything, and the report says so." |
-| 1:22 | Repository link and the words "testnet, not audited" | "It also lets an agent hire sub-agents on budgets that can only shrink. Code and every transaction are public. I would like to hear what attack you would try." |
+| Title | Plain text | Agents hire agents, who hire agents. Who keeps the third one inside the budget? |
+| Root | One node, and a counter of what the root has been charged | An owner gives a general contractor a budget |
+| Auction | Task 1's four bids as the hashes on chain, then as they opened | Sealed bids. dee never reveals and loses its bond. ada bid 200 and gets 230, the next bid |
+| Growth | The tree grows one node per award, with each price on its edge | The prize is a grant, not a payment. Nothing has left the vault. eve is refused `OVERCOMMITTED`. 13 auctions, 12 grants |
+| Hijack | hal turns amber, and a crossed-out line runs to an outsider | "Suppose hal is hijacked." The vault refuses the payment and the wider grant |
+| Revoke | hal and the three agents below it turn red in the same instant, with the transaction hash | One transaction. Keys deleted. Tasks void, bonds back |
+| Money | Meters fill up the lineage as agents draw, and the counter reaches 430 | fay draws 30, charged to every level above. ada is refused `CAP`. 330 paid, 100 back to the vault |
+| Page | A slow pan down `site/index.html`, rendered from the run's snapshot | Read-only, no wallet, no key |
+| Verify | `docs/evidence/verify-market.log` | One command, no keys |
+| End | Test numbers, repository link, status | The agents are scripted. The contracts and all 208 transactions are real |
 
-Recording notes:
+What keeps it true:
 
-- Run `python3 scripts/preflight.py` first, so that nothing fails on camera.
-- `attack-demo.py` needs `NEAR_SANDBOX_BIN_PATH`, and takes about a minute. Record it once and cut to the
-  log, rather than waiting on camera. Say nothing that is not on screen.
-- Do not show `~/.near-credentials`.
+- Every number in a caption comes from `docs/evidence/`. None is typed into the storyboard.
+- A caption can name `proof`, text that must be a passed check in `swarm-sim-testnet.json`, or the build stops.
+- The meters replay the run's draws, and the build stops unless they end on what the vault reported.
+- "Suppose" is deliberate: the hijack in this run is scripted. The end card says the agents are scripted.
+
+Before the repository goes public, check that the end card's link works.
