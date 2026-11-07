@@ -202,6 +202,10 @@ class ChainWorld:
         self.acct = {}
         self.txs = []
         self.pool = concurrent.futures.ThreadPoolExecutor(max_workers=8)
+        # A public RPC is several nodes. A read sent right after a write can land on one that has not
+        # seen the block yet, so on testnet a read waits this long after the last write.
+        self.settle = 2.5 if kind == "testnet" else 0.0
+        self.last_write = 0.0
 
     def wasm(self, name):
         return open(os.path.join(HERE, "..", "res", f"{name}.wasm"), "rb").read()
@@ -209,6 +213,12 @@ class ChainWorld:
     def rec(self, out, what, code=None):
         """Every transaction of a run is recorded with its signer, so a verifier can look it up."""
         self.txs.append({"hash": out.hash, "signer": out.raw["transaction"]["signer_id"], "what": what, "code": code})
+        self.last_write = time.time()
+
+    def fresh(self):
+        wait = self.last_write + self.settle - time.time()
+        if wait > 0:
+            time.sleep(wait)
 
     def must(self, out, what):
         self.rec(out, what, "ok" if out.ok else "FAILED")
@@ -220,17 +230,26 @@ class ChainWorld:
         key = near.Key.generate()
         account = f"{name}{self.tag}.{self.base.account}"
         self.must(self.base.create_subaccount(account, int(near_amount * 10**24), key), f"create {account}")
+        if self.kind == "testnet":
+            # Kept beside the base account's key, outside the repository, so the account can be
+            # used or emptied again later.
+            home = os.path.expanduser("~/.near-credentials/testnet")
+            with open(os.path.join(home, f"{account}.json"), "w") as f:
+                json.dump({"account_id": account, "public_key": key.public_str, "private_key": key.secret_str}, f)
         self.acct[name] = near.Signer(self.rpc, account, key)
         return self.acct[name]
 
     def setup(self):
+        # On testnet the faucet gives 10 NEAR an account, so every balance is sized. Prepaid gas is
+        # charged up front at about 0.001 NEAR per Tgas and mostly comes back, so an account that
+        # posts needs about 0.1 NEAR free at the moment it sends.
         cheap = self.kind == "testnet"
-        worker_near = 0.12 if cheap else 1.0
-        vault = self.sub("vault", 5.2 if cheap else 30)
-        market = self.sub("market", 3.9 if cheap else 8)
+        worker_near = 0.25 if cheap else 1.0
+        vault = self.sub("vault", 5.6 if cheap else 30)
+        market = self.sub("market", 3.8 if cheap else 8)
         self.vault, self.market = vault.account, market.account
         owner = self.sub("owner", 0.3 if cheap else 3)
-        self.sub("gc", 0.3 if cheap else 3)
+        self.sub("gc", 0.6 if cheap else 3)
         for w in WORKERS + [OUTSIDER]:
             self.sub(w, worker_near)
         self.must(vault.deploy(self.wasm("espalier_vault")), "deploy vault")
@@ -274,8 +293,12 @@ class ChainWorld:
         return self.rpc.view(self.vault, "vault_info")["now_ms"]
 
     def wait(self, ts):
-        while self.now() < ts:
-            time.sleep(0.5)
+        """Sleeps until chain time passes `ts`, asking the chain only now and then."""
+        while True:
+            left = ts - self.now()
+            if left <= 0:
+                return
+            time.sleep(min(max(left / 1000, 0.4), 15))
 
     def many(self, calls):
         """Runs calls from different accounts side by side. Results come back in order."""
@@ -309,7 +332,7 @@ class ChainWorld:
         t = dict(terms, asset="Native", window_secs=3600)
         for k in ("cap", "per_tx", "window_cap", "approval_threshold", "key_allowance", "gas_budget"):
             t[k] = str(t[k])
-        out = self.signers[holder.grant].call(self.vault, "delegate", {"child_pk": key.public_str, "terms": t}, tgas=100)
+        out = self.signers[holder.grant].call(self.vault, "delegate", {"child_pk": key.public_str, "terms": t}, tgas=60)
         self.rec(out, f"vault.delegate by grant {holder.grant}", (out.value or {}).get("code"))
         v = out.value or {}
         return v.get("code"), v.get("new_grant")
@@ -337,7 +360,7 @@ class ChainWorld:
 
     def draw(self, holder, amount, to=None):
         try:
-            out = self.signers[holder.grant].call(self.vault, "request_spend", {"recipient": to or self.market, "amount": str(amount), "memo": None}, tgas=100)
+            out = self.signers[holder.grant].call(self.vault, "request_spend", {"recipient": to or self.market, "amount": str(amount), "memo": None}, tgas=60)
         except near.RpcError as e:
             return ("NO_KEY", None) if "NO_KEY" in str(e.data) else (str(e.data)[:60], None)
         v = out.value or {}
@@ -353,6 +376,7 @@ class ChainWorld:
         return mk.code_of(self.keep(self.mk.refund(self.acct["gc"], task), f"refund {task}"))
 
     def payout(self, account):
+        self.fresh()
         owed = self.mk.owed(account)
         if owed:
             self.keep(self.mk.payout(self.acct["gc"], account), f"payout {account}")
@@ -361,13 +385,14 @@ class ChainWorld:
     def revoke(self, by, grant):
         signer = self.acct["owner"] if by == "owner" else self.signers[by.grant]
         try:
-            out = signer.call(self.vault, "revoke", {"grant_id": grant}, tgas=100)
+            out = signer.call(self.vault, "revoke", {"grant_id": grant}, tgas=60)
         except near.RpcError as e:
             return "NO_KEY" if "NO_KEY" in str(e.data) else str(e.data)[:60]
         self.rec(out, f"vault.revoke {grant}", (out.value or {}).get("code"))
         return (out.value or {}).get("code")
 
     def grant(self, gid):
+        self.fresh()
         g = self.rpc.view(self.vault, "get_grant", {"grant_id": gid})
         if g is None:
             return None
@@ -376,10 +401,12 @@ class ChainWorld:
         return g
 
     def poster_view(self, holder):
+        self.fresh()
         g = self.rpc.view(self.vault, "get_grant", {"grant_id": holder.grant})
         return {"window_secs": g["window_secs"], "expires_at_ms": g["expires_at_ms"], "max_denials": g["max_denials"]}
 
     def task(self, tid):
+        self.fresh()
         t = self.mk.task(tid)
         return {
             "id": tid, "status": t["status"], "note": t["note"], "price": int(t["price"]), "paid": int(t["paid"]), "held": int(t["held"]),
@@ -454,8 +481,9 @@ class Story:
     def at(self, units):
         self.w.wait(self.t0 + int(units * self.w.unit) + 1)
 
-    def bid_round(self, plan, commit_at, silent=()):
-        """`plan` maps task name -> {worker: price in mNEAR}. Commits, waits, reveals."""
+    def bid_round(self, plan, commit_at, silent=(), first=()):
+        """`plan` maps task name -> {worker: price in mNEAR}. Commits, waits, reveals. Equal bids are
+        ranked by who committed first, so a worker in `first` commits before everyone else."""
         w = self.w
         calls, who = [], []
         for name, bids in plan.items():
@@ -464,8 +492,14 @@ class Story:
                 self.tasks[name]["bids"][worker] = (price * MILLI, key, salt)
                 calls.append(lambda n=name, wk=worker, p=price * MILLI, k=key, s=salt: w.commit(wk, self.tasks[n]["id"], p, k, s))
                 who.append((name, worker))
-        # One account sends one transaction at a time, so bids are grouped by worker.
-        codes = self.grouped(calls, [x[1] for x in who])
+        early = [i for i, x in enumerate(who) if x[1] in first]
+        codes = [None] * len(calls)
+        for i in early:
+            codes[i] = calls[i]()
+        # One account sends one transaction at a time, so the rest are grouped by worker.
+        rest = [i for i in range(len(calls)) if i not in early]
+        for i, code in zip(rest, self.grouped([calls[i] for i in rest], [who[i][1] for i in rest])):
+            codes[i] = code
         bad = [f"{n}/{wk}: {c}" for (n, wk), c in zip(who, codes) if c != "ok"]
         self.check(f"{len(calls)} sealed bids committed", not bad, bad)
         self.at(commit_at)
@@ -588,6 +622,7 @@ class Story:
                 "clean": {"wes": 40, "xia": 50},
             },
             commit_at=4,
+            first=("ned",),
         )
         self.at(5)
         kai, ned, quin, sam, uma, wes = self.settle_round(

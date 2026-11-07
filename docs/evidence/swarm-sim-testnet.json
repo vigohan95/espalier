@@ -1,0 +1,2026 @@
+{
+ "network": "testnet",
+ "vault": "vault.espalier-swarm-1106.testnet",
+ "market": "market.espalier-swarm-1106.testnet",
+ "vault_wasm_sha256": "3218271c471fdd4e4161bfdc4a3d2d50f24631fc854df8b9eff1f27b314803a4",
+ "market_wasm_sha256": "94cd3000ff35056dfa33ea3e0e59724b63454781bfbba76b32df992790b4ead2",
+ "accounts": {
+  "vault": "vault.espalier-swarm-1106.testnet",
+  "market": "market.espalier-swarm-1106.testnet",
+  "owner": "owner.espalier-swarm-1106.testnet",
+  "gc": "gc.espalier-swarm-1106.testnet",
+  "ada": "ada.espalier-swarm-1106.testnet",
+  "bo": "bo.espalier-swarm-1106.testnet",
+  "cy": "cy.espalier-swarm-1106.testnet",
+  "dee": "dee.espalier-swarm-1106.testnet",
+  "eve": "eve.espalier-swarm-1106.testnet",
+  "fay": "fay.espalier-swarm-1106.testnet",
+  "gus": "gus.espalier-swarm-1106.testnet",
+  "hal": "hal.espalier-swarm-1106.testnet",
+  "ida": "ida.espalier-swarm-1106.testnet",
+  "jon": "jon.espalier-swarm-1106.testnet",
+  "kai": "kai.espalier-swarm-1106.testnet",
+  "lee": "lee.espalier-swarm-1106.testnet",
+  "max": "max.espalier-swarm-1106.testnet",
+  "ned": "ned.espalier-swarm-1106.testnet",
+  "oz": "oz.espalier-swarm-1106.testnet",
+  "pam": "pam.espalier-swarm-1106.testnet",
+  "quin": "quin.espalier-swarm-1106.testnet",
+  "ray": "ray.espalier-swarm-1106.testnet",
+  "sam": "sam.espalier-swarm-1106.testnet",
+  "tom": "tom.espalier-swarm-1106.testnet",
+  "uma": "uma.espalier-swarm-1106.testnet",
+  "vic": "vic.espalier-swarm-1106.testnet",
+  "wes": "wes.espalier-swarm-1106.testnet",
+  "xia": "xia.espalier-swarm-1106.testnet",
+  "mallory": "mallory.espalier-swarm-1106.testnet"
+ },
+ "agents": 25,
+ "agents_are_scripted": true,
+ "transactions": 208,
+ "tasks": {
+  "api": {
+   "id": 1,
+   "poster": "gc",
+   "status": "Paid",
+   "note": "",
+   "winner": "ada",
+   "price_mnear": 230,
+   "paid_mnear": 160,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "bo": 230,
+    "dee": null,
+    "ada": 200,
+    "cy": 260
+   }
+  },
+  "app": {
+   "id": 2,
+   "poster": "gc",
+   "status": "Failed",
+   "note": "nothing was delivered by deliver_end",
+   "winner": "eve",
+   "price_mnear": 210,
+   "paid_mnear": 0,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "eve": 150,
+    "gus": 250,
+    "fay": 210
+   }
+  },
+  "data": {
+   "id": 3,
+   "poster": "gc",
+   "status": "Void",
+   "note": "WINNER_NOT_LIVE",
+   "winner": "hal",
+   "price_mnear": 200,
+   "paid_mnear": 0,
+   "refunded_mnear": 100,
+   "bids_mnear": {
+    "ida": 200,
+    "jon": 220,
+    "hal": 180
+   }
+  },
+  "auth": {
+   "id": 4,
+   "poster": "ada",
+   "status": "Paid",
+   "note": "",
+   "winner": "kai",
+   "price_mnear": 70,
+   "paid_mnear": 70,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "lee": 70,
+    "kai": 60,
+    "max": 75
+   }
+  },
+  "billing": {
+   "id": 7,
+   "poster": "ada",
+   "status": "Failed",
+   "note": "nothing was delivered by deliver_end",
+   "winner": "ned",
+   "price_mnear": 70,
+   "paid_mnear": 0,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "ned": 70,
+    "pam": 70,
+    "oz": 70
+   }
+  },
+  "ui": {
+   "id": 5,
+   "poster": "eve",
+   "status": "Paid",
+   "note": "",
+   "winner": "quin",
+   "price_mnear": 100,
+   "paid_mnear": 70,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "quin": 90,
+    "ray": 100
+   }
+  },
+  "payments": {
+   "id": 9,
+   "poster": "eve",
+   "status": "Failed",
+   "note": "nothing was delivered by deliver_end",
+   "winner": "sam",
+   "price_mnear": 88,
+   "paid_mnear": 0,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "sam": 85,
+    "tom": 88
+   }
+  },
+  "ingest": {
+   "id": 6,
+   "poster": "hal",
+   "status": "Void",
+   "note": "WINNER_NOT_LIVE",
+   "winner": "uma",
+   "price_mnear": 70,
+   "paid_mnear": 0,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "uma": 60,
+    "vic": 70
+   }
+  },
+  "clean": {
+   "id": 8,
+   "poster": "hal",
+   "status": "Void",
+   "note": "WINNER_NOT_LIVE",
+   "winner": "wes",
+   "price_mnear": 50,
+   "paid_mnear": 0,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "wes": 40,
+    "xia": 50
+   }
+  },
+  "tests": {
+   "id": 10,
+   "poster": "kai",
+   "status": "Rejected",
+   "note": "rejected by the poster",
+   "winner": "cy",
+   "price_mnear": 20,
+   "paid_mnear": 0,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "bo": 20,
+    "cy": 15
+   }
+  },
+  "icons": {
+   "id": 12,
+   "poster": "quin",
+   "status": "Paid",
+   "note": "",
+   "winner": "fay",
+   "price_mnear": 30,
+   "paid_mnear": 30,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "fay": 22
+   }
+  },
+  "parser": {
+   "id": 13,
+   "poster": "uma",
+   "status": "Void",
+   "note": "WINNER_NOT_LIVE",
+   "winner": "ida",
+   "price_mnear": 25,
+   "paid_mnear": 0,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "ida": 20,
+    "gus": 25
+   }
+  },
+  "report": {
+   "id": 11,
+   "poster": "ned",
+   "status": "Defaulted",
+   "note": "no grant was created for the winner",
+   "winner": "jon",
+   "price_mnear": 20,
+   "paid_mnear": 0,
+   "refunded_mnear": 0,
+   "bids_mnear": {
+    "jon": 12
+   }
+  }
+ },
+ "grants": {
+  "gc": {
+   "grant": 1,
+   "parent": null,
+   "cap_mnear": 1000,
+   "spent_mnear": 430,
+   "live": true
+  },
+  "ada": {
+   "grant": 2,
+   "parent": 1,
+   "cap_mnear": 230,
+   "spent_mnear": 230,
+   "live": true
+  },
+  "eve": {
+   "grant": 3,
+   "parent": 1,
+   "cap_mnear": 210,
+   "spent_mnear": 100,
+   "live": false
+  },
+  "hal": {
+   "grant": 4,
+   "parent": 1,
+   "cap_mnear": 200,
+   "spent_mnear": 100,
+   "live": false
+  },
+  "kai": {
+   "grant": 6,
+   "parent": 2,
+   "cap_mnear": 70,
+   "spent_mnear": 70,
+   "live": true
+  },
+  "ned": {
+   "grant": 8,
+   "parent": 2,
+   "cap_mnear": 70,
+   "spent_mnear": 0,
+   "live": false
+  },
+  "quin": {
+   "grant": 5,
+   "parent": 3,
+   "cap_mnear": 100,
+   "spent_mnear": 100,
+   "live": false
+  },
+  "sam": {
+   "grant": 9,
+   "parent": 3,
+   "cap_mnear": 88,
+   "spent_mnear": 0,
+   "live": false
+  },
+  "uma": {
+   "grant": 7,
+   "parent": 4,
+   "cap_mnear": 70,
+   "spent_mnear": 0,
+   "live": false
+  },
+  "wes": {
+   "grant": 10,
+   "parent": 4,
+   "cap_mnear": 50,
+   "spent_mnear": 0,
+   "live": false
+  },
+  "cy": {
+   "grant": 13,
+   "parent": 6,
+   "cap_mnear": 20,
+   "spent_mnear": 0,
+   "live": false
+  },
+  "fay": {
+   "grant": 12,
+   "parent": 5,
+   "cap_mnear": 30,
+   "spent_mnear": 30,
+   "live": false
+  },
+  "ida": {
+   "grant": 11,
+   "parent": 7,
+   "cap_mnear": 25,
+   "spent_mnear": 0,
+   "live": false
+  }
+ },
+ "checks": [
+  {
+   "claim": "post api, up to 300 mNEAR: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "post app, up to 300 mNEAR: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "post data, up to 250 mNEAR: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "10 sealed bids committed",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "claim": "9 bids revealed, dee stayed silent",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "claim": "api: ada wins at 230 mNEAR",
+   "pass": true,
+   "detail": "WINNER ada 230000000000000000000000"
+  },
+  {
+   "claim": "api: gc creates a grant for ada with cap 230 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "app: eve wins at 210 mNEAR",
+   "pass": true,
+   "detail": "WINNER eve 210000000000000000000000"
+  },
+  {
+   "claim": "app: gc creates a grant for eve with cap 210 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "data: hal wins at 200 mNEAR",
+   "pass": true,
+   "detail": "WINNER hal 200000000000000000000000"
+  },
+  {
+   "claim": "data: gc creates a grant for hal with cap 200 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "nothing has left the vault: 0",
+   "pass": true,
+   "detail": "got 0"
+  },
+  {
+   "claim": "ada posts auth, up to 80: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "ada posts billing, up to 70: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "eve posts ui, up to 120: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "eve posts payments, up to 120: she has 210 and already promised 120: OVERCOMMITTED",
+   "pass": true,
+   "detail": "got OVERCOMMITTED"
+  },
+  {
+   "claim": "eve posts payments again, up to 90: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "eve posts a third task, up to 40: nothing is left to promise: OVERCOMMITTED",
+   "pass": true,
+   "detail": "got OVERCOMMITTED"
+  },
+  {
+   "claim": "hal posts ingest, up to 80: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "hal posts clean, up to 60: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "14 sealed bids committed",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "claim": "14 bids revealed",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "claim": "auth: kai wins at 70 mNEAR",
+   "pass": true,
+   "detail": "WINNER kai 70000000000000000000000"
+  },
+  {
+   "claim": "auth: ada creates a grant for kai with cap 70 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "billing: ned wins at 70 mNEAR",
+   "pass": true,
+   "detail": "WINNER ned 70000000000000000000000"
+  },
+  {
+   "claim": "billing: ada creates a grant for ned with cap 70 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "ui: quin wins at 100 mNEAR",
+   "pass": true,
+   "detail": "WINNER quin 100000000000000000000000"
+  },
+  {
+   "claim": "ui: eve creates a grant for quin with cap 100 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "payments: sam wins at 88 mNEAR",
+   "pass": true,
+   "detail": "WINNER sam 88000000000000000000000"
+  },
+  {
+   "claim": "payments: eve creates a grant for sam with cap 88 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "ingest: uma wins at 70 mNEAR",
+   "pass": true,
+   "detail": "WINNER uma 70000000000000000000000"
+  },
+  {
+   "claim": "ingest: hal creates a grant for uma with cap 70 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "clean: wes wins at 50 mNEAR",
+   "pass": true,
+   "detail": "WINNER wes 50000000000000000000000"
+  },
+  {
+   "claim": "clean: hal creates a grant for wes with cap 50 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "kai posts tests, up to 25: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "quin posts icons, up to 30, one bid is enough: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "uma posts parser, up to 30: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "ned posts report, up to 20, one bid is enough: POSTED",
+   "pass": true,
+   "detail": "got POSTED"
+  },
+  {
+   "claim": "mallory, an account off the owner's roster, tries to bid on parser: NOT_ON_ROSTER",
+   "pass": true,
+   "detail": "got NOT_ON_ROSTER"
+  },
+  {
+   "claim": "6 sealed bids committed",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "claim": "6 bids revealed",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "claim": "tests: cy wins at 20 mNEAR",
+   "pass": true,
+   "detail": "WINNER cy 20000000000000000000000"
+  },
+  {
+   "claim": "tests: kai creates a grant for cy with cap 20 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "icons: fay wins at 30 mNEAR",
+   "pass": true,
+   "detail": "WINNER fay 30000000000000000000000"
+  },
+  {
+   "claim": "icons: quin creates a grant for fay with cap 30 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "parser: ida wins at 25 mNEAR",
+   "pass": true,
+   "detail": "WINNER ida 25000000000000000000000"
+  },
+  {
+   "claim": "parser: uma creates a grant for ida with cap 25 mNEAR, and the market confirms it is the award",
+   "pass": true,
+   "detail": "GRANTED AWARDED"
+  },
+  {
+   "claim": "report: jon wins at 20 mNEAR",
+   "pass": true,
+   "detail": "WINNER jon 20000000000000000000000"
+  },
+  {
+   "claim": "ida's grant sits four levels under the owner: ida < uma < hal < gc: [11, 7, 4, 1]",
+   "pass": true,
+   "detail": "got [11, 7, 4, 1]"
+  },
+  {
+   "claim": "hal pays mallory from its grant: RECIPIENT_NOT_ALLOWED",
+   "pass": true,
+   "detail": "got RECIPIENT_NOT_ALLOWED"
+  },
+  {
+   "claim": "hal creates a grant that can pay mallory: ATT_RECIPIENTS",
+   "pass": true,
+   "detail": "got ATT_RECIPIENTS"
+  },
+  {
+   "claim": "hal draws 100 into the market before any of its work is accepted: SETTLED",
+   "pass": true,
+   "detail": "got SETTLED"
+  },
+  {
+   "claim": "the market pays hal none of it: 0",
+   "pass": true,
+   "detail": "got 0"
+  },
+  {
+   "claim": "the general contractor revokes hal: one transaction: REVOKED",
+   "pass": true,
+   "detail": "got REVOKED"
+  },
+  {
+   "claim": "hal, uma, wes and ida are all cut off: [False, False, False, False]",
+   "pass": true,
+   "detail": "got [False, False, False, False]"
+  },
+  {
+   "claim": "anyone voids data: VOID",
+   "pass": true,
+   "detail": "got VOID"
+  },
+  {
+   "claim": "anyone voids ingest: VOID",
+   "pass": true,
+   "detail": "got VOID"
+  },
+  {
+   "claim": "anyone voids clean: VOID",
+   "pass": true,
+   "detail": "got VOID"
+  },
+  {
+   "claim": "anyone voids parser: VOID",
+   "pass": true,
+   "detail": "got VOID"
+  },
+  {
+   "claim": "the 100 hal drew goes back to the vault: REFUNDED",
+   "pass": true,
+   "detail": "got REFUNDED"
+  },
+  {
+   "claim": "ida, three levels down, can no longer draw: NO_KEY",
+   "pass": true,
+   "detail": "got NO_KEY"
+  },
+  {
+   "claim": "ned created no grant for jon: the poster defaulted, and jon gets ned's bond: DEFAULTED",
+   "pass": true,
+   "detail": "got DEFAULTED"
+  },
+  {
+   "claim": "cy delivers tests: ok",
+   "pass": true,
+   "detail": "got ok"
+  },
+  {
+   "claim": "kai rejects it: the tests do not run: REJECTED",
+   "pass": true,
+   "detail": "got REJECTED"
+  },
+  {
+   "claim": "and revokes cy's grant: REVOKED",
+   "pass": true,
+   "detail": "got REVOKED"
+  },
+  {
+   "claim": "fay delivers icons: ok",
+   "pass": true,
+   "detail": "got ok"
+  },
+  {
+   "claim": "quin accepts: ACCEPTED",
+   "pass": true,
+   "detail": "got ACCEPTED"
+  },
+  {
+   "claim": "icons: fay draws 30 mNEAR from its own grant and the market forwards it",
+   "pass": true,
+   "detail": "SETTLED 30000000000000000000000"
+  },
+  {
+   "claim": "kai delivers auth: ok",
+   "pass": true,
+   "detail": "got ok"
+  },
+  {
+   "claim": "kai accepts its own work, signing with its own key: BAD_SIGNATURE",
+   "pass": true,
+   "detail": "got BAD_SIGNATURE"
+  },
+  {
+   "claim": "ada accepts: ACCEPTED",
+   "pass": true,
+   "detail": "got ACCEPTED"
+  },
+  {
+   "claim": "auth: kai draws 70 mNEAR from its own grant and the market forwards it",
+   "pass": true,
+   "detail": "SETTLED 70000000000000000000000"
+  },
+  {
+   "claim": "quin delivers ui: ok",
+   "pass": true,
+   "detail": "got ok"
+  },
+  {
+   "claim": "eve accepts: ACCEPTED",
+   "pass": true,
+   "detail": "got ACCEPTED"
+  },
+  {
+   "claim": "quin draws its whole price of 100: 30 of it already went to fay: CAP",
+   "pass": true,
+   "detail": "got CAP"
+  },
+  {
+   "claim": "ui: quin draws 70 mNEAR from its own grant and the market forwards it",
+   "pass": true,
+   "detail": "SETTLED 70000000000000000000000"
+  },
+  {
+   "claim": "ned delivered nothing on billing: its bond goes to the vault: FAILED",
+   "pass": true,
+   "detail": "got FAILED"
+  },
+  {
+   "claim": "ada revokes ned: REVOKED",
+   "pass": true,
+   "detail": "got REVOKED"
+  },
+  {
+   "claim": "sam delivered nothing on payments either: FAILED",
+   "pass": true,
+   "detail": "got FAILED"
+  },
+  {
+   "claim": "ada delivers api: ok",
+   "pass": true,
+   "detail": "got ok"
+  },
+  {
+   "claim": "the general contractor accepts: ACCEPTED",
+   "pass": true,
+   "detail": "got ACCEPTED"
+  },
+  {
+   "claim": "ada draws her whole price of 230: 70 of it already went to kai: CAP",
+   "pass": true,
+   "detail": "got CAP"
+  },
+  {
+   "claim": "api: ada draws 160 mNEAR from its own grant and the market forwards it",
+   "pass": true,
+   "detail": "SETTLED 160000000000000000000000"
+  },
+  {
+   "claim": "eve delivered nothing on app: her bond goes to the vault: FAILED",
+   "pass": true,
+   "detail": "got FAILED"
+  },
+  {
+   "claim": "the general contractor revokes eve: REVOKED",
+   "pass": true,
+   "detail": "got REVOKED"
+  },
+  {
+   "claim": "sam's grant is cut off with her: False",
+   "pass": true,
+   "detail": "got False"
+  },
+  {
+   "claim": "payouts in mNEAR: {'ada': 185, 'bo': 10, 'cy': 10, 'dee': 0, 'eve': 20, 'fay': 40, 'gus': 10, 'hal': 25, 'ida': 10, 'jon': 20, 'kai': 85, 'lee': 5, 'max': 5, 'ned': 0, 'oz': 5, 'pam': 5, 'quin': 85, 'ray': 5, 'sam': 0, 'tom': 5, 'uma': 15, 'vic': 5, 'wes': 5, 'xia': 5, 'gc': 30, 'vault': 120}",
+   "pass": true,
+   "detail": "got {'ada': 185, 'bo': 10, 'cy': 10, 'dee': 0, 'eve': 20, 'fay': 40, 'gus': 10, 'hal': 25, 'ida': 10, 'jon': 20, 'kai': 85, 'lee': 5, 'max': 5, 'ned': 0, 'oz': 5, 'pam': 5, 'quin': 85, 'ray': 5, 'sam': 0, 'tom': 5, 'uma': 15, 'vic': 5, 'wes': 5, 'xia': 5, 'gc': 30, 'vault': 120}"
+  },
+  {
+   "claim": "the tree was charged 160 + 70 for api, 70 + 30 for app, and hal's 100: 430",
+   "pass": true,
+   "detail": "got 430"
+  },
+  {
+   "claim": "the root can still spend the rest of its 1000: 570",
+   "pass": true,
+   "detail": "got 570"
+  },
+  {
+   "claim": "the chain ended exactly where the Python model predicted: every task, winner, price, payment and grant",
+   "pass": true,
+   "detail": ""
+  }
+ ],
+ "passed": true,
+ "matches_model": true,
+ "txs": [
+  {
+   "hash": "FDm1ZAnoeXgo2yW3puV3y1tZjBJ19ikUDjt49B5hRE4j",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create vault.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "HoZKGSRbsrzma9pULYLAPAcDJoCZraQFH4KPyPr3feXa",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create market.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "7Etf19eXgWgBeWy6FphCvZ5hJsmyMEVo97mcavCP1Qyb",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create owner.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "FbF5NP4LZmvnyq59mpvyjRvBf2TV5qQSuDoc6fEPgGKP",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create gc.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "HFKMKBVtwSKs3P4Qtw5LWDdBvVWmNVJdqGxAiskh5Fv8",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create ada.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "D8dFqeUt6uckWZa1ZDD3SnUTsiMbxSUmeLGigGF48TrA",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create bo.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "CVy1L48FFhJPGb8rVZarQySnWMwttjxrk3z4Emx82pE",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create cy.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "22DuBEq7VihtckAtokncVvo3P1ADSbw1jj6tqkSr1UiP",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create dee.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "7CrD8niRT4nWqFbEWJat8nkR9E1WywmW5Fz9v7V1au4a",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create eve.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "5riZM7PXdBkfH6tFGPjpwCGKv9u2ifC9ue4mzetMPeHf",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create fay.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "DsS5Fq7DGVf3kLZbqYxTsT91BFWmuVysSkFKmUigapLz",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create gus.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "BPNwjDjYT4f9gKiqaCpgPFkxyuN68AVMhY8UrakxAZCy",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create hal.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "9jPFXzgyCaJhso48Li83y9xCB9YSFJbivoA1qchvyd4z",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create ida.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "2TzL9mhSocmvHbGZSe9tQmnpzt1hE15zxbcx538y6pXN",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create jon.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "6FB6GvyoVwurnr3bKXTs4DE3QGRjEFoSq1rDXgT7E19A",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create kai.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "FHiPBNqudVZ5QpdweApTAem5T6k4hdQKNVGV61t7Hodw",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create lee.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "Hjd29Htij6gUi9EBmnbTQTP8RHwhcYRYuPptDRuFsnvC",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create max.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "4f3UtBu2hMzQWdjqeXzjMUizvE2qDSinyzAowuhqjnkY",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create ned.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "CdXojcVLpPz1LWAR4SsUHNXXqcYxseAQEopyTcJ1yqQ4",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create oz.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "23BrRhTtP7CYLjscRxAFzHUVD1XNxCqB2KuX4z4kmnj9",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create pam.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "ABr5YYXuLebngxqGkcMSBcGzJzcoMWR8VJcb6gESimW6",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create quin.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "3Dpth8DV4wacKx6oDyArfCNu35xJXtPLMXP3PcwVsWTS",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create ray.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "79ceAMvNngNepR5BMtcontDSddqFRyGNrrKPZ25mUsaD",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create sam.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "Ez4NBcgVMmwa8BQaY58LHMWwVwHT3bYrhEJnBtuKS5Ar",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create tom.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "FC69yevfhQf51r6pcZefTkwRR8XwrRssmkRwdJVVUEZ7",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create uma.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "5mAH3hE6YTSdro4HTLa4KBWNbPFA19haFoUgGpCaCHPD",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create vic.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "HGLhaFpvRppCPFKR2NQCh5Z1r5Af6pKfawdo3yXNc1XZ",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create wes.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "4A8M1zYGUtNAGsyTjWYeMshF816RJsPqM4pmQC5ZHKj8",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create xia.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "ABq4KxLi5nAorm3QBbY6TwamaYdhxbyKghR6YMm9kgQK",
+   "signer": "espalier-swarm-1106.testnet",
+   "what": "create mallory.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "3eLAmHk2aY66kgbTRus1ja1JT1Gd6ixvBENzuywFWEHX",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "deploy vault",
+   "code": "ok"
+  },
+  {
+   "hash": "9xcMhgSUxQefrFGAyfHPEBsvqktFsewZ3DJdymNTDagE",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "init vault",
+   "code": "ok"
+  },
+  {
+   "hash": "AoHNf1NrdsdkZgNZfy9ZEEe7tDgDmpdsJsZPknyLJRqe",
+   "signer": "market.espalier-swarm-1106.testnet",
+   "what": "deploy market",
+   "code": "ok"
+  },
+  {
+   "hash": "5GynAiE3pJ3Cvk7LPa5YvzmHutJm7sRucNkRuhXyemDY",
+   "signer": "market.espalier-swarm-1106.testnet",
+   "what": "init market",
+   "code": "ok"
+  },
+  {
+   "hash": "FApNm26CaaDXLXhPWhjyGmjiLWXYk5mPchndtNF3pQnd",
+   "signer": "owner.espalier-swarm-1106.testnet",
+   "what": "set roster",
+   "code": "ok"
+  },
+  {
+   "hash": "CtVceujKYWQsT9VYyptSrq3cgjGx7TtuxbVHADcP69bo",
+   "signer": "owner.espalier-swarm-1106.testnet",
+   "what": "create root",
+   "code": "ok"
+  },
+  {
+   "hash": "6skc1pLkZuqzi3MMXw87zSQTaVP6YrKoNc3iK315k2X2",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "post_task by gc",
+   "code": "POSTED"
+  },
+  {
+   "hash": "8Yt2JXZSEbiHTqdikp5N5Y3aj7Bt43QsJmcCiA7hT1cZ",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "post_task by gc",
+   "code": "POSTED"
+  },
+  {
+   "hash": "EeCs8rMAR2gTDQtHmgHeiQ8Gz9VWQoKe1qExy5f8U74b",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "post_task by gc",
+   "code": "POSTED"
+  },
+  {
+   "hash": "86YHof5hX3GsGPZzRPDvkq4ovqaf3zJNv2AzBS3Yg4Pj",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "commit_bid by eve on 2",
+   "code": "ok"
+  },
+  {
+   "hash": "9mnruEbBMv6ZXm3CowD8ruarJymAqFC9EkiA8u98Jesk",
+   "signer": "bo.espalier-swarm-1106.testnet",
+   "what": "commit_bid by bo on 1",
+   "code": "ok"
+  },
+  {
+   "hash": "CShiaFHFcNq6tZRwLkhA6tkbYvBP8p3KEnsDkptHugXE",
+   "signer": "ada.espalier-swarm-1106.testnet",
+   "what": "commit_bid by ada on 1",
+   "code": "ok"
+  },
+  {
+   "hash": "8dXtRktv648DA2hjw28oVQzVoRFgwAwiTyuUt4g7Tfmh",
+   "signer": "cy.espalier-swarm-1106.testnet",
+   "what": "commit_bid by cy on 1",
+   "code": "ok"
+  },
+  {
+   "hash": "8akEukSng81jc4YyWUf2mdtr9RgJLG5eQEAxhGTDbK7X",
+   "signer": "gus.espalier-swarm-1106.testnet",
+   "what": "commit_bid by gus on 2",
+   "code": "ok"
+  },
+  {
+   "hash": "z76hzZpEPmKQhaMyCzuzb7SYsj74u8xEDTVkfuJQuh5",
+   "signer": "fay.espalier-swarm-1106.testnet",
+   "what": "commit_bid by fay on 2",
+   "code": "ok"
+  },
+  {
+   "hash": "AVw2QDTYiGWUPm8Cx7MFbAPr8Xwhrzgp8fBXhfHNMqkp",
+   "signer": "dee.espalier-swarm-1106.testnet",
+   "what": "commit_bid by dee on 1",
+   "code": "ok"
+  },
+  {
+   "hash": "91EHqy8yHpmrWEd6NRzQD3wXhoG8vSr1TR7egg89d8Pv",
+   "signer": "ida.espalier-swarm-1106.testnet",
+   "what": "commit_bid by ida on 3",
+   "code": "ok"
+  },
+  {
+   "hash": "DcMDxBRV8rZfCkJe7PPqxpx6KJoNazpDAvSfV2N5ZZK5",
+   "signer": "jon.espalier-swarm-1106.testnet",
+   "what": "commit_bid by jon on 3",
+   "code": "ok"
+  },
+  {
+   "hash": "HMJFjVWNdpj9b6bnjtBq5q7wqy14T1VsaWGh5s5sgQAG",
+   "signer": "hal.espalier-swarm-1106.testnet",
+   "what": "commit_bid by hal on 3",
+   "code": "ok"
+  },
+  {
+   "hash": "EPWm8wrfkhwdReV7DDMPbfj8Y3ePRB6FA1p8tE68JJWh",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by eve on 2",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "ERJkAzL5r6RTRoZ4a3EUdPopq8JH9pKDZg6E44sWY6Ue",
+   "signer": "cy.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by cy on 1",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "7XfWQVmSoYcZvS3ZKPBEYmJvh5N41pbkwqpWaje4Aj31",
+   "signer": "hal.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by hal on 3",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "CuSoZn8n1LFxHK1x8KYcvcbWcD99jyhcUKi3fhssTF2o",
+   "signer": "gus.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by gus on 2",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "CQSUeQNE7FzxvXisjTc1vzpCJv7rqGVPnXQwyDMyqaQ4",
+   "signer": "fay.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by fay on 2",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "7QYNCzf6FYEnLDnS4h5ex3HyqqwbE9W9bDb6HSBw1fm",
+   "signer": "ida.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by ida on 3",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "8o1vb16N2LJnwijafxZ2s5TkebEDPBE8SD48Zr9GSWpU",
+   "signer": "ada.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by ada on 1",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "23ErJ5ctSfhq1exfULp9JMhKHgJH59vX9ZLWTskRhfjY",
+   "signer": "bo.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by bo on 1",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "6CuSTmkhhZNyrVwXarMf8g8KiLto2ZxGESWmNbnf8fyY",
+   "signer": "jon.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by jon on 3",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "84yaLSHbyh8nFSFkLMe554gAxGKD1Jfi6MKFC4TBzU9L",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "close_bidding 1",
+   "code": "WINNER"
+  },
+  {
+   "hash": "HgdadjMSNmZWtM9paNrVSbrz9HaysZDfyaqrJ2oCwcfy",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 1",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "6ScxcCt6cHoar3P4SLxnW8HfCvT99CSPWuccupycsafw",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "confirm_award 1",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "E9Fgb5QFYrkAWrAZNna1pGFc6J6WaLrNLxKnpGsFKDJG",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "close_bidding 2",
+   "code": "WINNER"
+  },
+  {
+   "hash": "6iQijTZ7ew7qr1hSvwSe5k8AUkS7muhpDvhFC8keLPTM",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 1",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "JDcMWKmxbLGtyDXbJ9h1mtugRfZgE7sx7ynTBWrvvDhy",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "confirm_award 2",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "iGfc7C5NYgLcefzgQkHsB5jctczy241JzvceEBDtt7e",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "close_bidding 3",
+   "code": "WINNER"
+  },
+  {
+   "hash": "DzvtNuhri23tBnHDzKK9fbm378PqYEY6qNec9PTGHWVB",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 1",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "23Cz1Mw3WgxBEmEj1uoWkgLomiu999qwne6BVVabNqDg",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "confirm_award 3",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "HhJziANvSMGRCM8BzXDLU3TPCyC5rXrehwS8CqRdYbAC",
+   "signer": "ada.espalier-swarm-1106.testnet",
+   "what": "post_task by ada",
+   "code": "POSTED"
+  },
+  {
+   "hash": "4XEF9actWhETNRhSXiyA89Ct9kR1x1jpFyffPHw4kGTK",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "post_task by eve",
+   "code": "POSTED"
+  },
+  {
+   "hash": "BACUx2i347Jq5cHGt8wxTGFpmTWUY79r6i6ZiKCekeGF",
+   "signer": "hal.espalier-swarm-1106.testnet",
+   "what": "post_task by hal",
+   "code": "POSTED"
+  },
+  {
+   "hash": "HnJpuVEQuu4VBhKoSeYbjAeMvwCMqzYLZTbWpoT4pZr4",
+   "signer": "ada.espalier-swarm-1106.testnet",
+   "what": "post_task by ada",
+   "code": "POSTED"
+  },
+  {
+   "hash": "GPETzQr1fB3s7tdAeyGbi19BPazsLZ4CNgmq4ePzrzkX",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "post_task by eve",
+   "code": "OVERCOMMITTED"
+  },
+  {
+   "hash": "EBZ1y4uBCbB2AqYkTqEXfif7xrr8wEKJr94YPHudPFeY",
+   "signer": "hal.espalier-swarm-1106.testnet",
+   "what": "post_task by hal",
+   "code": "POSTED"
+  },
+  {
+   "hash": "GYVud55pKgcHwSfKFMKAAgidYrLPrXBR5viaFCeb2WZo",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "post_task by eve",
+   "code": "POSTED"
+  },
+  {
+   "hash": "5tg2smEPh14XnWGk2cYLpyFGtBeA9Fp4jUvNtv4aixuR",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "post_task by eve",
+   "code": "OVERCOMMITTED"
+  },
+  {
+   "hash": "EtBJbnc2wi49LZq9gDicGnD3osnmrNuHBp6wuoR9TzWc",
+   "signer": "ned.espalier-swarm-1106.testnet",
+   "what": "commit_bid by ned on 7",
+   "code": "ok"
+  },
+  {
+   "hash": "huEUQTDB4uZJYgtGzrPF6BS6F1cU7LATSTqibvq17pu",
+   "signer": "lee.espalier-swarm-1106.testnet",
+   "what": "commit_bid by lee on 4",
+   "code": "ok"
+  },
+  {
+   "hash": "BAVH4BGDUsDxeozkeRVjStjdPDFwdygHLJ8ETQQJceJg",
+   "signer": "quin.espalier-swarm-1106.testnet",
+   "what": "commit_bid by quin on 5",
+   "code": "ok"
+  },
+  {
+   "hash": "BGX4jTfem7QYUcki34VjAkwRkC3b6KwJTyKpw8HCqauW",
+   "signer": "max.espalier-swarm-1106.testnet",
+   "what": "commit_bid by max on 4",
+   "code": "ok"
+  },
+  {
+   "hash": "An4c56Qj9aLHbmTdn3qcBDotJvipjSXg7MGqZWyejywx",
+   "signer": "sam.espalier-swarm-1106.testnet",
+   "what": "commit_bid by sam on 9",
+   "code": "ok"
+  },
+  {
+   "hash": "FWyS2bDzfEekdtnViRxbfQE3RXWFJhTf4SQFny3iVhdK",
+   "signer": "kai.espalier-swarm-1106.testnet",
+   "what": "commit_bid by kai on 4",
+   "code": "ok"
+  },
+  {
+   "hash": "JBzgZ2unMxJdG4zaoFsTnMuEff8iZ4DAMgMteZJYs13z",
+   "signer": "tom.espalier-swarm-1106.testnet",
+   "what": "commit_bid by tom on 9",
+   "code": "ok"
+  },
+  {
+   "hash": "5NBRMeQdHDLn1KMDnFymoVBE2gfcBZF9ozCsYfmpkRAw",
+   "signer": "pam.espalier-swarm-1106.testnet",
+   "what": "commit_bid by pam on 7",
+   "code": "ok"
+  },
+  {
+   "hash": "35b9Vfv5g939mMzTufw3draN27C3GZRG93zsCXZ9KpeA",
+   "signer": "ray.espalier-swarm-1106.testnet",
+   "what": "commit_bid by ray on 5",
+   "code": "ok"
+  },
+  {
+   "hash": "3SDi9V92gjobA5N5HgZP9PqVxpQXPZHg8W8gch6xUGxy",
+   "signer": "oz.espalier-swarm-1106.testnet",
+   "what": "commit_bid by oz on 7",
+   "code": "ok"
+  },
+  {
+   "hash": "47yAkq2xXkXZGk7WmkyABhKX79VJQxXEE3eaDTk9BFUq",
+   "signer": "uma.espalier-swarm-1106.testnet",
+   "what": "commit_bid by uma on 6",
+   "code": "ok"
+  },
+  {
+   "hash": "9hGybwntTd2SAbicAFB8mRymjkDrvYrrXZoTa3fZddCC",
+   "signer": "vic.espalier-swarm-1106.testnet",
+   "what": "commit_bid by vic on 6",
+   "code": "ok"
+  },
+  {
+   "hash": "3zwB1TW1Uob5cMNva53KWr2pXnXkyBLLXpqM2kAibagr",
+   "signer": "xia.espalier-swarm-1106.testnet",
+   "what": "commit_bid by xia on 8",
+   "code": "ok"
+  },
+  {
+   "hash": "8ztN5rWhgSwJQKKsW1U6XaZmJD9iRUucfioTSc766viW",
+   "signer": "wes.espalier-swarm-1106.testnet",
+   "what": "commit_bid by wes on 8",
+   "code": "ok"
+  },
+  {
+   "hash": "DQoJjgsRgv9BZr64jK3vzBc7C5F6y48C3VxheupSd3Ks",
+   "signer": "ned.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by ned on 7",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "Cfx6nn1tWCyEx6uiGJsazWqde3Y8dwaxRtPmT2r9sFdj",
+   "signer": "pam.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by pam on 7",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "9t6Uqwj3LwxYb3VQQsgyHorydVeM2bHbJuoUwb8nPExj",
+   "signer": "lee.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by lee on 4",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "F26NWt9CA5vyFHs9Phr1vSc5ygbPCzDxRd5UsDE8drKY",
+   "signer": "kai.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by kai on 4",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "3624mQMvwMBWLW164PemmEXUzvPELiRayTna7sLcXSS2",
+   "signer": "quin.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by quin on 5",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "FAmhEBmCVcDkMaxNfBHHH4ojDiae3TrBCcS718zjpmX5",
+   "signer": "ray.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by ray on 5",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "DBANAnoqx6ddGVpogk2JKJfcFoHTLo1NVMTuqru9hQyU",
+   "signer": "max.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by max on 4",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "3nLnoVWNfyMKa3cxGgBZqSjHsANyHyv1hG3kM8hzyfTD",
+   "signer": "sam.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by sam on 9",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "EL8nb9XgSkJCQsjhp92fdg5dqqcVXzYzzUuQc5S5gDxg",
+   "signer": "oz.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by oz on 7",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "8M7uuvPHjtSQVzym1vpxeyTZUNqCr9PmgbBVdTbsjSF7",
+   "signer": "tom.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by tom on 9",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "8RVRBtRwbYEvdvcNK9exsmKqp8PDiJXAde8tr5DyFmRs",
+   "signer": "uma.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by uma on 6",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "E9AMh8dyDjdVfXjEh5ZaWaGtQaAP9YXaqi4UHZBt8kZ7",
+   "signer": "wes.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by wes on 8",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "HDT1R7NY8tRVCNkzDy4TVCa1vrpMY53Y3xYgahK7m3jv",
+   "signer": "vic.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by vic on 6",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "BQQawdudv18RmY2Gq7nYQc39tkAgvfNcxAouCWTFR8r1",
+   "signer": "xia.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by xia on 8",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "59LpjAfDjhLipeEAHBNxHqxAuNuDXyBS89kvAeidNeZF",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "close_bidding 5",
+   "code": "WINNER"
+  },
+  {
+   "hash": "CxSB7TskZFmzFuwvxYY5GanJsRxMxt6LRyWbeShGquE7",
+   "signer": "hal.espalier-swarm-1106.testnet",
+   "what": "close_bidding 6",
+   "code": "WINNER"
+  },
+  {
+   "hash": "38CthpLyJUb2MdQAt5WP3BrVEv2A1k2gDuusn4JP72KL",
+   "signer": "ada.espalier-swarm-1106.testnet",
+   "what": "close_bidding 4",
+   "code": "WINNER"
+  },
+  {
+   "hash": "3QsdFdidrNmGJuirJ3pAYzMQk413z7LH1v6VXknkbJoA",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 3",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "AeE7ZJcUqTHMt2pHTwQhT4wAPUabeTUJ2nkGh4XYU84s",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 2",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "ByQTMJ1nGKHuVad1HRXhf7tHPzBbGQWACAQ2Q3gABEkd",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 4",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "cUtBhiCQjdDYgW3juZ8mFkJ22ffVEC5L8X2K3o7bV28",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "confirm_award 5",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "2S9zfWhq9NNKZBMnNKmT1bwYaZP62iXV7TDr1ix5dYMU",
+   "signer": "ada.espalier-swarm-1106.testnet",
+   "what": "confirm_award 4",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "H3cEma3VhdJHtv94SpdvUnM1ruEpgffrcLyGcgPX9R2i",
+   "signer": "hal.espalier-swarm-1106.testnet",
+   "what": "confirm_award 6",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "E1bjfrw2b2FVfhkm6QM5ktVKUuyegRPkph7AGYwxX9GZ",
+   "signer": "ada.espalier-swarm-1106.testnet",
+   "what": "close_bidding 7",
+   "code": "WINNER"
+  },
+  {
+   "hash": "6XSosfyCuWku6iR4eYYDGhzpCUUz9C5DS8fmt9Gm4NZx",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "close_bidding 9",
+   "code": "WINNER"
+  },
+  {
+   "hash": "AcoqaV6frkoKs56hLRpb8jKud7BAHSamm1atw2h1YGDq",
+   "signer": "hal.espalier-swarm-1106.testnet",
+   "what": "close_bidding 8",
+   "code": "WINNER"
+  },
+  {
+   "hash": "E8uG9DTzarqp9FYWa9x67RtLpGGv1CbtJmVWwuenRVEw",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 3",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "9cDQq8vbjSXD8p8FUB3567tWtfahU15TJnWrAtjYkcpB",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 2",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "8mNWDmgh1S9nh9WrQMQj58SEwKTMRVwF8gwDHu635SBC",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 4",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "CEtSY5EhcV9b47WrGt5u4KZsK29yX3PjXcNfWzuasfE8",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "confirm_award 9",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "HCqdxK8YBsTdwCstPLkWywgfoZFPGcJXNkEG6PaJUZwP",
+   "signer": "ada.espalier-swarm-1106.testnet",
+   "what": "confirm_award 7",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "FctALBYv7pFTi98XyW7G2HRuVQhirQ1NRSuTRWjtyuvk",
+   "signer": "hal.espalier-swarm-1106.testnet",
+   "what": "confirm_award 8",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "6nbzEgdDPRFSAQ72xdZUJomQvhZoCCacCUwfagyBhvYp",
+   "signer": "kai.espalier-swarm-1106.testnet",
+   "what": "post_task by kai",
+   "code": "POSTED"
+  },
+  {
+   "hash": "51jFchSWNbWXn43YoQraSvpHERD8UD858TUhRTWJcsyJ",
+   "signer": "ned.espalier-swarm-1106.testnet",
+   "what": "post_task by ned",
+   "code": "POSTED"
+  },
+  {
+   "hash": "PniFCQ8LER1nLR7H4wbqvTHfrToKo32Z6iSuDcydRvG",
+   "signer": "quin.espalier-swarm-1106.testnet",
+   "what": "post_task by quin",
+   "code": "POSTED"
+  },
+  {
+   "hash": "AAREfkpaqgFAZGR8FgkQjN3cybXaxwqQERHo5KfND3ao",
+   "signer": "uma.espalier-swarm-1106.testnet",
+   "what": "post_task by uma",
+   "code": "POSTED"
+  },
+  {
+   "hash": "51xcZfqS4Bthc6KFtjXswWdkraa3ceuLAsGBWWrLhEUk",
+   "signer": "mallory.espalier-swarm-1106.testnet",
+   "what": "commit_bid by mallory on 13",
+   "code": "NOT_ON_ROSTER"
+  },
+  {
+   "hash": "3AL9ysZegnJFvN6ntxbBqq64Vyo2rqgcJPRkCLnrKZJ9",
+   "signer": "bo.espalier-swarm-1106.testnet",
+   "what": "commit_bid by bo on 10",
+   "code": "ok"
+  },
+  {
+   "hash": "5sjXoZyLAXzjzqDvP6S7Sq5zEPEJ2GuBBMgsmtXWhjC1",
+   "signer": "jon.espalier-swarm-1106.testnet",
+   "what": "commit_bid by jon on 11",
+   "code": "ok"
+  },
+  {
+   "hash": "65piMnc4nRVChAvbdjfBBsAGkSuRHutdGHuL2pEJ9oVq",
+   "signer": "fay.espalier-swarm-1106.testnet",
+   "what": "commit_bid by fay on 12",
+   "code": "ok"
+  },
+  {
+   "hash": "3cBgpHoSMz5JAN6EpUYGSvKot1pgwXXtivi7WdRSt6dV",
+   "signer": "cy.espalier-swarm-1106.testnet",
+   "what": "commit_bid by cy on 10",
+   "code": "ok"
+  },
+  {
+   "hash": "ER5ZXB34B8UQReweLjN1XG16f57mGDgY1wDboMVX5eWm",
+   "signer": "ida.espalier-swarm-1106.testnet",
+   "what": "commit_bid by ida on 13",
+   "code": "ok"
+  },
+  {
+   "hash": "6Va9tCHdKrBG3a2Z3QEvKMhLh4k7wvGQiTiqYF8fRk16",
+   "signer": "gus.espalier-swarm-1106.testnet",
+   "what": "commit_bid by gus on 13",
+   "code": "ok"
+  },
+  {
+   "hash": "CmeHexG5brEouaazvTyL6sF5UaRporYf81iDV64UDYeQ",
+   "signer": "jon.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by jon on 11",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "4YfhU5XZM7c42HTwKWMoL5fPgoG5CG2fXPqTTUg6PFoE",
+   "signer": "gus.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by gus on 13",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "79tdZJoMBqXZ9Ep5FB7sK7MFrALNR7LaL6cafGthqtNW",
+   "signer": "bo.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by bo on 10",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "J2r26GenssL7phdNkNSdkYAGH67eV4evMzWXUsEF2sUf",
+   "signer": "fay.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by fay on 12",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "aGWTfHazcGQ9NzAhyYrrr2XytrL1nCsWksSTH5VZoyz",
+   "signer": "ida.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by ida on 13",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "J5Hn27FeUg6GusgY9MdKx2tdqx9ZBkCYmy13oug3WtjM",
+   "signer": "cy.espalier-swarm-1106.testnet",
+   "what": "reveal_bid by cy on 10",
+   "code": "REVEALED"
+  },
+  {
+   "hash": "FfgHdqnZzTKmsJsEgKMU6VJSexYrLaTeY8L4x14LVzn6",
+   "signer": "ned.espalier-swarm-1106.testnet",
+   "what": "close_bidding 11",
+   "code": "WINNER"
+  },
+  {
+   "hash": "6HrvACEJQ6cas4LZuVqpArcduofJ34ypUW6m35x1UAnL",
+   "signer": "uma.espalier-swarm-1106.testnet",
+   "what": "close_bidding 13",
+   "code": "WINNER"
+  },
+  {
+   "hash": "8Cg3J5wvQH1RTE8ZREKxei4TA7knEzWAu9NVxPCswccV",
+   "signer": "kai.espalier-swarm-1106.testnet",
+   "what": "close_bidding 10",
+   "code": "WINNER"
+  },
+  {
+   "hash": "51noSPdcduxezxADsqgTx8wrNKAx9GHzkLsrPF2vDfDi",
+   "signer": "quin.espalier-swarm-1106.testnet",
+   "what": "close_bidding 12",
+   "code": "WINNER"
+  },
+  {
+   "hash": "EKVsafEv3XAdUmPvuzEmkEgFoCojkSYUQBRzEMVyRcVo",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 7",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "2qxJBRo9v53GLuMonQRTSgKsnXa2UpE38UzeoL3haGmg",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 5",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "3N9VV7JoioJsGs8VwxH21xBcEoWSaVhVY1119i2qC15H",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 6",
+   "code": "GRANTED"
+  },
+  {
+   "hash": "3UfkbmRuu39koxor7gCkv8sereKA59meXjnWfZcpW36A",
+   "signer": "uma.espalier-swarm-1106.testnet",
+   "what": "confirm_award 13",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "xWSvrFLrBjAiBxQvNaoGcKNzdVR89p81qxV3TyyBsRc",
+   "signer": "kai.espalier-swarm-1106.testnet",
+   "what": "confirm_award 10",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "F44q6jEnhSrBTV94vc9PjYtEwGe827yvpP3BJMe1yLzM",
+   "signer": "quin.espalier-swarm-1106.testnet",
+   "what": "confirm_award 12",
+   "code": "AWARDED"
+  },
+  {
+   "hash": "GRbsoAJrnbc2kAYTsAZcXCiGeuxmLSGzgreHeHByVjzi",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.request_spend by grant 4",
+   "code": "RECIPIENT_NOT_ALLOWED"
+  },
+  {
+   "hash": "GM8r2SxHVY8RT86qK3xVf4sfHxwXAMBDFX4rEGMFWUXa",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.delegate by grant 4",
+   "code": "ATT_RECIPIENTS"
+  },
+  {
+   "hash": "2DKyUDfS16xuFQgprSzPUD5VXyS8erVfpzWJ1jqdaQUN",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.request_spend by grant 4",
+   "code": "SETTLED"
+  },
+  {
+   "hash": "9aMAQ9G7E1FuYQ2pMTEK1avpUVXDS8FgTQPTZa6XQPJh",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "claim 3",
+   "code": "CLAIMED"
+  },
+  {
+   "hash": "27hmPX7MvxoVriPBqZqiUNVdiZM1Ag4WWthBHAbQnh9i",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.revoke 4",
+   "code": "REVOKED"
+  },
+  {
+   "hash": "3J6dHxHquPjx9gbZ1hAreE7s5HfXm5zBgcxpNXz7uSGm",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "void_task 3",
+   "code": "VOID"
+  },
+  {
+   "hash": "9cTpcYTV8DspRow77m1sjc9v9cyBSC2dcMvFxXkAzs2d",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "void_task 6",
+   "code": "VOID"
+  },
+  {
+   "hash": "CdyMoDJMZ5MTohf45wHw3QMvaSqRACCHFhNShN6hwYpJ",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "void_task 8",
+   "code": "VOID"
+  },
+  {
+   "hash": "9AYsbNDybAVR9vtfa6bxps2SdTwJKcAaeGRw4Rs25huf",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "void_task 13",
+   "code": "VOID"
+  },
+  {
+   "hash": "faQk9JWjWkemKpG8fhekiwWm1X56a2aPQgLjbxJqjUJ",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "refund 3",
+   "code": "REFUNDED"
+  },
+  {
+   "hash": "BpQjLoJdFqjzo2punFEdNCh9P9EcWiHvWB5CXeyroRxQ",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "default_award 11",
+   "code": "DEFAULTED"
+  },
+  {
+   "hash": "7e2vSRNJy5tidKTKBcqZ5S8b9QGufDKdi3z2n9ubFiNP",
+   "signer": "cy.espalier-swarm-1106.testnet",
+   "what": "deliver 10 by cy",
+   "code": "ok"
+  },
+  {
+   "hash": "5p4FUGHGfQv5v73HgrfPcUXdPjxjuzdWjrfe2WwJo84D",
+   "signer": "kai.espalier-swarm-1106.testnet",
+   "what": "reject 10",
+   "code": "REJECTED"
+  },
+  {
+   "hash": "GNmtAvVj7G1o6nX9QP7SEvzs9qPvWDrEJfpAQRogQQir",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.revoke 13",
+   "code": "REVOKED"
+  },
+  {
+   "hash": "83JDnw1orKDFQ85wq41NXAp9CwLL8j5bdLyCRUMsxMzt",
+   "signer": "fay.espalier-swarm-1106.testnet",
+   "what": "deliver 12 by fay",
+   "code": "ok"
+  },
+  {
+   "hash": "HSzgRKb9fPXcDnyU8MNC9ToKW9aZyPBBbDaZvVgU9jF8",
+   "signer": "quin.espalier-swarm-1106.testnet",
+   "what": "accept 12",
+   "code": "ACCEPTED"
+  },
+  {
+   "hash": "27RA9NyRFCs1RUiWq2RT6p5suQt4LReefDqWcohi3Ek9",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.request_spend by grant 12",
+   "code": "SETTLED"
+  },
+  {
+   "hash": "3AkvyZaagchmn51beG9LTMf2j5TS9y6T3ej5yzbg4sA7",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "claim 12",
+   "code": "CLAIMED"
+  },
+  {
+   "hash": "AgowyARktqgNcGdE11syn2acXRg4CySYz6HgDYg6uFwF",
+   "signer": "kai.espalier-swarm-1106.testnet",
+   "what": "deliver 4 by kai",
+   "code": "ok"
+  },
+  {
+   "hash": "EYMpdohgNWbpHsNhVvRdPWKmcg94zmAXNUiQrbrgFrXB",
+   "signer": "kai.espalier-swarm-1106.testnet",
+   "what": "accept 4",
+   "code": "BAD_SIGNATURE"
+  },
+  {
+   "hash": "AN7z8uKAZLzWfm6H5nuGC7ijeaS8zwPfbuLdaKRKSSnU",
+   "signer": "ada.espalier-swarm-1106.testnet",
+   "what": "accept 4",
+   "code": "ACCEPTED"
+  },
+  {
+   "hash": "6puWC5hYBE1uV8MrEjE51YLg5E97qwwXoxnV1Gaa1cJc",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.request_spend by grant 6",
+   "code": "SETTLED"
+  },
+  {
+   "hash": "DsMyVYP6Csq6ZSjYL8mxu3ucYrusD71Tcyav5MKo9SsU",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "claim 4",
+   "code": "CLAIMED"
+  },
+  {
+   "hash": "FsJPGaw4KP4kL2CaK7XVTYVf5XFtTXNQ6aabFAtftnmQ",
+   "signer": "quin.espalier-swarm-1106.testnet",
+   "what": "deliver 5 by quin",
+   "code": "ok"
+  },
+  {
+   "hash": "Gs48hcCx228YCSM9dRDXWhfe5kU9F95G1vzZ5zFkADnm",
+   "signer": "eve.espalier-swarm-1106.testnet",
+   "what": "accept 5",
+   "code": "ACCEPTED"
+  },
+  {
+   "hash": "HzgTVuhsK8qK9eXaMC1xXNjRW654M4EgQSGGGGxhZtc9",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.request_spend by grant 5",
+   "code": "CAP"
+  },
+  {
+   "hash": "BgMeZuhhLcwGZnpcdNwfCruxGLs41f1dwJuweQfQ5XLc",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.request_spend by grant 5",
+   "code": "SETTLED"
+  },
+  {
+   "hash": "CdX8AoncxuH5pCjFhtPpBDjaNRrP2C66VFHixCUJNg9",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "claim 5",
+   "code": "CLAIMED"
+  },
+  {
+   "hash": "DXhpsMiRoUBNVr1hbxUX7LCTVs79svWSsW5ZN6DWNnaL",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "fail_delivery 7",
+   "code": "FAILED"
+  },
+  {
+   "hash": "4yib8cBg2JSN6raLkxgaJLPLkXUk3ZjBQiWiCAx7Bed2",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.revoke 8",
+   "code": "REVOKED"
+  },
+  {
+   "hash": "FfsgLJqGnKwRwyawTCJgbMXKG9YSvYCcPsS1Zpk4JRrU",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "fail_delivery 9",
+   "code": "FAILED"
+  },
+  {
+   "hash": "Fxi3GLRLeCzPM1k8BdAs3ezYhDjrA1AXJ7kocdKa3FfG",
+   "signer": "ada.espalier-swarm-1106.testnet",
+   "what": "deliver 1 by ada",
+   "code": "ok"
+  },
+  {
+   "hash": "7i8CD1MhUkdrC2c73JLdBigDo752JxGoTHpdD5cLebb1",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "accept 1",
+   "code": "ACCEPTED"
+  },
+  {
+   "hash": "8TyXPWgxsFNncnza1jX2JTGizrGe3tYPY7vC4Nqa1yPH",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.request_spend by grant 2",
+   "code": "CAP"
+  },
+  {
+   "hash": "Eoin77WSdK3rVQ8yqR6jNQdLEdysBu34ejCpymSyiKKx",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.request_spend by grant 2",
+   "code": "SETTLED"
+  },
+  {
+   "hash": "6UnzQAcAFN2fJsMbop4XGSWYxiBRfZGyzrYxxPgpSdp6",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "claim 1",
+   "code": "CLAIMED"
+  },
+  {
+   "hash": "Dv2BaHY3TCWSou3Xfqok7Fisk5UPhSwAbSttWUU7adqd",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "fail_delivery 2",
+   "code": "FAILED"
+  },
+  {
+   "hash": "Gpvgqdx5vo6w9KPZY5cyjZmZvSzRonEtnwLSjgrdriJQ",
+   "signer": "vault.espalier-swarm-1106.testnet",
+   "what": "vault.revoke 3",
+   "code": "REVOKED"
+  },
+  {
+   "hash": "GKLZ6XW1auWnSU2mHiWzsFHe7wjzrwjEPFRwDbDkm7F4",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout ada.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "7haTX6B7q4L4bBgn2CC8bMkmt58Dq79R7zAqu8LU7zrG",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout bo.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "8EGSm4XC33zkYeBRoDPboxUF1oi1jWr4v7wcpHJyrFrv",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout cy.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "D9ABxBLNrjmfPQLPcPk1QBbDgzcdWdAG7aAohVmvuPsq",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout eve.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "53Lq335WUFi3SBZD6PFErC1CdvxMTL2nVNLvTYQgngmW",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout fay.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "4zkZ89yJ44Akp9u165CQnuTkY68dagXk1iGP5nuQtbKT",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout gus.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "7C1XpqicQxrtVZ4gZSfTdiDmHmiHSJCLN12q6m6WMisx",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout hal.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "6koqv6UkzadueAjrKStxfzNEA87UeuWbjdYfEJtUnGk9",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout ida.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "HMhNTBjRXUdq1KTzK7WEJ1GNUdVMgxMsnqoZp4KG2Din",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout jon.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "CeNTKrgD766hNQmxZDNxdBz5pNqqNKfiQBaVKUHRQsXT",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout kai.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "75oCWkTDzJGLBFcJWqRaZKBTkMqS1QCsEbNhWTgvTu4Y",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout lee.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "9uUCH4zMK6CVTuvmHYNqsnXtm67nSWjDnKLRCTB72vqm",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout max.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "4toNGJGfHQJ3znkZTHqab1pPpvWrpkR6azxwQM1MMjfT",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout oz.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "DWdzx2bSfPpPc7jsgQCxLF7uZVTorJZggZwSVyZKBkLa",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout pam.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "HKLksRtDbea7D7MABZjABrwFLwfgP2Sc22aK1hfQxHmH",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout quin.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "GaQtKJb3B1ZPznzzYG5fJ9QtpHGULWtqTEYo4ZoBX8xf",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout ray.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "ALupUkJdMzVyCH7NZUjfdDEswcy7T62hNiAZjvzfpjNX",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout tom.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "7mEZzDoBLc6iHqtpVzNoSqrEjxbimTi53tfvWGztUxsq",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout uma.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "djoAjaqktxAgfCaSxWJtmrqtqUMYQsDsti8ikAfpJbE",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout vic.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "2ugGYggGqTGjhZerkRWBm1QGtL7oKtF1BTMbu2wriRZh",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout wes.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "H9NwYoEW5h8hESh3tUHujeqpziM6oSNEsrWYcvprKoJs",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout xia.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "DQqqaGQS1PpBArAnqqv9ByfkLzPJ1xBX2bo1rL9Msjqu",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout gc.espalier-swarm-1106.testnet",
+   "code": "ok"
+  },
+  {
+   "hash": "6XgaXTcEFJUusiMpZ5z2oxqTMuyWSiyxvvxZGWYLScUT",
+   "signer": "gc.espalier-swarm-1106.testnet",
+   "what": "payout vault.espalier-swarm-1106.testnet",
+   "code": "ok"
+  }
+ ]
+}

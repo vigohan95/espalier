@@ -1,0 +1,22 @@
+market market.espalier-swarm-1106.testnet
+vault  vault.espalier-swarm-1106.testnet
+
+  ok   208 of 208 recorded transactions found on chain, 0 missing, 0 with a different reason code
+  ok   13 of 13 tasks read back from the market: same status, winner, price, paid and refunded as recorded
+  ok   13 of 13 grants read back from the vault: same parent, cap, spent and live flag as recorded
+  ok   winner and price recomputed from the revealed bids on 13 of 13 closed tasks: same as the contract
+  ok   no grant spent past its cap (13 grants)
+  ok   every grant's counter covers everything spent below it
+  ok   each of the 12 awarded grants has its task's price as its cap and the poster's grant as its parent
+  ok   every awarded grant can pay only the market
+  ok   no task paid more than its price, or more than its winner's grant drew
+  ok   nothing was paid for work that was not accepted
+  ok   the vault's own record of what each winner's grant paid the market equals what the market counted from
+  ok   the root was charged 430 mNEAR = 330 paid to workers + 100 drawn without acceptance and sent back
+  ok   the market holds 3.797 NEAR, owes 0.000, and needs 3.585 for storage
+  ok   vault vault.espalier-swarm-1106.testnet runs res/espalier_vault.wasm, sha256 3218271c471fdd4e...
+       4 keys on the account, 1 full-access
+  ok   market market.espalier-swarm-1106.testnet runs res/espalier_market.wasm, sha256 94cd3000ff35056d...
+       1 keys on the account, 1 full-access
+
+all checks passed

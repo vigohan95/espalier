@@ -1,0 +1,114 @@
+general contractor: grant 1, budget 1000 mNEAR, can pay only market.espalier-swarm-1106.testnet
+24 workers on the owner's roster. One window is 150 s.
+
+1. The general contractor posts three tasks. Sealed bids.
+    ok   post api, up to 300 mNEAR: POSTED
+    ok   post app, up to 300 mNEAR: POSTED
+    ok   post data, up to 250 mNEAR: POSTED
+    ok   10 sealed bids committed
+    ok   9 bids revealed, dee stayed silent
+    ok   api: ada wins at 230 mNEAR
+    dee bid lowest on api and never revealed: its bond goes to the vault, and it does not win
+    ok   api: gc creates a grant for ada with cap 230 mNEAR, and the market confirms it is the award
+    ok   app: eve wins at 210 mNEAR
+    eve's real cost is 240 and she bid 150 to win: she is paid 210, the next bid, and is under water
+    ok   app: gc creates a grant for eve with cap 210 mNEAR, and the market confirms it is the award
+    ok   data: hal wins at 200 mNEAR
+    ok   data: gc creates a grant for hal with cap 200 mNEAR, and the market confirms it is the award
+    ok   nothing has left the vault: 0
+
+2. Each winner posts tasks of its own, from the grant it just won.
+    ok   ada posts auth, up to 80: POSTED
+    ok   ada posts billing, up to 70: POSTED
+    ok   eve posts ui, up to 120: POSTED
+    ok   eve posts payments, up to 120: she has 210 and already promised 120: OVERCOMMITTED
+    ok   eve posts payments again, up to 90: POSTED
+    ok   eve posts a third task, up to 40: nothing is left to promise: OVERCOMMITTED
+    ok   hal posts ingest, up to 80: POSTED
+    ok   hal posts clean, up to 60: POSTED
+    ok   14 sealed bids committed
+    ok   14 bids revealed
+    ok   auth: kai wins at 70 mNEAR
+    ok   auth: ada creates a grant for kai with cap 70 mNEAR, and the market confirms it is the award
+    ok   billing: ned wins at 70 mNEAR
+    ned, oz and pam agreed to bid the maximum on billing: the price is the budget, 70, and no more
+    ok   billing: ada creates a grant for ned with cap 70 mNEAR, and the market confirms it is the award
+    ok   ui: quin wins at 100 mNEAR
+    ok   ui: eve creates a grant for quin with cap 100 mNEAR, and the market confirms it is the award
+    ok   payments: sam wins at 88 mNEAR
+    ok   payments: eve creates a grant for sam with cap 88 mNEAR, and the market confirms it is the award
+    ok   ingest: uma wins at 70 mNEAR
+    ok   ingest: hal creates a grant for uma with cap 70 mNEAR, and the market confirms it is the award
+    ok   clean: wes wins at 50 mNEAR
+    ok   clean: hal creates a grant for wes with cap 50 mNEAR, and the market confirms it is the award
+
+3. The third level.
+    ok   kai posts tests, up to 25: POSTED
+    ok   quin posts icons, up to 30, one bid is enough: POSTED
+    ok   uma posts parser, up to 30: POSTED
+    ok   ned posts report, up to 20, one bid is enough: POSTED
+    ok   mallory, an account off the owner's roster, tries to bid on parser: NOT_ON_ROSTER
+    ok   6 sealed bids committed
+    ok   6 bids revealed
+    ok   tests: cy wins at 20 mNEAR
+    ok   tests: kai creates a grant for cy with cap 20 mNEAR, and the market confirms it is the award
+    ok   icons: fay wins at 30 mNEAR
+    fay was the only bidder on icons and is paid the budget, 30
+    ok   icons: quin creates a grant for fay with cap 30 mNEAR, and the market confirms it is the award
+    ok   parser: ida wins at 25 mNEAR
+    ok   parser: uma creates a grant for ida with cap 25 mNEAR, and the market confirms it is the award
+    ok   report: jon wins at 20 mNEAR
+    ned does not create jon's grant
+    ok   ida's grant sits four levels under the owner: ida < uma < hal < gc: [11, 7, 4, 1]
+
+4. hal is hijacked by an instruction hidden in a document.
+    ok   hal pays mallory from its grant: RECIPIENT_NOT_ALLOWED
+    ok   hal creates a grant that can pay mallory: ATT_RECIPIENTS
+    ok   hal draws 100 into the market before any of its work is accepted: SETTLED
+    ok   the market pays hal none of it: 0
+    the general contractor reads hal's grant from the vault: 2 refused attempts
+    ok   the general contractor revokes hal: one transaction: REVOKED
+    ok   hal, uma, wes and ida are all cut off: [False, False, False, False]
+    ok   anyone voids data: VOID
+    ok   anyone voids ingest: VOID
+    ok   anyone voids clean: VOID
+    ok   anyone voids parser: VOID
+    ok   the 100 hal drew goes back to the vault: REFUNDED
+    ok   ida, three levels down, can no longer draw: NO_KEY
+
+5. Work is delivered and reviewed, from the bottom up.
+    ok   ned created no grant for jon: the poster defaulted, and jon gets ned's bond: DEFAULTED
+    ok   cy delivers tests: ok
+    ok   kai rejects it: the tests do not run: REJECTED
+    ok   and revokes cy's grant: REVOKED
+    ok   fay delivers icons: ok
+    ok   quin accepts: ACCEPTED
+    ok   icons: fay draws 30 mNEAR from its own grant and the market forwards it
+    ok   kai delivers auth: ok
+    ok   kai accepts its own work, signing with its own key: BAD_SIGNATURE
+    ok   ada accepts: ACCEPTED
+    ok   auth: kai draws 70 mNEAR from its own grant and the market forwards it
+    ok   quin delivers ui: ok
+    ok   eve accepts: ACCEPTED
+    ok   quin draws its whole price of 100: 30 of it already went to fay: CAP
+    ok   ui: quin draws 70 mNEAR from its own grant and the market forwards it
+
+6. Deadlines.
+    ok   ned delivered nothing on billing: its bond goes to the vault: FAILED
+    ok   ada revokes ned: REVOKED
+    ok   sam delivered nothing on payments either: FAILED
+    ok   ada delivers api: ok
+    ok   the general contractor accepts: ACCEPTED
+    ok   ada draws her whole price of 230: 70 of it already went to kai: CAP
+    ok   api: ada draws 160 mNEAR from its own grant and the market forwards it
+    ok   eve delivered nothing on app: her bond goes to the vault: FAILED
+    ok   the general contractor revokes eve: REVOKED
+    ok   sam's grant is cut off with her: False
+
+7. Everyone is paid what the market owes them.
+    ok   payouts in mNEAR: {'ada': 185, 'bo': 10, 'cy': 10, 'dee': 0, 'eve': 20, 'fay': 40, 'gus': 10, 'hal': 25, 'ida': 10, 'jon': 20, 'kai': 85, 'lee': 5, 'max': 5, 'ned': 0, 'oz': 5, 'pam': 5, 'quin': 85, 'ray': 5, 'sam': 0, 'tom': 5, 'uma': 15, 'vic': 5, 'wes': 5, 'xia': 5, 'gc': 30, 'vault': 120}
+    ok   the tree was charged 160 + 70 for api, 70 + 30 for app, and hal's 100: 430
+    ok   the root can still spend the rest of its 1000: 570
+    ok   the chain ended exactly where the Python model predicted: every task, winner, price, payment and grant
+
+90/90 checks passed on testnet, 208 transactions, 2548 s
