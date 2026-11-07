@@ -1,3 +1,0 @@
-node: local near-sandbox, block 35
-vault vault.test.near, registry registry.test.near, quorum 2 of 3 reporters
-acme-b1lling.test.near is on the shared denylist: 2 reporters, 2 different evidence hashes

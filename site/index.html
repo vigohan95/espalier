@@ -256,7 +256,8 @@ const revealed = (t) => t.bids.filter((b) => b.revealed);
 function recompute(t) {
   const bids = t.bids.map((b, i) => [b, i]).filter(([b]) => b.revealed).map(([b, i]) => [big(b.price), i]);
   const got = pick(bids, big(t.spec.max_budget), t.spec.min_bids);
-  return got ? { worker: t.bids[got[0]].worker, price: got[1] } : null;
+  // `got[0]` indexes the revealed bids, so go through their stored position to reach `t.bids`.
+  return got ? { worker: t.bids[bids[got[0]][1]].worker, price: got[1] } : null;
 }
 function cutBy(S, g) {
   // The highest grant on the way up that is not live: the one whose revoke cut this branch. The vault
@@ -322,6 +323,7 @@ function nodeFor(S, D, g, depth) {
 function drawTree() {
   const S = STATE, D = derive(S);
   $("step").max = D.awards.length;
+  $("step").value = STEP;   // after max: a range input clamps its value to the max it has at that moment
   $("stepLabel").textContent = `${STEP} of ${D.awards.length}`;
   const tree = $("tree");
   tree.replaceChildren();
@@ -418,7 +420,7 @@ function drawChecks() {
   add(awarded.every((t) => big(t.paid) <= big(t.price) && big(t.paid) + big(t.held) + big(t.refunded) <= big(S.grants.get(t.grant).direct_spent)), "No task paid more than its price, or more than its winner's grant drew.");
   add(S.tasks.every((t) => big(t.paid) === 0n || ["Accepted", "Paid"].includes(t.status)), "Nothing was paid for work that was not accepted.");
   const owed = big(S.solvency.owed), bal = big(S.accounts[CFG.market]?.amount ?? S.solvency.balance), storage = big(S.accounts[CFG.market]?.storage_usage) * 10n ** 19n;
-  add(bal >= owed + storage, `The market holds ${mn(bal)} and owes ${mn(owed)} in bonds and balances, plus ${mn(storage)} for its storage.`);
+  add(bal >= owed + storage, `The market holds ${mn(bal)} mNEAR and owes ${mn(owed)} in bonds and balances, plus ${mn(storage)} for its storage.`);
   list.replaceChildren(...out.map(([ok, text]) => el("li", ok ? "" : "fail", text)));
 }
 function drawContracts() {
@@ -457,7 +459,6 @@ async function start(keepStep) {
     }
     const awards = derive(STATE).awards;
     if (!keepStep || STEP > awards.length) STEP = awards.length;
-    $("step").value = STEP;
     if (!PICKED && STATE.tasks.length) PICKED = STATE.tasks[0].id;
     drawAll();
   } catch (e) {
