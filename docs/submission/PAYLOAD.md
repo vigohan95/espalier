@@ -17,7 +17,7 @@ Endpoint: `POST https://nearhackathon.com/api/applications`, from 2026-11-01 to 
 | tracks | `["swarms", "security", "agents"]` | Human confirms |
 | nearAddress | | **Human confirms** the value in the private notes: mainnet account for the payout |
 | projectUrl | `https://github.com/vigohan95/espalier` | Valid only once the repository is public, which needs the human's confirmation. It must be public by the deadline |
-| demoUrl | | After the X post is up |
+| demoUrl | `https://x.com/AbaabaGge/status/2118997137606467708` | Posted 2026-11-07 |
 | idea | Below, 1040 characters of the 2,000 allowed | Draft |
 | consent | `true`, only after the human agrees to the notice | **Human decides** |
 
