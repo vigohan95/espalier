@@ -84,3 +84,21 @@ Read on 2026-11-05, public pages only (`/llms.txt`, `/skill/mcp-buyer/SKILL.md`,
 So jobs can be posted and paid programmatically, but both routes need an account or real USDC, and this
 project uses neither. Espalier is not integrated with the market. The part it would own is the money side:
 a worker's key and sub-budget, whichever market the job came from.
+
+## Hiring through the market
+
+`hire-demo.py` above is one level of hiring with a price agreed off chain. The market contract makes the
+same step an auction and lets it repeat: a grant holder posts a task signed with its grant key, workers
+bid sealed, and the winner's prize is a child grant with the price as its cap, from which it can post
+tasks of its own. A worker is paid by drawing from its own grant, and the market forwards the draw once
+its poster has accepted the work.
+
+```python
+from espalier import market
+
+mkt = market.Market(rpc, market_account)
+out = mkt.post(carrier, spec, grant_key, bond)        # any account carries it, the grant key signs it
+out = mkt.commit(worker, task_id, price, new_key.public_str, salt, bid_bond)
+```
+
+Rules: [SWARM-RULES.md](SWARM-RULES.md). A scripted 25-agent run in three modes: `scripts/swarm-sim.py`.

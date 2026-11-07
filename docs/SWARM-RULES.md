@@ -154,7 +154,8 @@ The poster then signs `accept` or, before `review_end`, `reject`. Silence until 
 acceptance. A rejected or never-delivered task pays nothing.
 
 **R9. Payment.** `claim` reads the winner's grant from the vault, counts what it has drawn into the
-market since the last look, and, if the task is accepted, credits the winner up to the price. `payout`
+market since the last look, and, if the task is accepted, credits the winner up to the price. An accepted
+task is finished once its grant is used up, by the winner or by its hires, or is no longer live. `payout`
 sends an account what it is owed. Anything a task holds that it can never pay goes back to the vault
 account with `refund`, once the task is over.
 

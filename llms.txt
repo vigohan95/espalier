@@ -1,50 +1,75 @@
 # Espalier
 
-> A NEAR contract that lets an AI agent hand part of its budget to sub-agents, with limits enforced on
-> chain, and that asks about a recipient before money moves. Built at NEAR HACKATHON 2026. Tracks:
-> security, agents. Testnet. Not audited. All code is from inside the hackathon window, written by Claude
-> Code under human direction.
+> Agents hire agents by sealed bid on NEAR, and what a winner gets is a grant in a vault: a budget that
+> can only be narrower than the one it came from, at every level of the chain, enforced on chain. Built at
+> NEAR HACKATHON 2026. Tracks: swarms, security, agents. Testnet. Not audited. All code is from inside
+> the hackathon window, written by Claude Code under human direction.
+
+Two contracts. The vault (contract/) is a delegation tree for spending: 14 dimensions that a child can
+only narrow, every spend charged to every ancestor, one transaction revokes a subtree, keys issued and
+deleted by the contract. The market (market/) is a sealed-bid subcontracting market on top of it: the
+prize of an auction is a child grant with the price as its cap. The market only reads the vault. The
+vault wasm was not changed for it.
 
 ## Verify in this order
 
 1. `python3 scripts/preflight.py`: what will work on this machine. Standard library, offline.
-2. `python3 scripts/story.py`: every key conclusion on one screen, offline, under a second. It recomputes
-   hashes, runs the client unit tests, re-decides each recorded trial from stored signals, and fails on a
+2. `python3 scripts/story.py`: every key conclusion on one screen, offline, a few seconds. It recomputes
+   hashes, runs the client unit tests, runs the 25-agent swarm on the Python model and compares it with the
+   recorded local and testnet runs, re-decides each recorded trial from stored signals, and fails on a
    mismatch. It does not rerun the chain.
-3. `python3 scripts/verify-testnet.py`: looks up each recorded testnet transaction on a public RPC and
-   compares reason codes and code hashes. No key needed.
-4. `cargo run --release -p harness -- sandbox --jobs 6 --report /tmp/espalier-report`: every scenario on
-   a real local node. Needs Rust 1.95 or newer.
-5. `python3 -m unittest discover -s client/tests`: client tests.
+3. `python3 scripts/swarm-sim.py --offline`: the swarm itself, step by step, on the Python model.
+4. `python3 scripts/verify-testnet.py` and `python3 scripts/verify-market.py`: look up each recorded
+   testnet transaction on a public RPC, read tasks and grants back, compare reason codes and code hashes.
+   No key needed.
+5. `cargo run --release -p harness -- sandbox --jobs 6 --report /tmp/espalier-report`: every scenario on
+   a real local node, 98 for the vault and 35 for the market. Needs Rust 1.95 or newer. About 7 minutes,
+   because the market's auctions run in real time.
+6. `python3 -m unittest discover -s client/tests` and `cargo test -p espalier-market --release`.
 
 ## Where each claim is backed
 
+- The market's rules, one task as a text sequence diagram, revocation at each stage: docs/SWARM-RULES.md
+- What was built for the market and how it was checked: docs/SWARM-BUILD.md
 - Attack scenarios, numbered and mapped to the threat model: docs/ATTACKS.md
 - Delegation tree, attenuation, cascade revoke, key lifecycle: docs/DESIGN.md
 - Recipient check, denylist poisoning, what is on chain and what is not: docs/RECIPIENT-CHECK.md
 - Agent wrapper, key limits, hiring, market.near.ai findings: docs/AGENTS.md
 - Real model under indirect injection: docs/evidence/trials/report.md, transcripts beside it
 - Documented gaps in the official reference products: docs/BASELINE-GAPS.md
-- Real mainnet signals: docs/evidence/mainnet-signals.md
-- Testnet transactions: docs/evidence/testnet-run-txs.md
-- Attack demo log: docs/evidence/attack-demo.log
-- Property tests and mutants: docs/evidence/sandbox-property.json, sandbox-property-screened.json,
+- Scenario report for both contracts: docs/evidence/sandbox-report.md
+- Random operations against vault and market together: docs/evidence/market-property.json
+- The 25-agent run on a local node and on testnet: docs/evidence/swarm-sim-sandbox.log,
+  swarm-sim-testnet.log, and the .json files beside them with every transaction hash
+- Vault testnet transactions: docs/evidence/testnet-run-txs.md
+- Vault property tests and mutants: docs/evidence/sandbox-property.json, sandbox-property-screened.json,
   property-report.json, mutants.json
+- Related projects at this hackathon, read from their code: README.md, "How this compares"
 
 ## Code
 
-- contract/src/lib.rs: the vault. registry/src/lib.rs: the shared denylist.
-- client/espalier/: Python client, standard library only. wrapper.py is what an agent calls. signals.py
-  gathers what a contract cannot read. policy.py decides. attestor.py signs tickets.
-- harness/src/scenarios.rs, recipient.rs: the scenarios. trials/: the model trials.
+- contract/src/lib.rs: the vault. market/src/lib.rs: the market. registry/src/lib.rs: the shared denylist.
+- market/src/pricing.rs: lowest bid wins, paid the second-lowest. market/fixtures/pricing-vectors.json is
+  run by the Rust tests, the Python client and the live page.
+- client/espalier/: Python client, standard library only. wrapper.py is what an agent calls to pay.
+  market.py has the market's byte layouts and calls. market_model.py is the rules in plain Python.
+- harness/src/scenarios.rs, recipient.rs, market.rs: the scenarios. market_property.rs: the random test.
+- scripts/swarm-sim.py: the 25-agent run, on the model, a local node, or testnet.
+- site/index.html: read-only page. The browser calls a public RPC. No key, no backend.
 
 ## Known limits, stated here so you do not have to find them
 
 - A bad payment inside the limits to a real vendor still goes through. The trials show it.
-- A contract cannot read another account's age or code, so those signals are off chain. The contract
-  enforces only that a trusted attestor looked recently. A stolen attestor key loses that layer.
-- The model in the trials is one small local model. Its numbers do not carry over to other models.
-- The human in the trials is scripted and perfect.
+- A poster can refuse good work: reject it, or revoke the winner before it draws. The contract cannot judge
+  work. It counts rejections and defaults per poster.
+- A contractor can draw its cap down before its accepted subcontractor draws, and the subcontractor is then
+  short (scenario M32). The tree's bound still holds.
+- Colluding workers on the owner's roster can lift a price to the task's maximum budget.
+- When a winner draws without being accepted, the money goes back to the vault but the tree's counters do
+  not go down: the vault has no method for that and none was added.
+- A contract cannot read another account's age or code, so those signals are off chain. The vault enforces
+  only that a trusted attestor looked recently. A stolen attestor key loses that layer.
+- The model in the injection trials is one small local model. The market's agents are scripted.
+- The market's random test is 671 calls on the real runtime. It has no mutation test.
 - No TEE, no NEAR Intents path, no market.near.ai integration, no reproducible wasm build.
-- The testnet vault still has its deployment key until the lock step, so `verify-testnet.py` shows one
-  full-access key.
+- The testnet contracts still have their deployment keys until the lock step.

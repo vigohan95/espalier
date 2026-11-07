@@ -1,7 +1,7 @@
 # Swarm market: what is built and how it is checked
 
 The rules are in [SWARM-RULES.md](SWARM-RULES.md). This file says what exists, what ran, and where the
-evidence is. Anything not yet run is marked as planned.
+evidence is.
 
 ## 1. Feasibility: what the probe showed
 
@@ -77,38 +77,66 @@ Bidding windows are real time, about 30 seconds per auction, so the group takes 
 
 ## 4. Property test on the real runtime
 
-`harness market-property`: random posts, bids, reveals, awards, deliveries, reviews, draws, claims,
-refunds and revokes against both contracts on a local node, with these invariants checked from views
-after every round. See section 4 of the evidence report for the run.
+`harness market-property` throws random posts, bids, reveals, awards with right and wrong terms,
+deliveries, reviews, draws, revokes and every call that anyone may make at both contracts on a local node,
+in waves. After each wave the invariants are read from views alone, nothing is taken from what a
+transaction returned, and a final sweep runs once every deadline has passed.
 
-| # | Invariant |
+The committed run ([evidence/market-property.json](evidence/market-property.json)): seed 7, 6 waves, 31
+tasks, 671 calls, 1,353 invariant checks, none broken. That is much smaller than the vault's 10,008
+operations, because every auction takes real time. There is no in-process version and no mutation test.
+
+| # | Invariant, as checked in `harness/src/market_property.rs` |
 |---|---|
-| N1 | For every grant in the tree, `spent + reserved <= cap`, and a parent's `spent` is at least the sum of its children's |
-| N2 | For every awarded task, `paid <= price`, and `paid + held + refunded` equals the grant's `direct_spent` as last read |
-| N3 | The market's balance covers its bonds, balances and held draws, plus its storage |
-| N4 | What the market has credited to workers for prices never exceeds what the vault says their grants paid the market |
-| N5 | A task whose grant is not live never moves forward, and a final task never changes status |
-| N6 | A poster's promised budget equals the sum over its open tasks, and never exceeds what the vault said it could spend when each was posted |
-| N7 | Bonds: every bond attached is either still locked, returned, or forfeited to a vault account or to a let-down winner. Nothing else |
-| N8 | The contract's winner and price equal the model's on the revealed bids |
+| N1 | For every grant, `spent + reserved <= cap`, and its `spent` covers the sum of its children's |
+| N2 | `paid <= price`. For every awarded task, `paid + held + refunded` equals what the vault says the grant paid itself, and the grant's cap is the price. A task with no grant holds and pays nothing |
+| N3 | Held draws add up across tasks, and the market's balance covers bonds, balances, held draws and storage |
+| N4 | Nothing is paid before acceptance |
+| N5 | A final task never changes status. After every deadline, the only tasks still open are accepted ones with a live grant |
+| N6 | A poster's promised budget is the sum over its open tasks, and a task's `drawn` equals what the vault says its grant and hires spent |
+| N7 | Every yocto that came in is locked, owed, held, or was paid out |
+| N8 | The contract's winner and price equal an independent model's on the revealed bids |
 
 ## 5. Simulation
 
 `scripts/swarm-sim.py`, standard library only, no LLM calls: one owner, one general contractor, three
-levels of hiring, 25 agents with scripted strategies. `--offline` runs the Python model alone,
-`--sandbox` sends every action as a signed transaction to a local node, `--network testnet` does the
-same on testnet and writes the evidence.
+levels of hiring, 24 workers with scripted strategies, 13 auctions. The script is written once.
+`--offline` runs it on the Python model, `--sandbox` sends every action as a signed transaction to a local
+node, and `--network testnet` does the same on testnet and writes the evidence. On a node, the last
+check compares the chain with what the model predicted for every task, winner, price, payment and grant.
+
+| Mode | Result | Evidence |
+|---|---|---|
+| Offline | 89/89 checks, under a second | CI runs it on every push |
+| Local node | 90/90 checks, 208 transactions, 743 s | [swarm-sim-sandbox.log](evidence/swarm-sim-sandbox.log) |
+| NEAR testnet | 90/90 checks, 208 transactions, 2,548 s | [swarm-sim-testnet.log](evidence/swarm-sim-testnet.log), every hash in [swarm-sim-testnet.json](evidence/swarm-sim-testnet.json) |
+
+Costs and budgets are invented inputs. What a run shows is that the rules hold, not what work costs.
 
 ## 6. Testnet
 
-A fresh faucet-funded account, with the vault deployed from the same `res/espalier_vault.wasm`, so its
-code hash equals `vault2`'s. One full run of the simulation, including a contractor revoked mid-work
-with its subcontractors cut off, and a read-only verifier that looks up every transaction and recomputes
-the invariants from views.
+`market.espalier-swarm-1106.testnet` and `vault.espalier-swarm-1106.testnet`, on two faucet-funded accounts.
+The vault is deployed from the same `res/espalier_vault.wasm`, so its code hash equals `vault2`'s. In the
+run the general contractor revokes `hal` while it and three agents below it are working: one transaction,
+and all four are cut off.
+
+`scripts/verify-market.py` needs no key. It looks up every transaction, reads every task and grant back,
+recomputes winners and prices, and compares the code on chain with `res/`. Its last run is in
+[evidence/verify-market.log](evidence/verify-market.log). Regular RPC nodes forget a transaction after
+about two days and public archival RPC allows only a few calls a minute, so it reads transactions in
+batches from FastNear's indexer, falls back to archival RPC, and retries every call. To check that it can
+fail, a copy of the record was altered in four places: a refusal recorded as a success, a transaction that
+does not exist, a wrong payment and a wrong cap. It reported all four and exited 1.
+
+`scripts/testnet-reclaim.py` gives a stopped run's NEAR back to its base account. The first testnet attempt
+stopped when an account ran out of balance for prepaid gas. Its accounts were reclaimed and the run was
+repeated with larger balances and less gas attached. None of its transactions are in the evidence.
 
 ## 7. Live page
 
-`site/index.html`: one static file, no backend, no key. The browser reads a public testnet RPC. Checked
-on 2026-11-06 with an `Origin` header and a preflight request: `test.rpc.fastnear.com`,
-`rpc.testnet.fastnear.com`, `archival-rpc.testnet.fastnear.com` and `near-testnet.drpc.org` all answer
-`Access-Control-Allow-Origin: *`.
+`site/index.html`: one static file, no backend, no key. The browser reads a public testnet RPC, and falls
+back to `site/snapshot.js`, labelled as a snapshot, when none answers. Checked on 2026-11-06 with an
+`Origin` header and a preflight request: `test.rpc.fastnear.com`, `rpc.testnet.fastnear.com`,
+`archival-rpc.testnet.fastnear.com` and `near-testnet.drpc.org` all answer `Access-Control-Allow-Origin: *`.
+It was rendered with headless Chrome at 1180 and 390 pixels wide, live against testnet and from the
+snapshot. It is not hosted yet.
