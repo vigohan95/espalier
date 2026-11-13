@@ -339,9 +339,12 @@ The vault adds each agent's key to its own account with `AddKey`. The protocol t
 A grant key cannot send a transaction to the market either. A poster signs its messages with that key, and
 any account carries them: the market checks the signature against the key the vault reports.
 
-The testnet contracts still hold their deployment keys, because the code may still change.
-`harness testnet --phase lock` deletes the vault's, after which the code can never change. That has not been
-run yet, so `verify-testnet.py` reports `1 full-access`. The first vault, `vault.espalier-vault-1105.testnet`,
+The vault with the evidence, `vault2.espalier-vault-1105.testnet`, is locked: `harness testnet --phase lock`
+deleted its full-access key on 2026-11-13 in
+[`ADppfkDM…`](https://testnet.nearblocks.io/txns/ADppfkDMbDh3Kq985rDdAWE4VxHWpVMmiTa27UjKtD5)
+([docs/evidence/testnet-lock.json](docs/evidence/testnet-lock.json)), so its code can never change and
+`verify-testnet.py` reports `0 full-access`. The market run's accounts (`market.` and `vault.espalier-swarm-1106.testnet`)
+and the registry still hold their deployment keys. The first vault, `vault.espalier-vault-1105.testnet`,
 ran the milestone 1 contract, whose state layout this one cannot read. Its code was swapped for a smaller
 contract to free its storage (`scripts/testnet-retire-v1.py`), and the vault evidence is on `vault2`.
 

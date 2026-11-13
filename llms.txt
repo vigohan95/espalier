@@ -72,4 +72,4 @@ vault wasm was not changed for it.
 - The model in the injection trials is one small local model. The market's agents are scripted.
 - The market's random test is 671 calls on the real runtime. It has no mutation test.
 - No TEE, no NEAR Intents path, no market.near.ai integration, no reproducible wasm build.
-- The testnet contracts still have their deployment keys until the lock step.
+- `vault2.espalier-vault-1105.testnet` is locked (no full-access key since 2026-11-13, tx ADppfkDMbDh3Kq985rDdAWE4VxHWpVMmiTa27UjKtD5). The market run's accounts and the registry still have their deployment keys.
