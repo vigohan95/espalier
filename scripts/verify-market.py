@@ -14,6 +14,7 @@ import json
 import os
 import re
 import sys
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "client"))
@@ -90,15 +91,30 @@ def main():
             print("  DIFFERENT task", name, "recorded", was, "chain", now)
     check(same == len(run["tasks"]), f"{same} of {len(run['tasks'])} tasks read back from the market: same status, winner, price, paid and refunded as recorded")
 
-    same = 0
+    def expired(g):
+        # Grants in the run last 24 hours, so a grant that was live then reads as not live once it or an
+        # ancestor has passed its expiry. That is the clock, not a change, as long as nothing revoked it.
+        at = time.time() * 1000
+        while g is not None:
+            if at >= g["expires_at_ms"]:
+                return True
+            g = grants.get(g["parent"]) if g["parent"] is not None else None
+        return False
+
+    same = expired_since = 0
     for name, rec in run["grants"].items():
         g = grants[rec["grant"]]
-        now = (g["parent"], int(g["cap"]) // MILLI, int(g["spent"]) // MILLI, g["live"])
+        live = g["live"]
+        if rec["live"] and not live and not g["revoked"] and expired(g):
+            live, expired_since = True, expired_since + 1
+        now = (g["parent"], int(g["cap"]) // MILLI, int(g["spent"]) // MILLI, live)
         was = (rec["parent"], rec["cap_mnear"], rec["spent_mnear"], rec["live"])
         same += now == was
         if now != was:
             print("  DIFFERENT grant", name, "recorded", was, "chain", now)
     check(same == len(run["grants"]), f"{same} of {len(run['grants'])} grants read back from the vault: same parent, cap, spent and live flag as recorded")
+    if expired_since:
+        print(f"       {expired_since} of them were live at the end of the run and have expired since, unrevoked")
 
     closed = [t for t in tasks.values() if t["status"] != "Open" and not (t["status"] == "Void" and not t["winner"])]
     agree = 0
