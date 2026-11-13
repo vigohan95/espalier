@@ -1,6 +1,6 @@
 # Submission payload draft
 
-Draft only. Nothing has been sent. The rules allow one submission per repository, and the payload must be
+Submitted once on 2026-11-13 (HTTP 201). Any correction goes through request-changes, never a second submission. The rules allow one submission per repository, and the payload must be
 confirmed by the human before it goes out. A mistake afterwards goes through https://nearhackathon.com/request-changes,
 never through a second submission. The rules also say not to commit the final payload, because it
 holds personal data, so the personal fields stay out of this file.
